@@ -1,0 +1,68 @@
+# ClaudeCraft — OpenClaw daily ops agent (sandboxed)
+# ----------------------------------------------------------------------------
+# Safety model: this agent can NEVER reach your bank accounts, your files,
+# customer data, or post anything publicly. It runs in a container that:
+#   • has access to ONE folder only: ./reports (where its daily report goes)
+#   • has NO direct internet — its only route out is the egress proxy
+#   • the egress proxy allows ONLY api.anthropic.com and api.stripe.com
+#   • runs as a non-root user, read-only root filesystem, no new privileges
+#   • has no credentials for posting to Reddit/social/email — it can't post
+#     anywhere even if it tried, because it was never given the ability to
+#
+# Start:  docker compose -f docker-compose.openclaw.yml up
+# Logs:   docker compose -f docker-compose.openclaw.yml logs -f openclaw
+# Stop:   docker compose -f docker-compose.openclaw.yml down
+#
+# BEFORE first run: copy .env.openclaw.example -> .env.openclaw and fill it
+# with a DEDICATED throwaway Anthropic API key with a low spend cap, and the
+# SAME restricted Stripe key already used for checkout (must have Checkout
+# Sessions: Read permission added for the sales summary to work).
+# NEVER put your main API keys or anything banking-related in here.
+
+networks:
+  egress:
+    driver: bridge
+  caged:
+    driver: bridge
+    internal: true   # <-- the wall: this network has no internet gateway at all
+
+services:
+  egress-proxy:
+    image: ubuntu/squid:latest
+    container_name: claudecraft-openclaw-egress-proxy
+    restart: unless-stopped
+    volumes:
+      - ./squid.allowlist.conf:/etc/squid/squid.conf:ro
+    networks:
+      - egress
+      - caged
+
+  openclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claudecraft-openclaw-agent
+    env_file:
+      - .env.openclaw
+    environment:
+      HTTP_PROXY:  "http://egress-proxy:3128"
+      HTTPS_PROXY: "http://egress-proxy:3128"
+      http_proxy:  "http://egress-proxy:3128"
+      https_proxy: "http://egress-proxy:3128"
+      NO_PROXY:    "localhost,127.0.0.1,egress-proxy"
+    networks:
+      - caged        # <-- no direct internet, only the proxy is reachable
+    volumes:
+      - ./reports:/workspace/reports:rw   # the ONLY folder this agent can write to
+    working_dir: /workspace
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m
+    pids_limit: 128
+    depends_on:
+      - egress-proxy

@@ -1,0 +1,6 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "node daily-task.mjs"
+cronSchedule = "0 12 * * *"
