@@ -87,7 +87,7 @@ function verifyResendSignature(req) {
   });
 }
 
-async function sendSupportEmail(to, subject, text) {
+async function sendSupportEmail(to, subject, text, html) {
   if (!process.env.RESEND_API_KEY) return false;
   try {
     const res = await fetch('https://api.resend.com/emails', {
@@ -98,6 +98,7 @@ async function sendSupportEmail(to, subject, text) {
         to,
         subject,
         text,
+        ...(html ? { html } : {}),
       }),
     });
     if (!res.ok) console.error('Resend send failed:', res.status, await res.text());
@@ -106,6 +107,26 @@ async function sendSupportEmail(to, subject, text) {
     console.error('Resend send error:', err.message);
     return false;
   }
+}
+
+// Mirrors DOWNLOAD_SETS in index.html — keep both in sync when a bundle's files change.
+const DOWNLOAD_SETS = {
+  solo: { files: ['bundles/solo-entrepreneur-pack/SKILLS.md', 'bundles/solo-entrepreneur-pack/SETUP-GUIDE.md'] },
+  content: { files: ['bundles/content-machine-pack/SKILLS.md', 'bundles/content-machine-pack/SETUP-GUIDE.md'] },
+  starter: { files: ['bundles/starter-kit/SKILLS.md', 'bundles/starter-kit/SETUP-GUIDE.md'] },
+  cowork: { files: ['bundles/cowork-beginners-guide/CLAUDE-COWORK-GUIDE.md', 'bundles/cowork-beginners-guide/QUICK-START-CHECKLIST.md'] },
+  student: { files: ['bundles/student-success-pack/SKILLS.md', 'bundles/student-success-pack/SETUP-GUIDE.md'] },
+  jobseeker: { files: ['bundles/job-seekers-career-pack/SKILLS.md', 'bundles/job-seekers-career-pack/SETUP-GUIDE.md'] },
+  poweruser: { files: ['bundles/power-user-pack/SKILLS.md', 'bundles/power-user-pack/SETUP-GUIDE.md'] },
+};
+
+async function sendPurchaseEmail(toEmail, productSlug, productName) {
+  const set = DOWNLOAD_SETS[productSlug];
+  if (!toEmail || !set) return;
+  const links = set.files.map(f => `${BASE_URL}/${f}`);
+  const text = `Thanks for buying ${productName}!\n\nYour download links:\n${links.join('\n')}\n\nKeep this email — these links work any time, no login needed. Questions? Reply to this email or contact support@claudecraft.ca.`;
+  const html = `<p>Thanks for buying <strong>${productName}</strong>!</p><p>Your download links:</p><ul>${links.map(l => `<li><a href="${l}">${l}</a></li>`).join('')}</ul><p>Keep this email — these links work any time, no login needed. Questions? Reply to this email or contact support@claudecraft.ca.</p>`;
+  await sendSupportEmail(toEmail, `Your ${productName} download links`, text, html);
 }
 
 async function getOrCreateReferralCoupon() {
@@ -137,6 +158,13 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
 
     if (!referrals.processedSessions.includes(session.id)) {
       try {
+        // 0. Email the buyer their download links — the success-page redirect is the only other place these show.
+        const productSlug = session.metadata?.product;
+        const buyerEmail = session.customer_details?.email;
+        if (productSlug && buyerEmail && PRODUCTS[productSlug]) {
+          await sendPurchaseEmail(buyerEmail, productSlug, PRODUCTS[productSlug].name);
+        }
+
         // 1. If this purchase used a referral code, credit the original referrer $10.
         const full = await stripe.checkout.sessions.retrieve(session.id, {
           expand: ['total_details.breakdown.discounts.discount.promotion_code'],
@@ -249,6 +277,7 @@ app.get('/checkout/:product', async (req, res) => {
         },
         quantity: 1,
       }],
+      metadata: { product: req.params.product },
       success_url: `${BASE_URL}/?purchased=true&product=${req.params.product}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${BASE_URL}/?canceled=true`,
     });

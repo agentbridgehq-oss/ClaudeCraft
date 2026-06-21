@@ -1376,6 +1376,30 @@ const KB = [
     quickReplies: ['How do I buy it?', 'How do I install?', 'Does free Claude work?', 'Take the quiz']
   },
   {
+    keys: ['never used', 'new to claude', 'first time', 'cowork', 'co-work', 'beginner guide', 'how do i start', 'never opened'],
+    response: "The <strong>Claude Co-Work Beginner's Guide ($19)</strong> is the cheapest way in if you've literally never used Claude before. It's an 8-part, step-by-step walkthrough — every step broken into substeps so you're never guessing:\n\n• Part-by-part setup, Projects, prompting, files, Artifacts &amp; more\n• Real example prompts you copy and adapt\n• A \"common mistakes\" section\n• Printable quick-start checklist\n\nWorks on the free Claude plan. Most people finish it in under an hour and are genuinely working with Claude by the end.",
+    spotlight: '#card-cowork',
+    quickReplies: ['How do I buy it?', 'How do I install?', 'Take the quiz']
+  },
+  {
+    keys: ['student', 'school', 'college', 'university', 'essay', 'homework', 'exam', 'study', 'flashcard', 'citation', 'thesis'],
+    response: "The <strong>Student Success Pack ($34)</strong> is built for actual student life, not generic productivity advice. 12 skills:\n\n• Essay Outline Builder &amp; writing feedback coach\n• Study Guide &amp; Flashcard Generator from your own notes\n• Citation Formatter (APA, MLA, Chicago)\n• Math/science step-by-step problem walkthroughs\n• Exam Cram Planner &amp; deadline tracker\n• Bonus: Procrastination Breaker\n\nMost students start with the Study Guide skill — paste in lecture notes and get flashcards back in seconds.",
+    spotlight: '#card-student',
+    quickReplies: ['How do I buy it?', 'How do I install?', 'Take the quiz']
+  },
+  {
+    keys: ['job', 'resume', 'cv', 'cover letter', 'interview', 'career', 'salary', 'negotiation', 'linkedin profile', 'job search'],
+    response: "The <strong>Job Seeker's Career Pack ($34)</strong> covers the whole job search, not just the resume. 12 skills:\n\n• Resume Tailoring matched to any real job posting\n• Cover Letter &amp; LinkedIn Profile Optimizer\n• STAR-method Interview Prep Coach\n• Salary Negotiation Scripts\n• Job Search Tracker &amp; follow-up reminders\n• Bonus: Rejection Recovery &amp; Next-Steps Coach\n\nMost people start with Resume Tailoring — paste a job posting and your old resume, get a tailored version back.",
+    spotlight: '#card-jobseeker',
+    quickReplies: ['How do I buy it?', 'How do I install?', 'Take the quiz']
+  },
+  {
+    keys: ['power user', 'advanced skill', 'native skill', 'skill format', 'token', 'agentic', 'code review', 'already comfortable', 'skill.md', 'zip'],
+    response: "The <strong>Claude Power User Pack ($29)</strong> is for people already comfortable with Claude who want to go further. 8 skills, built in the real Claude Skills format (zip + SKILL.md), not just Custom Instructions:\n\n• Package a real Claude Skill (zip + SKILL.md)\n• Token-saving prompt auditor\n• Multi-step agentic workflow builder\n• Code review specialist + long-document strategist\n• Skill template generator + prompt do's/don'ts coach\n• Power-user reference sheet\n\nThis is the one bundle that teaches you to build your own skills, not just use ours.",
+    spotlight: '#card-poweruser',
+    quickReplies: ['How do I buy it?', 'How do I install?', 'Take the quiz']
+  },
+  {
     keys: ['install', 'setup', 'use', 'how to', 'steps', 'instructions', 'where', 'paste', 'project'],
     response: "Installing your bundle takes about 5 minutes:\n\n<strong>Step 1:</strong> Go to <strong>claude.ai</strong> and sign in\n<strong>Step 2:</strong> Click <strong>Projects</strong> in the left sidebar\n<strong>Step 3:</strong> Click <strong>+ New Project</strong>\n<strong>Step 4:</strong> Click <strong>Custom Instructions</strong> (or Add Instructions)\n<strong>Step 5:</strong> Copy a skill from your SKILLS.md file\n<strong>Step 6:</strong> Paste it into the Custom Instructions field → Save\n\nYou're done. Start chatting inside that project and Claude is now your specialist. Repeat for each skill you want active.",
     spotlight: '#how',
@@ -1393,7 +1417,7 @@ const KB = [
   },
   {
     keys: ['price', 'cost', 'how much', 'cheap', 'expensive', 'discount', 'deal'],
-    response: "Current launch pricing:\n\n• <strong>Solo Entrepreneur Pack</strong> — $49 (was $97)\n• <strong>Content Machine Pack</strong> — $39 (was $79) ⭐ Best Seller\n• <strong>55+ AI Starter Kit</strong> — $29 (was $59)\n• <strong>Agent Bridge Pro</strong> — $99 (coming soon)\n\n🔥 Prices are 50% off during launch. The countdown timer at the top shows exactly how long this lasts. After that, prices go back up.\n\nIf you buy multiple bundles, email support@claudecraft.ca and we'll apply a 20% discount on extras.",
+    response: "Current launch pricing:\n\n• <strong>Claude Co-Work Beginner's Guide</strong> — $19 (was $39)\n• <strong>55+ AI Starter Kit</strong> — $29 (was $59)\n• <strong>Claude Power User Pack</strong> — $29\n• <strong>Content Machine Pack</strong> — $39 (was $79) ⭐ Best Seller\n• <strong>Student Success Pack</strong> — $34 (was $69)\n• <strong>Job Seeker's Career Pack</strong> — $34 (was $69)\n• <strong>Solo Entrepreneur Pack</strong> — $49 (was $97)\n• <strong>Agent Bridge Pro</strong> — $99 (coming soon)\n\n🔥 Prices are 50% off during launch. The countdown timer at the top shows exactly how long this lasts. After that, prices go back up.\n\nIf you buy multiple bundles, email support@claudecraft.ca and we'll apply a 20% discount on extras.",
     spotlight: '#products',
     quickReplies: ['Buy Solo Entrepreneur ($49)', 'Buy Content Machine ($39)', 'Buy 55+ Starter ($29)', 'Take the quiz']
   },
@@ -1411,7 +1435,7 @@ const KB = [
   },
   {
     keys: ['skills', 'what skills', 'list', 'what do i get', 'what\'s included', 'include'],
-    response: "Here's what's in each bundle:\n\n<strong>Solo Entrepreneur ($49)</strong> — 15 skills: Proposal Writer, Contract Generator, Client Email Machine, Invoice Follow-Up, Sales Call Prep, Scope Builder, Weekly Planner, Objection Crusher, Social Content, Onboarding Script, Rate Calculator, Referral Machine, Strategy Advisor, Meeting Summarizer, BI Dashboard + Bonus\n\n<strong>Content Machine ($39)</strong> — 12 skills: Blog Writer, YouTube Scripts, Newsletter Writer, 30-Day Calendar, Email Sequences, Hook Generator (60 hooks!), LinkedIn System, Repurposer, SEO Titles, Brand Voice, Short-Form Video, Analytics + Bonus\n\n<strong>55+ Starter ($29)</strong> — 10 skills: Recipes, Email Replies, Research, Letters & Cards, Travel Planner, Medical Q&A, Daily Planner + 3 more",
+    response: "Here's what's in each bundle:\n\n<strong>Co-Work Beginner's Guide ($19)</strong> — 8-part step-by-step guide, not a skill set: setup, Projects, prompting, files, Artifacts &amp; more\n\n<strong>55+ Starter ($29)</strong> — 10 skills: Recipes, Email Replies, Research, Letters & Cards, Travel Planner, Medical Q&A, Daily Planner + 3 more\n\n<strong>Power User Pack ($29)</strong> — 8 skills: real Skills format packager, token auditor, agentic workflow builder, code reviewer, long-doc strategist + 3 more\n\n<strong>Content Machine ($39)</strong> — 12 skills: Blog Writer, YouTube Scripts, Newsletter Writer, 30-Day Calendar, Email Sequences, Hook Generator (60 hooks!), LinkedIn System, Repurposer, SEO Titles, Brand Voice, Short-Form Video, Analytics + Bonus\n\n<strong>Student Success ($34)</strong> — 12 skills: Essay Outline Builder, Study Guide/Flashcards, Citation Formatter, Math/Science Walkthroughs, Exam Cram Planner + Bonus\n\n<strong>Job Seeker's Career Pack ($34)</strong> — 12 skills: Resume Tailoring, Cover Letter/LinkedIn Optimizer, Interview Prep Coach, Salary Negotiation Scripts, Job Search Tracker + Bonus\n\n<strong>Solo Entrepreneur ($49)</strong> — 15 skills: Proposal Writer, Contract Generator, Client Email Machine, Invoice Follow-Up, Sales Call Prep, Scope Builder, Weekly Planner, Objection Crusher, Social Content, Onboarding Script, Rate Calculator, Referral Machine, Strategy Advisor, Meeting Summarizer, BI Dashboard + Bonus",
     quickReplies: ['Which is right for me?', 'How do I install them?', 'Take the quiz']
   },
   {
@@ -1445,7 +1469,7 @@ const KB = [
 const QUIZ = [
   {
     q: "Quick question — what's your main goal right now?",
-    chips: ['Grow my business / freelance', 'Create more content', 'Learn AI for everyday life', 'Not sure yet']
+    chips: ['Grow my business / freelance', 'Create more content', 'Student / schoolwork', 'Job search', 'Learn AI for everyday life', "I've never used Claude before", 'Not sure yet']
   },
   {
     q: "Got it. How do you mainly use Claude right now?",
@@ -1460,18 +1484,31 @@ function runQuiz(step, answer) {
     setTimeout(() => addBotMsg(QUIZ[step].q, QUIZ[step].chips, () => runQuiz(step+1, null)), 600);
   } else {
     const goal = quizAnswers.q0 || '';
+    const usage = quizAnswers.q1 || '';
     let rec, spotlight, btn;
-    if (goal.includes('business') || goal.includes('freelance')) {
+    if (goal.includes('never used')) {
+      rec = "Start with the <strong>Claude Co-Work Beginner's Guide ($19)</strong> — it's the cheapest way in, and it's built exactly for someone who's never used Claude before. An 8-part walkthrough, every step broken down, no guessing.";
+      spotlight = '#card-cowork'; btn = "Get Co-Work Beginner's Guide →";
+    } else if (goal.includes('business') || goal.includes('freelance')) {
       rec = "Based on your answers, the <strong>Solo Entrepreneur Pack ($49)</strong> is your best match. It handles proposals, contracts, client emails, and billing — everything you need to run a business using Claude. 15 skills, instant download.";
       spotlight = '#card-solo'; btn = 'Get Solo Entrepreneur Pack →';
     } else if (goal.includes('content')) {
       rec = "You need the <strong>Content Machine Pack ($39)</strong> — it's built specifically for what you're doing. Blogs, hooks, newsletters, video scripts, 30-day calendars. One Claude session = a full week of content. Our best seller.";
       spotlight = '#card-content'; btn = 'Get Content Machine →';
+    } else if (goal.includes('student') || goal.includes('school')) {
+      rec = "The <strong>Student Success Pack ($34)</strong> is your match — essay outlines, study guides &amp; flashcards from your own notes, citation formatting, and an exam cram planner. 12 skills built for actual student life.";
+      spotlight = '#card-student'; btn = 'Get Student Success Pack →';
+    } else if (goal.includes('job')) {
+      rec = "The <strong>Job Seeker's Career Pack ($34)</strong> is your match — resume tailoring, cover letters, interview prep, salary negotiation scripts, and a job search tracker. 12 skills covering the whole search.";
+      spotlight = '#card-jobseeker'; btn = "Get Job Seeker's Career Pack →";
     } else if (goal.includes('everyday')) {
       rec = "The <strong>55+ AI Starter Kit ($29)</strong> is perfect for this. Simple, practical skills for everyday life — recipes, email replies, travel planning, research. No tech experience needed, and it works with the free Claude plan.";
       spotlight = '#card-starter'; btn = 'Get 55+ Starter Kit →';
+    } else if (usage.includes('almost every day')) {
+      rec = "Since you're already using Claude daily, the <strong>Power User Pack ($29)</strong> will get you more out of it — real Claude Skills format, a token-saving auditor, agentic workflow builder, and a code review specialist.";
+      spotlight = '#card-poweruser'; btn = 'Get Power User Pack →';
     } else {
-      rec = "Based on your answers, I'd recommend starting with the <strong>Content Machine Pack ($39)</strong> — it's our best seller and gives you the widest range of practical Claude skills. But all three bundles have a 30-day guarantee, so there's zero risk either way.";
+      rec = "Based on your answers, I'd recommend starting with the <strong>Content Machine Pack ($39)</strong> — it's our best seller and gives you the widest range of practical Claude skills. But every bundle has a 30-day guarantee, so there's zero risk either way.";
       spotlight = '#products'; btn = 'Browse All Bundles';
     }
     setTimeout(() => {
