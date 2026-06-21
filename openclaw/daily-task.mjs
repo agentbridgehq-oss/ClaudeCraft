@@ -106,10 +106,39 @@ Writing quality (this is what separates this from a generic news blurb):
   }
 }
 
+async function generateArticleImage(title) {
+  if (!process.env.GOOGLE_API_KEY) return null;
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${process.env.GOOGLE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instances: [{ prompt: `A clean, modern editorial header illustration for an article titled "${title}". Dark background, orange accent color, minimal tech/AI aesthetic, no text in the image.` }],
+          parameters: { sampleCount: 1 },
+        }),
+      }
+    );
+    if (!res.ok) {
+      console.log(`Image generation failed: ${res.status} ${await res.text()}`);
+      return null;
+    }
+    const data = await res.json();
+    const b64 = data?.predictions?.[0]?.bytesBase64Encoded;
+    return b64 ? `data:image/png;base64,${b64}` : null;
+  } catch (err) {
+    console.log(`Could not generate article image: ${err.message}`);
+    return null;
+  }
+}
+
 async function publishArticle(article, tag, meta) {
   if (!article || !process.env.ARTICLES_API_TOKEN) return 'Skipped — no article or no ARTICLES_API_TOKEN configured.';
   try {
-    const bodyHtml = article.body.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+    const imageDataUrl = await generateArticleImage(article.title);
+    const imageHtml = imageDataUrl ? `<img src="${imageDataUrl}" alt="" style="width:100%;border-radius:12px;margin-bottom:16px;display:block;">` : '';
+    const bodyHtml = imageHtml + article.body.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
     const res = await fetch(`${process.env.PUBLIC_BASE_URL || 'https://claudecraft-production.up.railway.app'}/api/articles`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-OpenClaw-Token': process.env.ARTICLES_API_TOKEN },

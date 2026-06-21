@@ -1,8 +1,10 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import Stripe from 'stripe';
+import Anthropic from '@anthropic-ai/sdk';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -13,10 +15,12 @@ const ARTICLES_PATH = path.join(DATA_DIR, 'articles.json');
 const REFERRALS_PATH = path.join(DATA_DIR, 'referrals.json');
 const REFERRAL_COUPON_ID_PATH = path.join(DATA_DIR, 'referral-coupon-id.txt');
 const SUBSCRIBERS_PATH = path.join(DATA_DIR, 'subscribers.json');
+const SUPPORT_ESCALATIONS_PATH = path.join(DATA_DIR, 'support-escalations.json');
 const MAX_DYNAMIC_ARTICLES = 90; // a few months of daily content before the oldest roll off
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
-const BASE_URL = process.env.PUBLIC_BASE_URL || 'https://claudecraft-production.up.railway.app';
+const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
+const BASE_URL = process.env.PUBLIC_BASE_URL || 'https://claudecraft.ca';
 
 const PRODUCTS = {
   solo: { name: 'Solo Entrepreneur Pack', amount: 4900, description: '15 done-for-you Claude skills + bonus, for running a solo business.' },
@@ -45,6 +49,64 @@ const loadReferrals = () => loadJson(REFERRALS_PATH, { bySession: {}, processedS
 const saveReferrals = data => saveJson(REFERRALS_PATH, data);
 const loadSubscribers = () => loadJson(SUBSCRIBERS_PATH, []);
 const saveSubscribers = data => saveJson(SUBSCRIBERS_PATH, data);
+const loadEscalations = () => loadJson(SUPPORT_ESCALATIONS_PATH, []);
+const saveEscalations = data => saveJson(SUPPORT_ESCALATIONS_PATH, data);
+
+// ── AI support inbox knowledge base — kept narrow and factual on purpose ──
+const SUPPORT_KB = `You are the support AI for ClaudeCraft (claudecraft.ca), which sells done-for-you Claude AI skill bundles.
+
+Products: ${Object.entries(PRODUCTS).map(([k, p]) => `${p.name} ($${(p.amount / 100).toFixed(2)}) — ${p.description}`).join('; ')}.
+
+How it works: One-time payment via Stripe, no subscription. Each bundle is a set of ready-to-paste Claude prompts/Custom Instructions ("skills") — setup is: claude.ai → Projects → New Project → Custom Instructions → paste the skill text → Save. One skill per Project. After checkout, the buyer is redirected back to the site with working download links shown immediately on the success screen.
+
+Referral program: every buyer gets a personal 10%-off code to share. When someone uses it, the original referrer gets a $10 account credit automatically.
+
+There's also a free "Articles" section on the site with daily AI news and a weekly free guide — no purchase needed.
+
+Published policies (you may confirm these exist, but never personally execute them — see ESCALATE rule below): 30-day no-questions-asked money-back guarantee; free skill updates forever for past buyers; a 20% discount on additional bundles for existing customers who email in.
+
+Your job: read the inbound customer email and decide ONE of two things:
+1. EASY — general "how do I use this / what's included / how does the referral code work" questions you can answer confidently using ONLY the facts above, where no money, refund, discount code, or file re-send needs to actually happen. Write a short, warm, accurate reply signed "— ClaudeCraft Support".
+2. ESCALATE — refunds, the 20% discount, re-sending/replacing files, billing disputes, chargebacks, complaints, anger/frustration, or anything you're not fully confident about. For these, you may confirm in your reply that the policy applies and they're covered (e.g. "you're covered under our 30-day guarantee") but NEVER say the refund/discount/file has already been sent — only a human can actually execute that. Say a person will follow up within 24 hours to complete it.
+
+Respond with ONLY valid JSON, no markdown fences: {"category": "EASY" or "ESCALATE", "reply": "the customer-facing reply text if EASY, or a short polite holding reply if ESCALATE (e.g. confirming receipt and that a person will follow up within 24 hours)", "internalNote": "one sentence on why, for the human reviewing escalations"}`;
+
+function verifyResendSignature(req) {
+  const secret = process.env.RESEND_WEBHOOK_SECRET;
+  if (!secret) return false;
+  const id = req.get('svix-id');
+  const timestamp = req.get('svix-timestamp');
+  const signatureHeader = req.get('svix-signature');
+  if (!id || !timestamp || !signatureHeader) return false;
+  const secretBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
+  const signedContent = `${id}.${timestamp}.${req.body}`;
+  const expected = crypto.createHmac('sha256', secretBytes).update(signedContent).digest('base64');
+  return signatureHeader.split(' ').some(part => {
+    const sig = part.split(',')[1];
+    return sig && crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+  });
+}
+
+async function sendSupportEmail(to, subject, text) {
+  if (!process.env.RESEND_API_KEY) return false;
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+      body: JSON.stringify({
+        from: process.env.SUPPORT_FROM_EMAIL || 'ClaudeCraft Support <support@claudecraft.ca>',
+        to,
+        subject,
+        text,
+      }),
+    });
+    if (!res.ok) console.error('Resend send failed:', res.status, await res.text());
+    return res.ok;
+  } catch (err) {
+    console.error('Resend send error:', err.message);
+    return false;
+  }
+}
 
 async function getOrCreateReferralCoupon() {
   try {
@@ -112,6 +174,61 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
   res.json({ received: true });
 });
 
+// ── Inbound support email webhook (Resend) — raw body needed for svix signature verification ──
+app.post('/api/inbound-email', express.text({ type: '*/*', limit: '2mb' }), async (req, res) => {
+  if (!verifyResendSignature(req)) return res.status(401).send('Invalid signature');
+  res.json({ received: true }); // ack immediately, process after
+
+  try {
+    const event = JSON.parse(req.body);
+    const data = event.data || {};
+    const fromEmail = (data.from?.address || data.from || '').toString();
+    const subject = data.subject || '(no subject)';
+    const bodyText = data.text || data.html?.replace(/<[^>]+>/g, ' ') || '';
+    if (!fromEmail || !bodyText) return;
+
+    let triage = { category: 'ESCALATE', reply: 'Thanks for reaching out — a member of our team will follow up within 24 hours.', internalNote: 'AI triage unavailable.' };
+    if (anthropic) {
+      try {
+        const msg = await anthropic.messages.create({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 500,
+          messages: [{ role: 'user', content: `${SUPPORT_KB}\n\nInbound email — Subject: "${subject}"\nBody: ${bodyText.slice(0, 3000)}` }],
+        });
+        const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+        triage = JSON.parse(text.replace(/^```json\s*|\s*```$/g, ''));
+      } catch (err) {
+        console.error('Support triage error (defaulting to escalate):', err.message);
+      }
+    }
+
+    await sendSupportEmail(fromEmail, `Re: ${subject}`, triage.reply);
+
+    if (triage.category === 'ESCALATE') {
+      const escalations = loadEscalations();
+      escalations.unshift({
+        id: `${Date.now()}`,
+        receivedAt: new Date().toISOString(),
+        from: fromEmail,
+        subject,
+        body: bodyText.slice(0, 3000),
+        aiReplySent: triage.reply,
+        internalNote: triage.internalNote,
+      });
+      saveEscalations(escalations.slice(0, 500));
+      if (process.env.SUPPORT_NOTIFY_EMAIL) {
+        await sendSupportEmail(
+          process.env.SUPPORT_NOTIFY_EMAIL,
+          `[ClaudeCraft Support] Needs your reply: ${subject}`,
+          `From: ${fromEmail}\n\n${bodyText.slice(0, 1500)}\n\n— AI note: ${triage.internalNote}\n— AI already sent a holding reply to the customer.`
+        );
+      }
+    }
+  } catch (err) {
+    console.error('Inbound email processing error:', err.message);
+  }
+});
+
 app.use(express.json({ limit: '200kb' }));
 
 app.get('/checkout/:product', async (req, res) => {
@@ -138,7 +255,7 @@ app.get('/checkout/:product', async (req, res) => {
     res.redirect(303, session.url);
   } catch (err) {
     console.error('Stripe checkout error:', err.message);
-    res.status(500).send('Something went wrong starting checkout. Please try again or email support@claudecraft.io.');
+    res.status(500).send('Something went wrong starting checkout. Please try again or email support@claudecraft.ca.');
   }
 });
 
@@ -183,6 +300,14 @@ app.get('/api/subscribers', (req, res) => {
   res.json(loadSubscribers());
 });
 
+app.get('/api/support-escalations', (req, res) => {
+  const token = req.get('X-OpenClaw-Token');
+  if (!process.env.ARTICLES_API_TOKEN || token !== process.env.ARTICLES_API_TOKEN) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.json(loadEscalations());
+});
+
 app.get('/api/articles', (req, res) => {
   res.json(loadArticles());
 });
@@ -223,4 +348,5 @@ app.listen(port, () => {
   console.log(`ClaudeCraft static site listening on port ${port}`);
   console.log(`Stripe checkout: ${stripe ? 'configured' : 'NOT configured (missing STRIPE_SECRET_KEY)'}`);
   console.log(`Referral webhook: ${process.env.STRIPE_WEBHOOK_SECRET ? 'configured' : 'NOT configured (missing STRIPE_WEBHOOK_SECRET)'}`);
+  console.log(`Support email AI: ${anthropic && process.env.RESEND_API_KEY && process.env.RESEND_WEBHOOK_SECRET ? 'configured' : 'NOT fully configured (needs ANTHROPIC_API_KEY, RESEND_API_KEY, RESEND_WEBHOOK_SECRET)'}`);
 });

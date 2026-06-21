@@ -155,4 +155,4 @@ You now know more about actually working with Claude than the vast majority of p
 
 If you bought one of our skill bundles (Solo Entrepreneur, Content Machine, 55+ Starter, Student Success, or Job Seeker's Career Pack), everything in those bundles is just a pre-built, faster version of the exact Project setup taught in Part 3 of this guide.
 
-Questions? Email **support@claudecraft.io** — a real person answers.
+Questions? Email **support@claudecraft.ca** — a real person answers.

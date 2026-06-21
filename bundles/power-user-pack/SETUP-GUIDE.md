@@ -4,4 +4,4 @@ Same setup as every bundle: claude.ai → Projects → + New Project → Custom 
 
 **Skill #1 (Build a Real Claude Skill)** needs a Pro/Max/Team plan with Code Execution enabled — everything else works on the free plan.
 
-Questions? support@claudecraft.io
+Questions? support@claudecraft.ca

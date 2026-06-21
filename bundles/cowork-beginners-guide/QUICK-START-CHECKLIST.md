@@ -23,4 +23,4 @@ Print this or keep it open in a second tab while you go through the main guide.
 ## If You Get Stuck
 1. Re-read the matching Part in the main guide — it's organized so you can jump straight to the relevant Step.
 2. Try rephrasing using Role / Task / Context / Format.
-3. Email support@claudecraft.io — include what you tried and what happened. A real person replies.
+3. Email support@claudecraft.ca — include what you tried and what happened. A real person replies.

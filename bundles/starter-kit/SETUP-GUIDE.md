@@ -102,4 +102,4 @@ Absolutely — this guide is also a great one to do together with a son, daughte
 
 ## Need a Real Person?
 
-Email **support@claudecraft.io** any time. A real human reads and replies — usually the same day. There is no such thing as a silly question here.
+Email **support@claudecraft.ca** any time. A real human reads and replies — usually the same day. There is no such thing as a silly question here.

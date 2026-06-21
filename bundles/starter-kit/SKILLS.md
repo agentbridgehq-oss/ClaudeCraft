@@ -5,7 +5,7 @@ Once a skill is set up, you never have to set it up again. You just use it, any 
 
 **Don't worry about doing this perfectly.** If you copy something wrong, nothing breaks — you can always try again. There is no way to damage anything by following these steps.
 
-If you get stuck on any step, email **support@claudecraft.io** and a real person will help you — not a robot.
+If you get stuck on any step, email **support@claudecraft.ca** and a real person will help you — not a robot.
 
 ---
 
@@ -203,4 +203,4 @@ Be patient and warm. This is about preserving something meaningful, not about pe
 - You don't need to memorize anything. Once a skill is set up in Claude, it's just... there, waiting, every time you open that project.
 - It's completely normal to need a few tries to get comfortable. Nobody gets this perfect on the first day.
 - These 10 skills work on the **free** version of Claude. You do not need to pay for anything extra.
-- Stuck? Email **support@claudecraft.io** any time — a real person answers, not a bot.
+- Stuck? Email **support@claudecraft.ca** any time — a real person answers, not a bot.

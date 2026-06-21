@@ -49,6 +49,6 @@ Every skill in this bundle is built to help you present your REAL experience mor
 
 **"I don't see Custom Instructions."** Make sure you're inside a Project, not a regular chat.
 
-**Still stuck?** Email **support@claudecraft.io** — usually same-day reply.
+**Still stuck?** Email **support@claudecraft.ca** — usually same-day reply.
 
 All skills work on the **free** Claude plan.

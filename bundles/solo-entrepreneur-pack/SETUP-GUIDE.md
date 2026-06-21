@@ -70,7 +70,7 @@ Double-check you copied the entire block of text, including the first and last l
 **"Can I edit the skill instructions?"**
 Yes — feel free to tweak wording to better match your business. These are starting points, not rigid rules.
 
-**Still stuck?** Email **support@claudecraft.io** — we'll get you sorted, usually same day.
+**Still stuck?** Email **support@claudecraft.ca** — we'll get you sorted, usually same day.
 
 ---
 

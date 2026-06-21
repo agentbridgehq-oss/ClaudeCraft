@@ -72,7 +72,7 @@ You need to be inside a Project, not a regular chat — the option only shows up
 **"Can multiple skills share my brand voice?"**
 Yes — after running the Brand Voice Trainer, copy the voice profile summary it gives you and paste it at the top of your first message in any other skill's project: "Here's my voice profile: [paste]. Now write..."
 
-**Still stuck?** Email **support@claudecraft.io** — real humans, usually same-day reply.
+**Still stuck?** Email **support@claudecraft.ca** — real humans, usually same-day reply.
 
 ---
 
