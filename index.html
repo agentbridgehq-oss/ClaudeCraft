@@ -30,7 +30,7 @@
   --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 body {
   font-family: var(--font-sans);
   background: var(--bg); color: var(--text);
@@ -38,7 +38,7 @@ body {
 }
 
 .bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55; animation: drift 18s ease-in-out infinite; }
+.orb { position: absolute; border-radius: 50%; filter: blur(55px); opacity: 0.5; animation: drift 18s ease-in-out infinite; will-change: transform; }
 .orb-1 { width:600px; height:600px; top:-150px; left:-100px; background: radial-gradient(circle, rgba(255,107,26,0.22), transparent 70%); animation-duration:20s; }
 .orb-2 { width:500px; height:500px; top:40%; right:-150px; background: radial-gradient(circle, rgba(120,80,255,0.15), transparent 70%); animation-duration:25s; animation-delay:-8s; }
 .orb-3 { width:400px; height:400px; bottom:10%; left:30%; background: radial-gradient(circle, rgba(255,107,26,0.12), transparent 70%); animation-duration:22s; animation-delay:-14s; }
@@ -54,7 +54,7 @@ body {
 @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
 .grad-text { background:linear-gradient(135deg,#FF8C42 0%,#FF6B1A 40%,#E85A0A 80%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 .grad-text-cool { background:linear-gradient(135deg,#FFFFFF 0%,#C8D0E0 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.glass-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-lg); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); transition:border-color .3s,background .3s,transform .3s,box-shadow .3s; }
+.glass-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-lg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); transition:border-color .3s,background .3s,transform .3s,box-shadow .3s; }
 .glass-card:hover { border-color:rgba(255,107,26,0.3); background:var(--glass-hover); transform:translateY(-4px); box-shadow:0 24px 60px rgba(0,0,0,0.5),0 0 40px rgba(255,107,26,0.06); }
 .btn { display:inline-flex; align-items:center; gap:8px; font-weight:700; border:none; cursor:pointer; text-decoration:none; transition:all .25s; border-radius:var(--r-sm); white-space:nowrap; }
 .btn-xl { font-size:1rem; padding:16px 36px; letter-spacing:.3px; }
@@ -73,7 +73,7 @@ body {
 .countdown { font-family:var(--font-mono); font-size:0.82rem; color:rgba(255,255,255,0.9); }
 #timer { font-weight:800; letter-spacing:2px; }
 
-nav { position:fixed; top:38px; left:0; right:0; z-index:200; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; background:rgba(7,8,15,0.82); backdrop-filter:blur(20px); border-bottom:1px solid var(--glass-border); }
+nav { position:fixed; top:38px; left:0; right:0; z-index:200; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; background:rgba(7,8,15,0.94); border-bottom:1px solid var(--glass-border); }
 .nav-logo { font-size:1.2rem; font-weight:900; letter-spacing:-0.5px; color:var(--text); }
 .nav-logo .orange { color:var(--brand); }
 .nav-links { display:flex; align-items:center; gap:32px; }
@@ -84,7 +84,7 @@ nav { position:fixed; top:38px; left:0; right:0; z-index:200; padding:14px 32px;
 .hero { padding:108px 0 120px; text-align:center; }
 .hero-eyebrow { margin-bottom:20px; }
 .hero-title { font-size:clamp(3rem,7vw,6rem); font-weight:900; letter-spacing:-4px; line-height:1.0; margin-bottom:24px; }
-@keyframes heroDropIn { 0%{opacity:0; transform:translateY(-55px);} 100%{opacity:1; transform:translateY(0);} }
+@keyframes heroDropIn { 0%{opacity:0; transform:translateY(-36px);} 100%{opacity:1; transform:translateY(0);} }
 @keyframes heroBounceDrop {
   0%   { opacity:0; transform:translateY(-110px); }
   38%  { opacity:1; transform:translateY(0); }
@@ -96,7 +96,7 @@ nav { position:fixed; top:38px; left:0; right:0; z-index:200; padding:14px 32px;
   95%  { opacity:1; transform:translateY(0); }
   100% { opacity:1; transform:translateY(0); }
 }
-.hero-line { display:inline-block; opacity:0; animation: heroDropIn 1.05s cubic-bezier(.16,1,.3,1) forwards; }
+.hero-line { display:inline-block; opacity:0; animation: heroDropIn 1.4s cubic-bezier(.19,1,.22,1) forwards; }
 .hero-line-1 { animation-delay: .15s; }
 .hero-line-2 { animation: heroBounceDrop 1.6s cubic-bezier(.33,1,.68,1) forwards; animation-delay: 1.65s; }
 .hero-bridge { font-size:0.85rem; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:0 auto 28px; display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
@@ -126,23 +126,23 @@ nav { position:fixed; top:38px; left:0; right:0; z-index:200; padding:14px 32px;
 <style>
 .products-section { padding:100px 0; }
 .products-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
-.product-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-xl); overflow:hidden; transition:all .3s cubic-bezier(.25,.8,.25,1); display:flex; flex-direction:column; backdrop-filter:blur(16px); position:relative; }
+.product-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-xl); overflow:hidden; transition:all .3s cubic-bezier(.25,.8,.25,1); display:flex; flex-direction:column; backdrop-filter:blur(14px); position:relative; }
 .product-card::after { content:''; position:absolute; inset:0; border-radius:var(--r-xl); background:linear-gradient(135deg,rgba(255,107,26,0) 0%,rgba(255,107,26,0.04) 100%); opacity:0; transition:opacity .3s; pointer-events:none; }
-.product-card:hover { border-color:rgba(255,107,26,0.5); transform:translateY(-6px) scale(1.012); box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,107,26,0.2),0 0 60px rgba(255,107,26,0.18); }
+.product-card:hover { border-color:rgba(255,107,26,0.5); transform:translateY(-6px) scale(1.012); box-shadow:0 1px 2px rgba(0,0,0,.3),0 4px 8px rgba(0,0,0,.22),0 12px 24px rgba(0,0,0,.18),0 32px 64px rgba(0,0,0,.5),0 0 0 1px rgba(255,107,26,0.25),0 0 60px rgba(255,107,26,0.18),inset 0 1px 0 rgba(255,255,255,.06); }
 .product-card:hover::after { opacity:1; }
 .card-stripe { height:3px; background:linear-gradient(90deg,transparent,var(--brand),var(--brand-light),transparent); opacity:0; transition:opacity .3s; }
 .product-card:hover .card-stripe { opacity:1; }
 .card-stripe-always { opacity:1 !important; }
-.card-body { padding:32px 28px; flex:1; display:flex; flex-direction:column; }
+.card-body { padding:26px 26px; flex:1; display:flex; flex-direction:column; }
 .card-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
 .card-name { font-size:1.15rem; font-weight:800; letter-spacing:-0.3px; }
 .card-cat { font-size:0.72rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:16px; }
-.card-desc { font-size:0.88rem; color:var(--sub); line-height:1.65; margin-bottom:22px; }
-.card-features { list-style:none; margin-bottom:28px; flex:1; }
-.card-features li { display:flex; align-items:flex-start; gap:10px; font-size:0.84rem; color:#9AA3B8; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+.card-desc { font-size:0.86rem; color:var(--sub); line-height:1.55; margin-bottom:16px; }
+.card-features { list-style:none; margin-bottom:18px; flex:1; }
+.card-features li { display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; color:#9AA3B8; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04); line-height:1.4; }
 .card-features li:last-child { border-bottom:none; }
 .cf-icon { color:var(--green); font-size:0.75rem; flex-shrink:0; margin-top:3px; }
-.card-footer { display:flex; align-items:center; justify-content:space-between; padding-top:22px; border-top:1px solid var(--glass-border); }
+.card-footer { display:flex; align-items:center; justify-content:space-between; padding-top:16px; border-top:1px solid var(--glass-border); }
 .price-block { display:flex; align-items:baseline; gap:8px; }
 .price-now { font-size:2rem; font-weight:900; }
 .price-was { font-size:0.88rem; color:var(--muted); text-decoration:line-through; }
@@ -481,7 +481,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
     </div>
     <div class="articles-grid stagger" id="articles-grid">
 
-      <details class="article-card reveal">
+      <details class="article-card reveal" open>
         <summary>
           <span class="article-chevron">▾</span>
           <span class="article-tag">Feature Explainer</span>
@@ -772,6 +772,32 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
         </div>
       </div>
 
+      <div class="product-card reveal" id="card-poweruser">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Claude Power User Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Advanced · 8 Skills</div>
+          <div class="card-desc">Already comfortable with Claude? Go further — real native Skills format, token efficiency, agentic workflows, and a code review specialist.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Package a real Claude Skill (zip + SKILL.md)</li>
+            <li><span class="cf-icon">✦</span>Token-saving prompt auditor</li>
+            <li><span class="cf-icon">✦</span>Multi-step agentic workflow builder</li>
+            <li><span class="cf-icon">✦</span>Code review specialist + long-document strategist</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block">
+              <span class="price-now grad-text">$29</span>
+            </div>
+            <div>
+              <a href="/checkout/poweruser" class="btn btn-orange-outline btn-md" id="buy-poweruser">Get Bundle →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="product-card is-soon reveal">
         <div class="card-stripe"></div>
         <div class="card-body">
@@ -1028,9 +1054,11 @@ fetch('/api/articles').then(r => r.json()).then(articles => {
   if (!Array.isArray(articles) || articles.length === 0) return;
   const grid = document.getElementById('articles-grid');
   if (!grid) return;
-  articles.forEach(a => {
+  const fragment = document.createDocumentFragment();
+  articles.forEach((a, i) => {
     const el = document.createElement('details');
     el.className = 'article-card reveal visible';
+    if (i === 0) el.open = true;
     el.innerHTML = `
       <summary>
         <span class="article-chevron">▾</span>
@@ -1040,8 +1068,9 @@ fetch('/api/articles').then(r => r.json()).then(articles => {
       </summary>
       <div class="article-body">${a.bodyHtml}${a.sourcesHtml ? `<p style="margin-top:18px;font-size:0.78rem;">${a.sourcesHtml}</p>` : ''}</div>
     `;
-    grid.insertBefore(el, grid.firstChild);
+    fragment.appendChild(el);
   });
+  grid.insertBefore(fragment, grid.firstChild);
 }).catch(() => {});
 
 const revealEls = document.querySelectorAll('.reveal');
@@ -1138,6 +1167,13 @@ const DOWNLOAD_SETS = {
     files: [
       { name: 'SKILLS.md — 12 Career Claude Skills', sub: 'Your main bundle file — paste skills into Claude Projects', href: 'bundles/job-seekers-career-pack/SKILLS.md' },
       { name: 'SETUP-GUIDE.md — 5-Minute Install Guide', sub: 'Step-by-step walkthrough to get up and running fast', href: 'bundles/job-seekers-career-pack/SETUP-GUIDE.md' },
+    ]
+  },
+  poweruser: {
+    title: 'Claude Power User Pack — Ready to Download!',
+    files: [
+      { name: 'SKILLS.md — 8 Advanced Claude Skills', sub: 'Your main bundle file — paste skills into Claude Projects', href: 'bundles/power-user-pack/SKILLS.md' },
+      { name: 'SETUP-GUIDE.md — Setup Guide', sub: 'Step-by-step walkthrough to get up and running fast', href: 'bundles/power-user-pack/SETUP-GUIDE.md' },
     ]
   }
 };

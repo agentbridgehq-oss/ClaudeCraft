@@ -25,6 +25,7 @@ const PRODUCTS = {
   cowork: { name: "Claude Co-Work Beginner's Guide", amount: 1900, description: 'A complete 8-part, step-by-step guide to working with Claude every day.' },
   student: { name: 'Student Success Pack', amount: 3400, description: '12 done-for-you Claude skills + bonus, for academic life.' },
   jobseeker: { name: "Job Seeker's Career Pack", amount: 3400, description: '12 done-for-you Claude skills + bonus, for resumes, interviews, and the job search.' },
+  poweruser: { name: 'Claude Power User Pack', amount: 2900, description: '8 advanced skills: real Claude Skills format, token efficiency, agentic workflows, and more.' },
 };
 
 function loadJson(filePath, fallback) {
