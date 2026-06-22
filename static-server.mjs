@@ -16,7 +16,10 @@ const REFERRALS_PATH = path.join(DATA_DIR, 'referrals.json');
 const REFERRAL_COUPON_ID_PATH = path.join(DATA_DIR, 'referral-coupon-id.txt');
 const SUBSCRIBERS_PATH = path.join(DATA_DIR, 'subscribers.json');
 const SUPPORT_ESCALATIONS_PATH = path.join(DATA_DIR, 'support-escalations.json');
+const PURCHASES_PATH = path.join(DATA_DIR, 'purchases.json');
+const REFUND_LOG_PATH = path.join(DATA_DIR, 'refund-log.json');
 const OG_IMAGE_PATH = path.join(DATA_DIR, 'og-image.png');
+const REFUND_WINDOW_DAYS = 30;
 const MAX_DYNAMIC_ARTICLES = 90; // a few months of daily content before the oldest roll off
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -32,6 +35,8 @@ const PRODUCTS = {
   jobseeker: { name: "Job Seeker's Career Pack", amount: 3400, description: '12 done-for-you Claude skills + bonus, for resumes, interviews, and the job search.' },
   poweruser: { name: 'Claude Power User Pack', amount: 2900, description: '8 advanced skills: real Claude Skills format, token efficiency, agentic workflows, and more.' },
   money: { name: 'Money Mastery Pack', amount: 3400, description: '10 done-for-you Claude skills for budgeting, debt payoff, investing basics, and everyday financial planning.' },
+  vault: { name: 'Claude Power Prompts Vault', amount: 900, description: '50 advanced Claude prompts and multi-step workflows — the perfect cheap add-on to any bundle.' },
+  startup: { name: "Startup Founder's Toolkit", amount: 3900, description: '10 done-for-you Claude skills for pitching, fundraising math, cofounder conflict, and the high-stakes moments of building a company.' },
   family: { name: 'Family Life Pack', amount: 3400, description: '10 done-for-you Claude skills for meal planning, tough conversations, schedules, and the daily mental load of parenting.' },
   connected: { name: 'Claude Connected Pack', amount: 3900, description: '8 guided workflows for using Claude with real Gmail, Calendar, Drive, Slack, and Notion connectors.' },
   writer: { name: "Creative Writer's Pack", amount: 3400, description: '10 done-for-you Claude skills for fiction and long-form writing — outlining, character work, line edits, and querying.' },
@@ -56,6 +61,10 @@ const loadSubscribers = () => loadJson(SUBSCRIBERS_PATH, []);
 const saveSubscribers = data => saveJson(SUBSCRIBERS_PATH, data);
 const loadEscalations = () => loadJson(SUPPORT_ESCALATIONS_PATH, []);
 const saveEscalations = data => saveJson(SUPPORT_ESCALATIONS_PATH, data);
+const loadPurchases = () => loadJson(PURCHASES_PATH, []);
+const savePurchases = data => saveJson(PURCHASES_PATH, data);
+const loadRefundLog = () => loadJson(REFUND_LOG_PATH, []);
+const saveRefundLog = data => saveJson(REFUND_LOG_PATH, data);
 
 // ── AI support inbox knowledge base — kept narrow and factual on purpose ──
 const SUPPORT_KB = `You are the support AI for ClaudeCraft (claudecraft.ca), which sells done-for-you Claude AI skill bundles.
@@ -124,6 +133,8 @@ const DOWNLOAD_SETS = {
   jobseeker: { files: ['bundles/job-seekers-career-pack/SKILLS.md', 'bundles/job-seekers-career-pack/SETUP-GUIDE.md'] },
   poweruser: { files: ['bundles/power-user-pack/SKILLS.md', 'bundles/power-user-pack/SETUP-GUIDE.md'] },
   money: { files: ['bundles/money-mastery-pack/SKILLS.md', 'bundles/money-mastery-pack/SETUP-GUIDE.md'] },
+  vault: { files: ['bundles/power-prompts-vault/PROMPTS-VAULT.md'] },
+  startup: { files: ['bundles/startup-founders-toolkit/SKILLS.md', 'bundles/startup-founders-toolkit/SETUP-GUIDE.md'] },
   family: { files: ['bundles/family-life-pack/SKILLS.md', 'bundles/family-life-pack/SETUP-GUIDE.md'] },
   connected: { files: ['bundles/claude-connected-pack/SKILLS.md', 'bundles/claude-connected-pack/SETUP-GUIDE.md'] },
   writer: { files: ['bundles/creative-writers-pack/SKILLS.md', 'bundles/creative-writers-pack/SETUP-GUIDE.md'] },
@@ -172,6 +183,21 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
         const buyerEmail = session.customer_details?.email;
         if (productSlug && buyerEmail && PRODUCTS[productSlug]) {
           await sendPurchaseEmail(buyerEmail, productSlug, PRODUCTS[productSlug].name);
+        }
+
+        // 0.5. Record the purchase so the self-serve refund flow can verify eligibility later.
+        if (productSlug && buyerEmail && session.payment_intent) {
+          const purchases = loadPurchases();
+          purchases.unshift({
+            email: buyerEmail.toLowerCase(),
+            sessionId: session.id,
+            paymentIntentId: session.payment_intent,
+            product: productSlug,
+            amount: session.amount_total,
+            purchasedAt: new Date().toISOString(),
+            refunded: false,
+          });
+          savePurchases(purchases.slice(0, 5000));
         }
 
         // 1. If this purchase used a referral code, credit the original referrer $10.
@@ -338,6 +364,65 @@ app.post('/api/subscribe', (req, res) => {
     ).catch(() => {}); // best-effort — don't block the signup response on email delivery
   }
   res.json({ ok: true });
+});
+
+// ── Self-serve instant refund ──────────────────────────────────────────────
+// Rules-based, not AI-judgment-based: this only ever refunds a VERIFIED real
+// Stripe payment, only within the 30-day guarantee window, and only ONCE per
+// email ever — anything outside those three rules falls through to the
+// existing human-escalation support flow instead of being auto-approved.
+app.post('/api/self-refund', async (req, res) => {
+  if (!stripe) return res.status(500).json({ error: 'Refunds are not configured yet.' });
+  const email = (req.body?.email || '').trim().toLowerCase();
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!isValidEmail) return res.status(400).json({ error: 'Please enter a valid email address.' });
+
+  const refundLog = loadRefundLog();
+  if (refundLog.some(r => r.email === email)) {
+    return res.json({
+      ok: false,
+      escalated: true,
+      message: "You've already used a self-serve refund before. We've flagged this for a real person to review personally — email support@claudecraft.ca and reference this request.",
+    });
+  }
+
+  const purchases = loadPurchases();
+  const now = Date.now();
+  const windowMs = REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  const eligible = purchases
+    .filter(p => p.email === email && !p.refunded && (now - new Date(p.purchasedAt).getTime()) <= windowMs)
+    .sort((a, b) => new Date(b.purchasedAt) - new Date(a.purchasedAt))[0];
+
+  if (!eligible) {
+    return res.json({
+      ok: false,
+      escalated: false,
+      message: "We couldn't find a purchase from this email within the last 30 days. If you think this is wrong, email support@claudecraft.ca and a real person will check manually.",
+    });
+  }
+
+  try {
+    await stripe.refunds.create({ payment_intent: eligible.paymentIntentId });
+
+    eligible.refunded = true;
+    savePurchases(purchases);
+
+    refundLog.push({ email, sessionId: eligible.sessionId, product: eligible.product, refundedAt: new Date().toISOString() });
+    saveRefundLog(refundLog);
+
+    const productName = PRODUCTS[eligible.product]?.name || eligible.product;
+    sendSupportEmail(
+      email,
+      `Your refund for ${productName} is on its way`,
+      `Your refund for ${productName} has been processed — it should land back on your original payment method within 5-10 business days. No further action needed from you.`,
+      `<p>Your refund for <strong>${productName}</strong> has been processed — it should land back on your original payment method within 5-10 business days. No further action needed from you.</p>`
+    ).catch(() => {});
+
+    res.json({ ok: true, message: `Refund for ${productName} processed — it'll land back on your original payment method within 5-10 business days.` });
+  } catch (err) {
+    console.error('Self-refund error:', err.message);
+    res.status(500).json({ ok: false, escalated: false, message: "Something went wrong processing this automatically. Email support@claudecraft.ca and a real person will sort it out." });
+  }
 });
 
 app.get('/api/subscribers', (req, res) => {

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request a Refund — ClaudeCraft</title>
+<meta name="robots" content="noindex">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{ --brand:#FF6B1A; --brand-light:#FF8C42; --bg:#070A12; --text:#EDF0F7; --sub:#8B93A8; --glass-border:rgba(255,255,255,0.09); --green:#22D37F; }
+body{ font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif; background:linear-gradient(180deg,#070A12 0%,#04060A 100%); color:var(--text); line-height:1.7; min-height:100vh; }
+.container{ max-width:480px; margin:0 auto; padding:60px 24px 100px; }
+header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:48px; }
+.logo{ font-size:1.1rem; font-weight:800; color:var(--text); text-decoration:none; }
+.logo .orange{ color:var(--brand); }
+.back{ font-size:0.85rem; color:var(--sub); text-decoration:none; }
+.card{ background:rgba(255,255,255,0.04); border:1px solid var(--glass-border); border-radius:18px; padding:36px 32px; }
+h1{ font-size:1.6rem; font-weight:900; letter-spacing:-0.5px; margin-bottom:10px; }
+p{ color:var(--sub); font-size:0.92rem; margin-bottom:20px; }
+label{ display:block; font-size:0.82rem; font-weight:700; margin-bottom:8px; color:var(--text); }
+input{ width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; padding:13px 14px; color:var(--text); font-size:0.92rem; margin-bottom:16px; font-family:inherit; }
+input:focus{ outline:none; border-color:rgba(255,107,26,0.5); }
+button{ width:100%; background:linear-gradient(135deg,var(--brand-light),var(--brand)); color:#fff; font-weight:700; border:none; padding:14px; border-radius:8px; font-size:0.92rem; cursor:pointer; font-family:inherit; }
+button:disabled{ opacity:0.6; cursor:default; }
+.result{ margin-top:20px; padding:16px 18px; border-radius:10px; font-size:0.88rem; display:none; }
+.result.ok{ background:rgba(34,211,127,0.08); border:1px solid rgba(34,211,127,0.3); color:var(--green); display:block; }
+.result.err{ background:rgba(255,107,26,0.08); border:1px solid rgba(255,107,26,0.3); color:var(--sub); display:block; }
+.note{ font-size:0.78rem; color:var(--sub); margin-top:24px; text-align:center; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a href="/" class="logo">Claude<span class="orange">Craft</span></a>
+    <a href="/" class="back">← Back to home</a>
+  </header>
+
+  <div class="card">
+    <h1>Request a Refund</h1>
+    <p>Every bundle is covered by our 30-day money-back guarantee, no questions asked. Enter the email you purchased with and we'll verify it instantly.</p>
+
+    <form id="refund-form">
+      <label for="email">Your purchase email</label>
+      <input type="email" id="email" placeholder="you@email.com" required>
+      <button type="submit" id="submit-btn">Check &amp; Process Refund</button>
+    </form>
+
+    <div class="result" id="result"></div>
+
+    <div class="note">One self-serve refund per email. Anything beyond that, or anything that doesn't match, goes to a real person at support@claudecraft.ca — never auto-denied, just reviewed personally.</div>
+  </div>
+</div>
+
+<script>
+document.getElementById('refund-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const result = document.getElementById('result');
+  const email = document.getElementById('email').value;
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  result.className = 'result';
+  result.style.display = 'none';
+
+  fetch('/api/self-refund', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  }).then(r => r.json()).then(data => {
+    result.textContent = data.message || (data.ok ? 'Refund processed.' : 'Something went wrong.');
+    result.className = 'result ' + (data.ok ? 'ok' : 'err');
+    btn.textContent = data.ok ? 'Done' : 'Check & Process Refund';
+    btn.disabled = !!data.ok;
+  }).catch(() => {
+    result.textContent = 'Something went wrong — please try again, or email support@claudecraft.ca.';
+    result.className = 'result err';
+    btn.textContent = 'Check & Process Refund';
+    btn.disabled = false;
+  });
+});
+</script>
+</body>
+</html>
