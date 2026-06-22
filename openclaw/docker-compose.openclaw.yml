@@ -1,22 +1,26 @@
 # ClaudeCraft — OpenClaw daily ops agent (sandboxed)
 # ----------------------------------------------------------------------------
 # Safety model: this agent can NEVER reach your bank accounts, your files,
-# customer data, or post anything publicly. It runs in a container that:
+# customer data, or post anything to a third-party platform. It runs in a
+# container that:
 #   • has access to ONE folder only: ./reports (where its daily report goes)
 #   • has NO direct internet — its only route out is the egress proxy
-#   • the egress proxy allows ONLY api.anthropic.com and api.stripe.com
+#   • the egress proxy allows ONLY api.anthropic.com, api.stripe.com, and
+#     the ClaudeCraft site itself (to publish articles + read escalations)
 #   • runs as a non-root user, read-only root filesystem, no new privileges
-#   • has no credentials for posting to Reddit/social/email — it can't post
-#     anywhere even if it tried, because it was never given the ability to
+#   • has no credentials for Reddit/social/email — it can draft replies and
+#     marketing ideas, but it has no mechanism to send or post them itself;
+#     publishing to ClaudeCraft's own Articles section is the one exception
 #
 # Start:  docker compose -f docker-compose.openclaw.yml up
 # Logs:   docker compose -f docker-compose.openclaw.yml logs -f openclaw
 # Stop:   docker compose -f docker-compose.openclaw.yml down
 #
-# BEFORE first run: copy .env.openclaw.example -> .env.openclaw and fill it
-# with a DEDICATED throwaway Anthropic API key with a low spend cap, and the
-# SAME restricted Stripe key already used for checkout (must have Checkout
-# Sessions: Read permission added for the sales summary to work).
+# BEFORE first run: copy .env.openclaw.example -> .env.openclaw and fill in
+# ALL FOUR values — a DEDICATED throwaway Anthropic API key with a low spend
+# cap, the SAME restricted Stripe key already used for checkout (needs
+# Checkout Sessions: Read), ARTICLES_API_TOKEN (must match the main site's
+# value exactly), and PUBLIC_BASE_URL (the live site's real URL).
 # NEVER put your main API keys or anything banking-related in here.
 
 networks:

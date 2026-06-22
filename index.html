@@ -6,6 +6,18 @@
 <title>ClaudeCraft — Pre-Built Claude AI Skills</title>
 <meta name="description" content="Done-for-you Claude AI skill bundles. Install in 5 minutes. Save 10+ hours every week. Trusted by 340+ professionals.">
 
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://claudecraft.ca/">
+<meta property="og:title" content="ClaudeCraft — Pre-Built Claude AI Skills That Actually Work">
+<meta property="og:description" content="Done-for-you Claude AI skill bundles. Install in 5 minutes. Save 10+ hours every week. Trusted by 340+ professionals.">
+<meta property="og:image" content="https://claudecraft.ca/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ClaudeCraft — Pre-Built Claude AI Skills That Actually Work">
+<meta name="twitter:description" content="Done-for-you Claude AI skill bundles. Install in 5 minutes. Save 10+ hours every week.">
+<meta name="twitter:image" content="https://claudecraft.ca/og-image.png">
+
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
@@ -14,11 +26,11 @@
   --brand-light: #FF8C42;
   --brand-dim:   rgba(255,107,26,0.18);
   --brand-glow:  rgba(255,107,26,0.35);
-  --bg:    #07080F;
+  --bg:    #070A12;
   --bg2:   #0B0C15;
   --bg3:   #0F1120;
   --glass: rgba(255,255,255,0.04);
-  --glass-border: rgba(255,255,255,0.09);
+  --glass-border: rgba(255,255,255,0.07);
   --glass-hover:  rgba(255,255,255,0.07);
   --text:  #EDF0F7;
   --sub:   #8B93A8;
@@ -30,20 +42,16 @@
   --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
 }
 
-html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+html { scroll-behavior: smooth; scroll-padding-top: 120px; }
 body {
   font-family: var(--font-sans);
-  background: var(--bg); color: var(--text);
+  background: var(--bg); background-image: linear-gradient(180deg, #070A12 0%, #04060A 100%); color: var(--text);
   overflow-x: hidden; line-height: 1.6;
 }
 
 .bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.orb { position: absolute; border-radius: 50%; filter: blur(55px); opacity: 0.5; animation: drift 18s ease-in-out infinite; will-change: transform; }
-.orb-1 { width:600px; height:600px; top:-150px; left:-100px; background: radial-gradient(circle, rgba(255,107,26,0.22), transparent 70%); animation-duration:20s; }
-.orb-2 { width:500px; height:500px; top:40%; right:-150px; background: radial-gradient(circle, rgba(120,80,255,0.15), transparent 70%); animation-duration:25s; animation-delay:-8s; }
-.orb-3 { width:400px; height:400px; bottom:10%; left:30%; background: radial-gradient(circle, rgba(255,107,26,0.12), transparent 70%); animation-duration:22s; animation-delay:-14s; }
-@keyframes drift { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(30px,-40px) scale(1.05);} 66%{transform:translate(-20px,30px) scale(0.97);} }
 .dot-grid { position:fixed; inset:0; z-index:0; pointer-events:none; background-image:radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px); background-size:32px 32px; mask-image:radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%); }
+.grid-lines { position:fixed; inset:0; z-index:0; pointer-events:none; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size:40px 40px; mask-image:radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 100%); }
 
 .z1 { position:relative; z-index:1; }
 .container { max-width:1140px; margin:0 auto; padding:0 24px; }
@@ -52,7 +60,7 @@ body {
 .tag-live .dot { background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse-dot 2s infinite; }
 .tag-hot  .dot { background:var(--brand); box-shadow:0 0 8px var(--brand-glow); }
 @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
-.grad-text { background:linear-gradient(135deg,#FF8C42 0%,#FF6B1A 40%,#E85A0A 80%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.grad-text { background:linear-gradient(135deg,#FFFFFF 0%,#FF8A4C 45%,#E65100 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 .grad-text-cool { background:linear-gradient(135deg,#FFFFFF 0%,#C8D0E0 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 .glass-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-lg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); transition:border-color .3s,background .3s,transform .3s,box-shadow .3s; }
 .glass-card:hover { border-color:rgba(255,107,26,0.3); background:var(--glass-hover); transform:translateY(-4px); box-shadow:0 24px 60px rgba(0,0,0,0.5),0 0 40px rgba(255,107,26,0.06); }
@@ -60,53 +68,52 @@ body {
 .btn-xl { font-size:1rem; padding:16px 36px; letter-spacing:.3px; }
 .btn-lg { font-size:0.9rem; padding:13px 28px; }
 .btn-md { font-size:0.82rem; padding:11px 22px; letter-spacing:.5px; }
-.btn-primary { background:linear-gradient(135deg,var(--brand-light),var(--brand)); color:#fff; box-shadow:0 4px 30px rgba(255,107,26,0.35),0 1px 0 rgba(255,255,255,0.15) inset; }
-.btn-primary:hover { box-shadow:0 8px 50px rgba(255,107,26,0.55),0 1px 0 rgba(255,255,255,0.15) inset; transform:translateY(-2px); }
+.btn-primary { background:linear-gradient(135deg,var(--brand-light),var(--brand)); color:#fff; box-shadow:0 1px 1px rgba(0,0,0,0.15),0 6px 18px rgba(255,107,26,0.22); }
+.btn-primary:hover { box-shadow:0 1px 1px rgba(0,0,0,0.15),0 10px 26px rgba(255,107,26,0.3); transform:translateY(-1px); }
 .btn-ghost { background:transparent; color:var(--text); border:1px solid var(--glass-border); }
 .btn-ghost:hover { border-color:rgba(255,107,26,0.4); color:var(--brand-light); }
 .btn-orange-outline { background:var(--brand-dim); color:var(--brand-light); border:1px solid rgba(255,107,26,0.35); }
 .btn-orange-outline:hover { background:rgba(255,107,26,0.25); box-shadow:0 0 20px var(--brand-dim); }
 .divider { height:1px; background:var(--glass-border); margin:0; }
 
-.announce-bar { position:fixed; top:0; left:0; right:0; z-index:300; background:linear-gradient(90deg,rgba(255,107,26,0.9),rgba(232,90,10,0.9)); backdrop-filter:blur(10px); padding:9px 20px; text-align:center; display:flex; align-items:center; justify-content:center; gap:12px; }
-.announce-text { font-size:0.8rem; font-weight:700; letter-spacing:.5px; color:#fff; }
-.countdown { font-family:var(--font-mono); font-size:0.82rem; color:rgba(255,255,255,0.9); }
+.announce-bar { position:fixed; top:0; left:0; right:0; z-index:300; background:linear-gradient(90deg,rgba(245,158,11,0.92),rgba(194,65,12,0.92)); backdrop-filter:blur(10px); padding:9px 20px; text-align:center; display:flex; align-items:center; justify-content:center; gap:12px; }
+.announce-text { display:inline-flex; align-items:center; gap:8px; font-size:0.8rem; font-weight:700; letter-spacing:.5px; color:#fff; }
+.announce-dot { width:6px; height:6px; border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(255,255,255,0.8); animation:pulse-dot 2s infinite; flex-shrink:0; }
+.countdown { font-family:var(--font-mono); font-size:0.82rem; color:rgba(255,255,255,0.9); letter-spacing:1px; }
 #timer { font-weight:800; letter-spacing:2px; }
 
-nav { position:fixed; top:38px; left:0; right:0; z-index:200; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; background:rgba(7,8,15,0.94); border-bottom:1px solid var(--glass-border); }
-.nav-logo { font-size:1.2rem; font-weight:900; letter-spacing:-0.5px; color:var(--text); }
-.nav-logo .orange { color:var(--brand); }
+nav { position:fixed; top:50px; left:16px; right:16px; max-width:1180px; margin:0 auto; z-index:200; padding:11px 24px; display:flex; align-items:center; justify-content:space-between; background:rgba(13,15,24,0.62); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.07); border-radius:999px; box-shadow:0 16px 50px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05); transition:border-color .3s cubic-bezier(.16,1,.3,1), box-shadow .3s cubic-bezier(.16,1,.3,1); }
+.nav-logo { display:flex; align-items:center; gap:10px; font-size:1.2rem; font-weight:800; letter-spacing:-0.3px; color:var(--text); }
+.nav-logo-icon { display:flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:9px; background:linear-gradient(160deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)); border:1px solid var(--glass-border); box-shadow:0 0 14px rgba(255,107,26,0.25) inset, 0 2px 8px rgba(0,0,0,0.3); flex-shrink:0; }
 .nav-links { display:flex; align-items:center; gap:32px; }
-.nav-links a { font-size:0.85rem; color:var(--sub); text-decoration:none; font-weight:500; transition:color .2s; }
+.nav-links a { position:relative; font-size:0.85rem; color:var(--sub); text-decoration:none; font-weight:500; transition:color .25s cubic-bezier(.16,1,.3,1); }
+.nav-links a::after { content:''; position:absolute; left:50%; bottom:-6px; width:100%; height:1px; background:var(--brand); transform:translateX(-50%) scaleX(0); transition:transform .3s cubic-bezier(.16,1,.3,1); }
 .nav-links a:hover { color:var(--text); }
+.nav-links a:hover::after { transform:translateX(-50%) scaleX(1); }
 @media(max-width:768px){ .nav-links { display:none; } }
+.btn-icon-badge { display:flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:6px; background:rgba(255,255,255,0.18); font-size:0.76rem; flex-shrink:0; }
+.btn-primary { transition:all .3s cubic-bezier(.16,1,.3,1); }
+a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid rgba(255,107,26,0.6); outline-offset:3px; border-radius:6px; }
 
-.hero { padding:108px 0 120px; text-align:center; }
+.hero { position:relative; padding:140px 0 120px; text-align:center; }
+.hero::before { content:''; position:absolute; top:80px; left:50%; transform:translateX(-50%) rotate(-8deg); width:760px; height:380px; background:radial-gradient(ellipse at center,rgba(255,122,0,0.11),transparent 70%); filter:blur(60px); pointer-events:none; z-index:-1; }
+.hero-bridge .sep { opacity:.4; }
 .hero-eyebrow { margin-bottom:20px; }
 .hero-title { font-size:clamp(3rem,7vw,6rem); font-weight:900; letter-spacing:-4px; line-height:1.0; margin-bottom:24px; }
-@keyframes heroDropIn { 0%{opacity:0; transform:translateY(-36px);} 100%{opacity:1; transform:translateY(0);} }
-@keyframes heroBounceDrop {
-  0%   { opacity:0; transform:translateY(-110px); }
-  38%  { opacity:1; transform:translateY(0); }
-  50%  { opacity:1; transform:translateY(-26px); }
-  62%  { opacity:1; transform:translateY(0); }
-  72%  { opacity:1; transform:translateY(-12px); }
-  82%  { opacity:1; transform:translateY(0); }
-  89%  { opacity:1; transform:translateY(-5px); }
-  95%  { opacity:1; transform:translateY(0); }
-  100% { opacity:1; transform:translateY(0); }
-}
-.hero-line { display:inline-block; opacity:0; animation: heroDropIn 1.4s cubic-bezier(.19,1,.22,1) forwards; }
-.hero-line-1 { animation-delay: .15s; }
-.hero-line-2 { animation: heroBounceDrop 1.6s cubic-bezier(.33,1,.68,1) forwards; animation-delay: 1.65s; }
-.hero-bridge { font-size:0.85rem; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:0 auto 28px; display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
+@keyframes heroDropSettle { 0%{opacity:0; transform:translateY(-44px);} 100%{opacity:1; transform:translateY(0);} }
+@keyframes heroFadeUp { 0%{opacity:0; transform:translateY(14px);} 100%{opacity:1; transform:translateY(0);} }
+.hero-line { display:inline-block; opacity:0; animation: heroDropSettle .65s cubic-bezier(.34,1.56,.64,1) forwards; }
+.hero-line-1 { animation-delay: .1s; }
+.hero-line-2 { animation-delay: .28s; }
+.hero-bridge { font-size:0.85rem; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:0 auto 28px; display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; opacity:0; animation: heroFadeUp .5s cubic-bezier(.16,1,.3,1) forwards; animation-delay: .55s; }
 .hero-bridge::before,.hero-bridge::after { content:''; display:inline-block; width:40px; height:1px; background:var(--glass-border); }
-.hero-sub { font-size:clamp(1.05rem,2vw,1.3rem); color:var(--sub); max-width:560px; margin:0 auto 44px; font-weight:400; line-height:1.7; text-shadow:0 2px 16px rgba(0,0,0,0.6); }
+.hero-sub { font-size:clamp(1.05rem,2vw,1.3rem); color:var(--sub); max-width:560px; margin:0 auto 44px; font-weight:400; line-height:1.7; text-shadow:0 2px 16px rgba(0,0,0,0.6); opacity:0; animation: heroFadeUp .5s cubic-bezier(.16,1,.3,1) forwards; animation-delay: .7s; }
 .hero-sub strong { color:var(--text); font-weight:600; }
 .hero-ctas { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:56px; }
 .trust-strip { display:flex; align-items:center; justify-content:center; gap:28px; flex-wrap:wrap; }
 .trust-item { display:flex; align-items:center; gap:7px; font-size:0.82rem; color:var(--sub); font-weight:500; }
-.trust-icon { font-size:1rem; }
+.ic { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--brand-light); }
+.ic svg { display:block; }
 
 .stats-section { border-top:1px solid var(--glass-border); border-bottom:1px solid var(--glass-border); background:rgba(255,255,255,0.02); padding:0; }
 .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); max-width:1140px; margin:0 auto; }
@@ -125,7 +132,19 @@ nav { position:fixed; top:38px; left:0; right:0; z-index:200; padding:14px 32px;
 <body>
 <style>
 .products-section { padding:100px 0; }
-.products-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; }
+.product-tabs { display:flex; align-items:center; justify-content:center; gap:8px; margin:-12px auto 40px; padding:6px; max-width:fit-content; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:999px; }
+.product-tab { display:inline-flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700; color:var(--sub); background:transparent; border:none; padding:10px 22px; border-radius:999px; cursor:pointer; transition:all .3s cubic-bezier(.16,1,.3,1); font-family:var(--font-sans); }
+.product-tab:hover { color:var(--text); }
+.product-tab.active { color:#fff; background:linear-gradient(135deg,var(--brand-light),var(--brand)); box-shadow:0 6px 18px rgba(255,107,26,0.25); }
+.tab-count { font-size:0.7rem; opacity:0.75; }
+.trust-badge-row { display:flex; align-items:center; justify-content:center; gap:26px; flex-wrap:wrap; margin:-16px auto 36px; }
+.trust-badge { display:inline-flex; align-items:center; gap:7px; font-size:0.78rem; color:var(--sub); font-weight:600; }
+.trust-badge .ic { color:var(--green); }
+.products-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:stretch; animation: tabFadeIn .4s cubic-bezier(.16,1,.3,1); }
+@keyframes tabFadeIn { 0%{opacity:0; transform:translateY(10px);} 100%{opacity:1; transform:translateY(0);} }
+@media(max-width:980px){ .products-grid { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:560px){ .products-grid { grid-template-columns:1fr; } }
+.card-desc { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
 .product-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-xl); overflow:hidden; transition:all .3s cubic-bezier(.25,.8,.25,1); display:flex; flex-direction:column; backdrop-filter:blur(14px); position:relative; }
 .product-card::after { content:''; position:absolute; inset:0; border-radius:var(--r-xl); background:linear-gradient(135deg,rgba(255,107,26,0) 0%,rgba(255,107,26,0.04) 100%); opacity:0; transition:opacity .3s; pointer-events:none; }
 .product-card:hover { border-color:rgba(255,107,26,0.5); transform:translateY(-6px) scale(1.012); box-shadow:0 1px 2px rgba(0,0,0,.3),0 4px 8px rgba(0,0,0,.22),0 12px 24px rgba(0,0,0,.18),0 32px 64px rgba(0,0,0,.5),0 0 0 1px rgba(255,107,26,0.25),0 0 60px rgba(255,107,26,0.18),inset 0 1px 0 rgba(255,255,255,.06); }
@@ -133,18 +152,18 @@ nav { position:fixed; top:38px; left:0; right:0; z-index:200; padding:14px 32px;
 .card-stripe { height:3px; background:linear-gradient(90deg,transparent,var(--brand),var(--brand-light),transparent); opacity:0; transition:opacity .3s; }
 .product-card:hover .card-stripe { opacity:1; }
 .card-stripe-always { opacity:1 !important; }
-.card-body { padding:26px 26px; flex:1; display:flex; flex-direction:column; }
+.card-body { padding:22px 20px; flex:1; display:flex; flex-direction:column; }
 .card-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
-.card-name { font-size:1.15rem; font-weight:800; letter-spacing:-0.3px; }
-.card-cat { font-size:0.72rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:16px; }
+.card-name { font-size:1.02rem; font-weight:800; letter-spacing:-0.2px; line-height:1.25; }
+.card-cat { font-size:0.68rem; color:var(--muted); letter-spacing:.8px; text-transform:uppercase; margin-bottom:12px; }
 .card-desc { font-size:0.86rem; color:var(--sub); line-height:1.55; margin-bottom:16px; }
 .card-features { list-style:none; margin-bottom:18px; flex:1; }
-.card-features li { display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; color:#9AA3B8; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04); line-height:1.4; }
+.card-features li { display:flex; align-items:flex-start; gap:8px; font-size:0.78rem; color:#9AA3B8; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.04); line-height:1.35; }
 .card-features li:last-child { border-bottom:none; }
 .cf-icon { color:var(--green); font-size:0.75rem; flex-shrink:0; margin-top:3px; }
-.card-footer { display:flex; align-items:center; justify-content:space-between; padding-top:16px; border-top:1px solid var(--glass-border); }
+.card-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding-top:14px; border-top:1px solid var(--glass-border); }
 .price-block { display:flex; align-items:baseline; gap:8px; }
-.price-now { font-size:2rem; font-weight:900; }
+.price-now { font-size:1.55rem; font-weight:900; }
 .price-was { font-size:0.88rem; color:var(--muted); text-decoration:line-through; }
 .product-card.is-featured { border-color:rgba(255,107,26,0.35); box-shadow:0 0 60px rgba(255,107,26,0.1); }
 .featured-crown { position:absolute; top:20px; right:20px; background:linear-gradient(135deg,var(--brand-light),var(--brand)); color:#fff; font-size:0.68rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; box-shadow:0 4px 16px var(--brand-glow); }
@@ -231,8 +250,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 .dl-btn .dl-icon { font-size:1.2rem; }
 .dl-btn .dl-sub { font-size:0.72rem; color:var(--sub); font-weight:400; display:block; }
 
-.reveal { opacity:0; transform:translateY(24px); transition:opacity .55s ease,transform .55s ease; }
-.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal { opacity:1; transform:none; }
 .stagger .reveal:nth-child(1) { transition-delay:0s; }
 .stagger .reveal:nth-child(2) { transition-delay:.1s; }
 .stagger .reveal:nth-child(3) { transition-delay:.2s; }
@@ -279,26 +297,29 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 .guide-trigger { display: none !important; }
 
 .cc-bottom-bar {
-  max-width: 540px; margin: 0 auto 36px; z-index: 5;
-  background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,107,26,0.28); border-radius: var(--r-lg); padding: 8px 8px 8px 10px;
+  max-width: 560px; margin: 0 auto 36px; z-index: 5;
+  background: rgba(255,255,255,0.045); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: var(--r-lg); padding: 8px 8px 8px 12px;
   display: flex; align-items: center; gap: 10px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35), 0 0 30px rgba(255,107,26,0.08);
-  transition: border-color .2s, box-shadow .2s;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 50px rgba(255,107,26,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: border-color .25s, box-shadow .25s, transform .25s;
 }
-.cc-bottom-bar:hover { border-color: rgba(255,107,26,0.45); box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 36px rgba(255,107,26,0.14); }
+.cc-bottom-bar:hover { border-color: rgba(255,255,255,0.22); box-shadow: 0 24px 70px rgba(0,0,0,0.5), 0 0 64px rgba(255,107,26,0.2), inset 0 1px 0 rgba(255,255,255,0.08); transform: translateY(-2px); }
 .cc-bar-avatar {
   width: 40px; height: 40px; border-radius: var(--r-md);
-  background: linear-gradient(135deg, var(--brand-light), var(--brand));
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
   display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(255,107,26,0.4); cursor: pointer;
+  cursor: pointer; transition: transform .25s, background .25s;
+  color: var(--brand-light);
 }
+.cc-bar-avatar:hover { transform: scale(1.06); background: rgba(255,255,255,0.1); }
 .cc-bar-input {
   flex: 1; background: transparent; border: none;
   color: var(--text); padding: 12px 4px; font-size: 0.92rem; font-family: var(--font-sans); outline: none;
   text-align: left;
 }
 .cc-bar-input::placeholder { color: var(--muted); }
+.cc-bar-input:focus-visible, .cc-bar-input:focus { outline: none; }
 .cc-bar-send {
   width: 40px; height: 40px; border-radius: var(--r-md);
   background: linear-gradient(135deg, var(--brand-light), var(--brand));
@@ -306,18 +327,19 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   transition: transform .2s, box-shadow .2s; font-family: var(--font-sans);
 }
-.cc-bar-send:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(255,107,26,0.5); }
+.cc-bar-send:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 20px rgba(255,107,26,0.5); }
 @media(max-width:600px){ .cc-bottom-bar { margin: 0 auto 28px; max-width: 100%; } }
 
 .guide-panel {
-  position: fixed; top: 0; left: 0; width: 420px; max-width: 100vw; height: 100vh;
-  background: #0B0C15; border-right: 1px solid rgba(255,107,26,0.22);
+  position: fixed; top: 50%; left: 50%; width: 560px; max-width: 92vw; max-height: 78vh;
+  background: #0B0C15; border: 1px solid rgba(255,107,26,0.22); border-radius: var(--r-lg);
   display: flex; flex-direction: column; overflow: hidden;
-  box-shadow: 20px 0 80px rgba(0,0,0,0.65), 0 0 40px rgba(255,107,26,0.05);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.65), 0 0 50px rgba(255,107,26,0.1);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 1001;
-  transition: transform .35s cubic-bezier(.4,0,.2,1); transform: translateX(-100%); pointer-events: none;
+  transition: transform .4s cubic-bezier(.16,1,.3,1), opacity .3s ease;
+  transform: translate(-50%, 75vh); opacity: 0; pointer-events: none;
 }
-.guide-panel.open { transform: translateX(0); pointer-events: all; }
+.guide-panel.open { transform: translate(-50%, -50%); opacity: 1; pointer-events: all; }
 .guide-hamburger {
   position: fixed; top: 18px; left: 18px; z-index: 902;
   width: 44px; height: 44px; border-radius: 12px;
@@ -385,7 +407,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
   .nl-card { padding:40px 28px; }
   .guarantee-card { padding:36px 28px; }
   footer { justify-content:center; text-align:center; }
-  .guide-panel { width: 100vw; border-left: none; border-top: 1px solid rgba(255,107,26,0.22); }
+  .guide-panel { width: 94vw; max-height: 82vh; }
   .cc-bar-input { font-size: 0.85rem; }
 }
 
@@ -408,21 +430,32 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 /* ── NEW PRODUCT CARD addition styling reuses .product-card, no overrides needed ── */
 </style>
 
-<div class="bg-canvas">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
 <div class="dot-grid"></div>
+<div class="grid-lines"></div>
 
 <div class="announce-bar" id="announce">
-  <span class="announce-text">🔥 Launch Special — 50% off all bundles. Ends in</span>
+  <span class="announce-text"><span class="announce-dot"></span>Launch Special — 50% off all bundles. Ends in</span>
   <span class="countdown" id="timer">23:47:12</span>
-  <a href="#products" style="color:#fff; font-size:.78rem; font-weight:700; text-decoration:underline; white-space:nowrap;">Grab It →</a>
+  <a href="#products" style="color:#fff; font-size:.78rem; font-weight:700; text-decoration:underline; white-space:nowrap;">Grab it →</a>
 </div>
 
 <nav>
-  <div class="nav-logo">Claude<span class="orange">Craft</span></div>
+  <div class="nav-logo">
+    <span class="nav-logo-icon" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="18" height="18">
+        <defs>
+          <linearGradient id="ccLogoGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFD9B0"/>
+            <stop offset="55%" stop-color="#FF8C42"/>
+            <stop offset="100%" stop-color="#E05A2B"/>
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="13" fill="none" stroke="url(#ccLogoGrad)" stroke-width="3"/>
+        <path d="M21 11a7 7 0 1 0 0 10" fill="none" stroke="#0B0C15" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </span>
+    Claudecraft
+  </div>
   <div class="nav-links">
     <a href="#articles">Articles</a>
     <a href="#products">Bundles</a>
@@ -430,7 +463,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
     <a href="#testimonials">Reviews</a>
     <a href="#faq">FAQ</a>
   </div>
-  <a href="#products" class="btn btn-primary btn-md">Browse Bundles ⚡</a>
+  <a href="#products" class="btn btn-primary btn-md"><span class="btn-icon-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>Browse Bundles</a>
 </nav>
 
 <section class="hero z1">
@@ -442,12 +475,18 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
       <span class="grad-text-cool hero-line hero-line-1">Pre-Built Claude Skills</span><br>
       <span class="grad-text hero-line hero-line-2">That Actually Work.</span>
     </h1>
-    <p class="hero-bridge">Trusted by 340+ professionals · Instant download · No coding required</p>
+    <p class="hero-bridge">
+      <span class="ti"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V6l7-3z"/></svg></span>Trusted by 340+ professionals</span>
+      <span class="sep">•</span>
+      <span class="ti"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg></span>Instant download</span>
+      <span class="sep">•</span>
+      <span class="ti"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg></span>No coding required</span>
+    </p>
     <p class="hero-sub">
       Done-for-you Claude skill bundles that install in <strong>5 minutes</strong> and save you <strong>10+ hours every week.</strong><br>No tech skills needed. Results from day one.
     </p>
     <div class="cc-bottom-bar" id="cc-bottom-bar">
-      <div class="cc-bar-avatar" onclick="toggleGuide()" title="Open AI Chat">✨</div>
+      <div class="cc-bar-avatar" onclick="toggleGuide()" title="Open AI Chat"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 2l1.8 5.6L19.4 9.4 13.8 11.2 12 17l-1.8-5.8L4.6 9.4l5.6-1.8L12 2z"/></svg></div>
       <input
         class="cc-bar-input"
         id="cc-bar-input"
@@ -457,21 +496,29 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
         onfocus="openPanelIfClosed()"
         onkeydown="if(event.key==='Enter')sendBarMsg()"
       >
-      <button class="cc-bar-send" onclick="sendBarMsg()" aria-label="Send message">↑</button>
+      <button class="cc-bar-send" onclick="sendBarMsg()" aria-label="Send message">→</button>
     </div>
     <div class="hero-ctas">
-      <a href="#products" class="btn btn-primary btn-xl">⚡ Browse Skill Bundles</a>
+      <a href="#products" class="btn btn-primary btn-xl"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>Browse Skill Bundles</a>
       <a href="#how" class="btn btn-ghost btn-xl">See How It Works</a>
     </div>
     <div class="trust-strip">
-      <div class="trust-item"><span class="trust-icon">⚡</span>Instant Download</div>
-      <div class="trust-item"><span class="trust-icon">🔒</span>30-Day Guarantee</div>
-      <div class="trust-item"><span class="trust-icon">🤖</span>Works with Claude Free &amp; Pro</div>
-      <div class="trust-item"><span class="trust-icon">🌍</span>340+ Happy Customers</div>
+      <div class="trust-item"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>Instant Download</div>
+      <div class="trust-item"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>30-Day Guarantee</div>
+      <div class="trust-item"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.2 2.2 4.8-5.4"/></svg></span>Works with Claude Free &amp; Pro</div>
+      <div class="trust-item"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2 19c0-3 3-5 7-5s7 2 7 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 13.2c2.7.4 5 2 5 4.8"/></svg></span>340+ Happy Customers</div>
     </div>
   </div>
 </section>
 
+<div class="stats-section z1">
+  <div class="stats-grid">
+    <div class="stat-cell"><div class="stat-num grad-text" data-count="340">0</div><div class="stat-lbl">Customers</div></div>
+    <div class="stat-cell"><div class="stat-num grad-text">10 hrs</div><div class="stat-lbl">Saved Per Week</div></div>
+    <div class="stat-cell"><div class="stat-num grad-text">4.9 ★</div><div class="stat-lbl">Average Rating</div></div>
+    <div class="stat-cell"><div class="stat-num grad-text">$0</div><div class="stat-lbl">Extra Subscriptions</div></div>
+  </div>
+</div>
 <section class="articles-section z1" id="articles">
   <div class="container">
     <div class="s-header">
@@ -490,8 +537,8 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
         </summary>
         <div class="article-body">
           <p>Anthropic shipped a real, native "Agent Skills" feature for Claude — and it's genuinely different from just pasting instructions into a Custom Instructions box. A native Skill is a small folder containing a <strong>SKILL.md</strong> file plus optional scripts and resources, uploaded as a zip. Claude scans the metadata of every installed Skill and only pulls in the full content when it's actually relevant to what you're doing — a technique called progressive disclosure.</p>
-          <p>Here's the part most people miss: native Skills currently require a paid plan (Pro, Max, Team, or Enterprise) with <strong>Code Execution</strong> turned on, and you install them by uploading a zip file — not something most non-technical users are going to do on day one.</p>
-          <p>That's exactly why every ClaudeCraft bundle still ships in the simple copy-paste Custom Instructions format: it works on the <strong>free plan</strong>, with zero technical setup. But we're watching the native Skills format closely — it's the more "official" long-term direction, and our roadmap includes a Skills-format upgrade path for Pro+ users. If you're curious how to package your own Custom Instructions as a real Skill someday, that's a great sign you're ready to graduate from beginner tools — which is also exactly what our <strong>Claude Co-Work Beginner's Guide</strong> is designed to get you to.</p>
+          <p>Good news as of the latest update: native Skills now work on every plan, including <strong>Free</strong> — not just paid tiers like before. The catch is they still require <strong>Code Execution</strong> turned on (Settings → Capabilities → "Code execution and file creation"), and building your own custom Skill still means packaging a zip file — genuinely not something most non-technical users want to deal with on day one, even though Anthropic's docs now note "no coding required for simple skills."</p>
+          <p>That's exactly why every ClaudeCraft bundle still ships in the simple copy-paste Custom Instructions format: zero setup beyond pasting text, works the moment you turn it on, no zip files, no toggles to hunt for. But we're watching the native Skills format closely — it's the more "official" long-term direction, and our roadmap includes a Skills-format upgrade path. If you're curious how to package your own Custom Instructions as a real Skill someday, that's a great sign you're ready to graduate from beginner tools — which is also exactly what our <strong>Claude Co-Work Beginner's Guide</strong> is designed to get you to.</p>
         </div>
       </details>
 
@@ -576,14 +623,6 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
   </div>
 </section>
 
-<div class="stats-section z1">
-  <div class="stats-grid">
-    <div class="stat-cell"><div class="stat-num grad-text" data-count="340">0</div><div class="stat-lbl">Customers</div></div>
-    <div class="stat-cell"><div class="stat-num grad-text">10 hrs</div><div class="stat-lbl">Saved Per Week</div></div>
-    <div class="stat-cell"><div class="stat-num grad-text">4.9 ★</div><div class="stat-lbl">Average Rating</div></div>
-    <div class="stat-cell"><div class="stat-num grad-text">$0</div><div class="stat-lbl">Extra Subscriptions</div></div>
-  </div>
-</div>
 <section class="products-section z1" id="products">
   <div class="container">
     <div class="s-header">
@@ -595,7 +634,19 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
       </div>
     </div>
 
-    <div class="products-grid stagger">
+    <div class="product-tabs">
+      <button class="product-tab active" id="tab-btn-popular" onclick="showProductTab('popular', this)">Most Popular</button>
+      <button class="product-tab" id="tab-btn-more" onclick="showProductTab('more', this)">More Bundles <span class="tab-count">+4</span></button>
+    </div>
+
+    <div class="trust-badge-row">
+      <span class="trust-badge"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>Secure Checkout</span>
+      <span class="trust-badge"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>Stripe &amp; PayPal Accepted</span>
+      <span class="trust-badge"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V6l7-3z"/></svg></span>30-Day Money-Back Guarantee</span>
+      <span class="trust-badge"><span class="ic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg></span>Instant Download</span>
+    </div>
+
+    <div class="products-grid stagger" id="tab-popular">
 
       <div class="product-card reveal" id="card-cowork">
         <div class="card-stripe"></div>
@@ -607,11 +658,9 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
           <div class="card-cat">Foundations · Long-Form Step-by-Step Guide</div>
           <div class="card-desc">Never used Claude before? Start here. A complete, deeply detailed walkthrough — every step broken into substeps — that takes you from "never opened claude.ai" to genuinely working with it every day.</div>
           <ul class="card-features">
-            <li><span class="cf-icon">✦</span>8 full Parts — setup, Projects, prompting, files, Artifacts &amp; more</li>
-            <li><span class="cf-icon">✦</span>Every step broken into numbered substeps — zero guessing</li>
-            <li><span class="cf-icon">✦</span>Real example prompts you can copy and adapt immediately</li>
-            <li><span class="cf-icon">✦</span>A "common mistakes" section most guides skip entirely</li>
-            <li><span class="cf-icon">✦</span>Printable quick-start checklist included</li>
+            <li><span class="cf-icon">✦</span>8 full Parts — setup, Projects, prompting &amp; more</li>
+            <li><span class="cf-icon">✦</span>Every step broken into numbered substeps</li>
+            <li><span class="cf-icon">✦</span>Real example prompts you can copy and adapt</li>
             <li><span class="cf-icon">✦</span>Works with the free Claude plan</li>
           </ul>
           <div class="card-footer">
@@ -639,8 +688,6 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
             <li><span class="cf-icon">✦</span>Recipes from whatever's already in your fridge</li>
             <li><span class="cf-icon">✦</span>Reply to any email in 30 seconds flat</li>
             <li><span class="cf-icon">✦</span>Research anything — plain answers, no fluff</li>
-            <li><span class="cf-icon">✦</span>Write meaningful cards, letters &amp; messages</li>
-            <li><span class="cf-icon">✦</span>Travel planner — just tell Claude where to go</li>
             <li><span class="cf-icon">✦</span>Large-print cheat sheet PDF included</li>
           </ul>
           <div class="card-footer">
@@ -692,11 +739,9 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
           <div class="card-desc">From essay outlines to exam crams — a full toolkit built for actual student life, not generic productivity advice.</div>
           <ul class="card-features">
             <li><span class="cf-icon">✦</span>Essay outline builder &amp; writing feedback coach</li>
-            <li><span class="cf-icon">✦</span>Study guide &amp; flashcard generator from your own notes</li>
+            <li><span class="cf-icon">✦</span>Study guide &amp; flashcard generator from your notes</li>
             <li><span class="cf-icon">✦</span>Citation formatter (APA, MLA, Chicago)</li>
-            <li><span class="cf-icon">✦</span>Math/science step-by-step problem walkthroughs</li>
             <li><span class="cf-icon">✦</span>Exam cram planner &amp; deadline tracker</li>
-            <li><span class="cf-icon">✦</span>Bonus: Procrastination Breaker</li>
           </ul>
           <div class="card-footer">
             <div class="price-block">
@@ -724,8 +769,6 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
             <li><span class="cf-icon">✦</span>Cover letter &amp; LinkedIn profile optimizer</li>
             <li><span class="cf-icon">✦</span>STAR-method interview prep coach</li>
             <li><span class="cf-icon">✦</span>Salary negotiation scripts</li>
-            <li><span class="cf-icon">✦</span>Job search tracker &amp; follow-up reminders</li>
-            <li><span class="cf-icon">✦</span>Bonus: Rejection Recovery &amp; Next-Steps Coach</li>
           </ul>
           <div class="card-footer">
             <div class="price-block">
@@ -752,10 +795,8 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
           <ul class="card-features">
             <li><span class="cf-icon">✦</span>Blog posts, hooks &amp; captions in your exact voice</li>
             <li><span class="cf-icon">✦</span>YouTube script generator with viral structure</li>
-            <li><span class="cf-icon">✦</span>Newsletter template that gets opened every week</li>
             <li><span class="cf-icon">✦</span>30-day content calendar builder (automated)</li>
             <li><span class="cf-icon">✦</span>Email sequence writer — 5 emails in 10 minutes</li>
-            <li><span class="cf-icon">✦</span>SEO title &amp; meta description batch generator</li>
           </ul>
           <div class="card-footer">
             <div class="price-block">
@@ -782,9 +823,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
             <li><span class="cf-icon">✦</span>Proposals &amp; contracts that close deals faster</li>
             <li><span class="cf-icon">✦</span>Client email templates that sound like you</li>
             <li><span class="cf-icon">✦</span>Invoice &amp; follow-up automation scripts</li>
-            <li><span class="cf-icon">✦</span>Social content from a single bullet point</li>
             <li><span class="cf-icon">✦</span>Weekly planning system built with Claude</li>
-            <li><span class="cf-icon">✦</span>Full setup guide + real-world examples</li>
           </ul>
           <div class="card-footer">
             <div class="price-block">
@@ -793,6 +832,118 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
             </div>
             <div>
               <a href="/checkout/solo" class="btn btn-orange-outline btn-md" id="buy-solo">Get Bundle →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card is-featured reveal" id="card-connected">
+        <div class="card-stripe card-stripe-always"></div>
+        <div class="featured-crown">✦ New</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Claude Connected Pack</div></div>
+            <span class="tag tag-hot" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Hot</span>
+          </div>
+          <div class="card-cat">App Connectors · 8 Workflows</div>
+          <div class="card-desc">Link Claude to your real Gmail, Calendar, Drive, Slack &amp; Notion — then let it actually use them, not just chat about them.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Inbox triage &amp; calendar command center workflows</li>
+            <li><span class="cf-icon">✦</span>Drive document digest &amp; Slack standup summarizer</li>
+            <li><span class="cf-icon">✦</span>Cross-app weekly report &amp; meeting prep briefing</li>
+            <li><span class="cf-icon">✦</span>Full connector setup &amp; troubleshooting guide</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block">
+              <span class="price-now grad-text">$39</span>
+              <span class="price-was">$79</span>
+            </div>
+            <div>
+              <a href="/checkout/connected" class="btn btn-primary btn-md" id="buy-connected">Get Bundle →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      </div>
+      <div class="products-grid stagger" id="tab-more" style="display:none;">
+
+      <div class="product-card reveal" id="card-money">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Money Mastery Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Personal Finance · 10 Skills</div>
+          <div class="card-desc">Budgeting, debt payoff, bill negotiation, and investing basics — explained in plain English, with the math done for you.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Budget builder &amp; debt payoff planner (snowball + avalanche)</li>
+            <li><span class="cf-icon">✦</span>Bill negotiation scripts that actually get used</li>
+            <li><span class="cf-icon">✦</span>Investing 101 &amp; retirement projector, plain English</li>
+            <li><span class="cf-icon">✦</span>Emergency fund &amp; side-income planning</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block">
+              <span class="price-now grad-text">$34</span>
+              <span class="price-was">$69</span>
+            </div>
+            <div>
+              <a href="/checkout/money" class="btn btn-orange-outline btn-md" id="buy-money">Get Bundle →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card reveal" id="card-family">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Family Life Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Parenting &amp; Home · 10 Skills</div>
+          <div class="card-desc">Meal planning, tough conversations, schedules, and homework help — for the mental load that never clocks out.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Weekly family meal planner + shopping list</li>
+            <li><span class="cf-icon">✦</span>Age-appropriate homework helper that doesn't just do it for them</li>
+            <li><span class="cf-icon">✦</span>Tough conversation script writer</li>
+            <li><span class="cf-icon">✦</span>Family calendar &amp; logistics coordinator</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block">
+              <span class="price-now grad-text">$34</span>
+              <span class="price-was">$69</span>
+            </div>
+            <div>
+              <a href="/checkout/family" class="btn btn-orange-outline btn-md" id="buy-family">Get Bundle →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card reveal" id="card-writer">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Creative Writer's Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Fiction &amp; Long-Form · 10 Skills</div>
+          <div class="card-desc">Outlining, character work, dialogue, line edits, and querying — a craft partner for novels and stories, not marketing copy.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Story outline builder &amp; character developer</li>
+            <li><span class="cf-icon">✦</span>Dialogue polisher &amp; line-edit pass assistant</li>
+            <li><span class="cf-icon">✦</span>Beta-reader feedback simulator</li>
+            <li><span class="cf-icon">✦</span>Query letter &amp; synopsis writer</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block">
+              <span class="price-now grad-text">$34</span>
+              <span class="price-was">$69</span>
+            </div>
+            <div>
+              <a href="/checkout/writer" class="btn btn-orange-outline btn-md" id="buy-writer">Get Bundle →</a>
             </div>
           </div>
         </div>
@@ -812,7 +963,6 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
             <li><span class="cf-icon" style="color:var(--muted);">✦</span>Autonomous social posting pipeline</li>
             <li><span class="cf-icon" style="color:var(--muted);">✦</span>Client reporting agent — zero manual work</li>
             <li><span class="cf-icon" style="color:var(--muted);">✦</span>Lead research &amp; outreach automation</li>
-            <li><span class="cf-icon" style="color:var(--muted);">✦</span>Full business intelligence setup</li>
           </ul>
           <div class="card-footer">
             <div class="price-block">
@@ -826,6 +976,9 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
     </div>
   </div>
 </section>
+
+
+
 <section class="how-section z1" id="how">
   <div class="container">
     <div class="s-header">
@@ -967,8 +1120,8 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
   <div class="footer-brand">Claude<span class="orange">Craft</span></div>
   <div class="footer-copy">© 2026 ClaudeCraft. All rights reserved.</div>
   <div class="footer-links">
-    <a href="#">Terms</a>
-    <a href="#">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
     <a href="mailto:support@claudecraft.ca">Support</a>
   </div>
 </footer>
@@ -1175,6 +1328,34 @@ const DOWNLOAD_SETS = {
       { name: 'SKILLS.md — 8 Advanced Claude Skills', sub: 'Your main bundle file — paste skills into Claude Projects', href: 'bundles/power-user-pack/SKILLS.md' },
       { name: 'SETUP-GUIDE.md — Setup Guide', sub: 'Step-by-step walkthrough to get up and running fast', href: 'bundles/power-user-pack/SETUP-GUIDE.md' },
     ]
+  },
+  money: {
+    title: 'Money Mastery Pack — Ready to Download!',
+    files: [
+      { name: 'SKILLS.md — 10 Personal Finance Claude Skills', sub: 'Your main bundle file — paste skills into Claude Projects', href: 'bundles/money-mastery-pack/SKILLS.md' },
+      { name: 'SETUP-GUIDE.md — 5-Minute Install Guide', sub: 'Step-by-step walkthrough to get up and running fast', href: 'bundles/money-mastery-pack/SETUP-GUIDE.md' },
+    ]
+  },
+  family: {
+    title: 'Family Life Pack — Ready to Download!',
+    files: [
+      { name: 'SKILLS.md — 10 Family Claude Skills', sub: 'Your main bundle file — paste skills into Claude Projects', href: 'bundles/family-life-pack/SKILLS.md' },
+      { name: 'SETUP-GUIDE.md — 5-Minute Install Guide', sub: 'Step-by-step walkthrough to get up and running fast', href: 'bundles/family-life-pack/SETUP-GUIDE.md' },
+    ]
+  },
+  connected: {
+    title: 'Claude Connected Pack — Ready to Download!',
+    files: [
+      { name: 'SKILLS.md — 8 Connector Workflows', sub: 'Your main bundle file — workflows for Gmail, Calendar, Drive, Slack & Notion', href: 'bundles/claude-connected-pack/SKILLS.md' },
+      { name: 'SETUP-GUIDE.md — Connector Setup Guide', sub: 'How to turn on Settings → Connections and get started', href: 'bundles/claude-connected-pack/SETUP-GUIDE.md' },
+    ]
+  },
+  writer: {
+    title: "Creative Writer's Pack — Ready to Download!",
+    files: [
+      { name: 'SKILLS.md — 10 Fiction & Long-Form Claude Skills', sub: 'Your main bundle file — paste skills into Claude Projects', href: 'bundles/creative-writers-pack/SKILLS.md' },
+      { name: 'SETUP-GUIDE.md — 5-Minute Install Guide', sub: 'Step-by-step walkthrough to get up and running fast', href: 'bundles/creative-writers-pack/SETUP-GUIDE.md' },
+    ]
   }
 };
 
@@ -1223,6 +1404,14 @@ let guideInited = false;
 let quizStep = 0;
 let quizAnswers = {};
 let isTyping = false;
+
+function showProductTab(tab, btn) {
+  document.getElementById('tab-popular').style.display = tab === 'popular' ? 'grid' : 'none';
+  document.getElementById('tab-more').style.display = tab === 'more' ? 'grid' : 'none';
+  document.getElementById('tab-btn-popular').classList.toggle('active', tab === 'popular');
+  document.getElementById('tab-btn-more').classList.toggle('active', tab === 'more');
+  if (btn) btn.blur();
+}
 
 function toggleGuide() {
   guideOpen = !guideOpen;
@@ -1370,7 +1559,7 @@ const KB = [
     quickReplies: ['How do I buy it?', 'What\'s in Solo Pack?', 'How do I install?', 'Take the quiz']
   },
   {
-    keys: ['55', 'senior', 'older', 'retire', 'starter', 'simple', 'easy', 'beginner', 'parent', 'grandparent', 'family', 'everyday', 'age'],
+    keys: ['55', 'senior', 'older', 'retire', 'starter', 'simple', 'easy', 'beginner', 'grandparent', 'everyday', 'age'],
     response: "The <strong>55+ AI Starter Kit ($29)</strong> is designed for everyday life — no tech background needed. 10 skills:\n\n• Recipe Generator — meals from what's in your fridge\n• Email Reply Helper — respond to anything in 30 seconds\n• Research Assistant — plain answers, no jargon\n• Letter & Card Writer — meaningful messages for any occasion\n• Travel Planner — tell it where you want to go\n• Medical Question Explainer, Daily Planner + 3 more\n\nComes with a large-print cheat sheet PDF. Works with the free Claude plan.",
     spotlight: '#card-starter',
     quickReplies: ['How do I buy it?', 'How do I install?', 'Does free Claude work?', 'Take the quiz']
@@ -1400,6 +1589,30 @@ const KB = [
     quickReplies: ['How do I buy it?', 'How do I install?', 'Take the quiz']
   },
   {
+    keys: ['money', 'budget', 'debt', 'finance', 'financial', 'save', 'savings', 'invest', 'investing', 'retirement', 'bill negotiation', 'emergency fund'],
+    response: "The <strong>Money Mastery Pack ($34)</strong> is built for everyday financial progress — no finance degree needed. 10 skills:\n\n• Budget Builder — categorized budget + one realistic savings target\n• Debt Payoff Planner — snowball vs. avalanche, side by side\n• Bill Negotiation Script Writer — actual words for the call\n• Subscription Audit Assistant — find the money you're already leaking\n• Investing 101 Explainer &amp; Retirement Savings Projector, plain English\n• Emergency Fund Planner + Side-Income Brainstormer\n\nEvery skill is written to say clearly when something deserves a real licensed financial advisor — this is a thinking partner, not a replacement for one.",
+    spotlight: '#card-money',
+    quickReplies: ['How do I buy it?', 'How do I install?', 'Take the quiz']
+  },
+  {
+    keys: ['family', 'parent', 'parenting', 'kids', 'kid', 'child', 'children', 'meal plan', 'chores', 'allowance', 'screen time'],
+    response: "The <strong>Family Life Pack ($34)</strong> is built for the mental load of parenting — meals, schedules, hard conversations, all of it. 10 skills:\n\n• Family Meal Planner — full week of dinners + shopping list\n• Age-Appropriate Homework Helper — guides, doesn't just do it for them\n• \"Explain Anything to My Kid\" Age-Adapter\n• Family Calendar &amp; Logistics Coordinator\n• Tough Conversation Script Writer, Screen Time Advisor + 4 more\n\nThese skills support your judgment as a parent — they never replace it. You always have the final call.",
+    spotlight: '#card-family',
+    quickReplies: ['How do I buy it?', 'How do I install?', 'Take the quiz']
+  },
+  {
+    keys: ['connector', 'connectors', 'connect', 'gmail', 'google drive', 'slack', 'notion', 'calendar', 'integration', 'mcp'],
+    response: "The <strong>Claude Connected Pack ($39)</strong> is different from our other bundles — it's built for Claude's <strong>Connectors</strong> (Settings → Connections), which let Claude actually read your real Gmail, Calendar, Drive, Slack, and Notion instead of just chatting about them. 8 guided workflows:\n\n• Inbox Triage Workflow (Gmail) &amp; Calendar Command Center\n• Drive Document Digest &amp; Slack Daily Standup Summarizer\n• Notion Knowledge Base Builder\n• Cross-App Weekly Report Builder &amp; Meeting Prep Briefing\n• Connector Health Check &amp; Troubleshooting skill\n\nThe setup guide walks you through turning on each connector first — this is the bundle that turns Claude into a real assistant, not just a chat window.",
+    spotlight: '#card-connected',
+    quickReplies: ['How do I buy it?', 'How do I turn on connectors?', 'Take the quiz']
+  },
+  {
+    keys: ['novel', 'fiction', 'story', 'writer', 'writing a book', 'manuscript', 'character', 'dialogue', 'query letter', 'beta reader', 'outline'],
+    response: "The <strong>Creative Writer's Pack ($34)</strong> is built for fiction and long-form writing — not marketing content (that's the Content Machine Pack). 10 skills:\n\n• Story Outline Builder &amp; Character Developer\n• Dialogue Polisher &amp; Line-Edit Pass Assistant\n• World-Building Consistency Tracker\n• Beta-Reader Feedback Simulator &amp; Writer's Block Buster\n• Query Letter/Pitch Writer &amp; Synopsis Writer\n\nIt's a craft partner, not a ghostwriter — the story and the voice stay yours.",
+    spotlight: '#card-writer',
+    quickReplies: ['How do I buy it?', 'How do I install?', 'Take the quiz']
+  },
+  {
     keys: ['install', 'setup', 'use', 'how to', 'steps', 'instructions', 'where', 'paste', 'project'],
     response: "Installing your bundle takes about 5 minutes:\n\n<strong>Step 1:</strong> Go to <strong>claude.ai</strong> and sign in\n<strong>Step 2:</strong> Click <strong>Projects</strong> in the left sidebar\n<strong>Step 3:</strong> Click <strong>+ New Project</strong>\n<strong>Step 4:</strong> Click <strong>Custom Instructions</strong> (or Add Instructions)\n<strong>Step 5:</strong> Copy a skill from your SKILLS.md file\n<strong>Step 6:</strong> Paste it into the Custom Instructions field → Save\n\nYou're done. Start chatting inside that project and Claude is now your specialist. Repeat for each skill you want active.",
     spotlight: '#how',
@@ -1417,7 +1630,7 @@ const KB = [
   },
   {
     keys: ['price', 'cost', 'how much', 'cheap', 'expensive', 'discount', 'deal'],
-    response: "Current launch pricing:\n\n• <strong>Claude Co-Work Beginner's Guide</strong> — $19 (was $39)\n• <strong>55+ AI Starter Kit</strong> — $29 (was $59)\n• <strong>Claude Power User Pack</strong> — $29\n• <strong>Content Machine Pack</strong> — $39 (was $79) ⭐ Best Seller\n• <strong>Student Success Pack</strong> — $34 (was $69)\n• <strong>Job Seeker's Career Pack</strong> — $34 (was $69)\n• <strong>Solo Entrepreneur Pack</strong> — $49 (was $97)\n• <strong>Agent Bridge Pro</strong> — $99 (coming soon)\n\n🔥 Prices are 50% off during launch. The countdown timer at the top shows exactly how long this lasts. After that, prices go back up.\n\nIf you buy multiple bundles, email support@claudecraft.ca and we'll apply a 20% discount on extras.",
+    response: "Current launch pricing:\n\n• <strong>Claude Co-Work Beginner's Guide</strong> — $19 (was $39)\n• <strong>55+ AI Starter Kit</strong> — $29 (was $59)\n• <strong>Claude Power User Pack</strong> — $29\n• <strong>Content Machine Pack</strong> — $39 (was $79) ⭐ Best Seller\n• <strong>Student Success Pack</strong> — $34 (was $69)\n• <strong>Job Seeker's Career Pack</strong> — $34 (was $69)\n• <strong>Money Mastery Pack</strong> — $34 (was $69)\n• <strong>Family Life Pack</strong> — $34 (was $69)\n• <strong>Solo Entrepreneur Pack</strong> — $49 (was $97)\n• <strong>Claude Connected Pack</strong> — $39 (was $79) ✦ New\n• <strong>Creative Writer's Pack</strong> — $34 (was $69)\n• <strong>Agent Bridge Pro</strong> — $99 (coming soon)\n\n🔥 Prices are 50% off during launch. The countdown timer at the top shows exactly how long this lasts. After that, prices go back up.\n\nIf you buy multiple bundles, email support@claudecraft.ca and we'll apply a 20% discount on extras.",
     spotlight: '#products',
     quickReplies: ['Buy Solo Entrepreneur ($49)', 'Buy Content Machine ($39)', 'Buy 55+ Starter ($29)', 'Take the quiz']
   },
@@ -1435,7 +1648,7 @@ const KB = [
   },
   {
     keys: ['skills', 'what skills', 'list', 'what do i get', 'what\'s included', 'include'],
-    response: "Here's what's in each bundle:\n\n<strong>Co-Work Beginner's Guide ($19)</strong> — 8-part step-by-step guide, not a skill set: setup, Projects, prompting, files, Artifacts &amp; more\n\n<strong>55+ Starter ($29)</strong> — 10 skills: Recipes, Email Replies, Research, Letters & Cards, Travel Planner, Medical Q&A, Daily Planner + 3 more\n\n<strong>Power User Pack ($29)</strong> — 8 skills: real Skills format packager, token auditor, agentic workflow builder, code reviewer, long-doc strategist + 3 more\n\n<strong>Content Machine ($39)</strong> — 12 skills: Blog Writer, YouTube Scripts, Newsletter Writer, 30-Day Calendar, Email Sequences, Hook Generator (60 hooks!), LinkedIn System, Repurposer, SEO Titles, Brand Voice, Short-Form Video, Analytics + Bonus\n\n<strong>Student Success ($34)</strong> — 12 skills: Essay Outline Builder, Study Guide/Flashcards, Citation Formatter, Math/Science Walkthroughs, Exam Cram Planner + Bonus\n\n<strong>Job Seeker's Career Pack ($34)</strong> — 12 skills: Resume Tailoring, Cover Letter/LinkedIn Optimizer, Interview Prep Coach, Salary Negotiation Scripts, Job Search Tracker + Bonus\n\n<strong>Solo Entrepreneur ($49)</strong> — 15 skills: Proposal Writer, Contract Generator, Client Email Machine, Invoice Follow-Up, Sales Call Prep, Scope Builder, Weekly Planner, Objection Crusher, Social Content, Onboarding Script, Rate Calculator, Referral Machine, Strategy Advisor, Meeting Summarizer, BI Dashboard + Bonus",
+    response: "Here's what's in each bundle:\n\n<strong>Co-Work Beginner's Guide ($19)</strong> — 8-part step-by-step guide, not a skill set: setup, Projects, prompting, files, Artifacts &amp; more\n\n<strong>55+ Starter ($29)</strong> — 10 skills: Recipes, Email Replies, Research, Letters & Cards, Travel Planner, Medical Q&A, Daily Planner + 3 more\n\n<strong>Power User Pack ($29)</strong> — 8 skills: real Skills format packager, token auditor, agentic workflow builder, code reviewer, long-doc strategist + 3 more\n\n<strong>Content Machine ($39)</strong> — 12 skills: Blog Writer, YouTube Scripts, Newsletter Writer, 30-Day Calendar, Email Sequences, Hook Generator (60 hooks!), LinkedIn System, Repurposer, SEO Titles, Brand Voice, Short-Form Video, Analytics + Bonus\n\n<strong>Student Success ($34)</strong> — 12 skills: Essay Outline Builder, Study Guide/Flashcards, Citation Formatter, Math/Science Walkthroughs, Exam Cram Planner + Bonus\n\n<strong>Job Seeker's Career Pack ($34)</strong> — 12 skills: Resume Tailoring, Cover Letter/LinkedIn Optimizer, Interview Prep Coach, Salary Negotiation Scripts, Job Search Tracker + Bonus\n\n<strong>Solo Entrepreneur ($49)</strong> — 15 skills: Proposal Writer, Contract Generator, Client Email Machine, Invoice Follow-Up, Sales Call Prep, Scope Builder, Weekly Planner, Objection Crusher, Social Content, Onboarding Script, Rate Calculator, Referral Machine, Strategy Advisor, Meeting Summarizer, BI Dashboard + Bonus\n\n<strong>Money Mastery ($34)</strong> — 10 skills: Budget Builder, Debt Payoff Planner, Bill Negotiation Scripts, Subscription Audit, \"Can I Afford This?\" Analyzer, Investing 101, Retirement Projector, Tax Season Organizer, Emergency Fund Planner, Side-Income Brainstormer\n\n<strong>Family Life Pack ($34)</strong> — 10 skills: Family Meal Planner, Age-Appropriate Homework Helper, \"Explain Anything to My Kid\" Adapter, Family Calendar Coordinator, Tough Conversation Scripts, Birthday/Occasion Planner, Screen Time Advisor, Chores &amp; Allowance Designer, Education Savings Planner, Family Vacation Planner\n\n<strong>Claude Connected Pack ($39)</strong> — 8 connector workflows: Inbox Triage, Calendar Command Center, Drive Document Digest, Slack Standup Summarizer, Notion Knowledge Base Builder, Cross-App Weekly Report, Meeting Prep Briefing, Connector Health Check\n\n<strong>Creative Writer's Pack ($34)</strong> — 10 skills: Story Outline Builder, Character Developer, Dialogue Polisher, World-Building Consistency Tracker, Query Letter Writer, Beta-Reader Feedback Simulator, Writer's Block Buster, Line-Edit Pass Assistant, Synopsis Writer, Daily Writing Accountability Partner",
     quickReplies: ['Which is right for me?', 'How do I install them?', 'Take the quiz']
   },
   {
@@ -1469,7 +1682,7 @@ const KB = [
 const QUIZ = [
   {
     q: "Quick question — what's your main goal right now?",
-    chips: ['Grow my business / freelance', 'Create more content', 'Student / schoolwork', 'Job search', 'Learn AI for everyday life', "I've never used Claude before", 'Not sure yet']
+    chips: ['Grow my business / freelance', 'Create more content', 'Write a novel or story', 'Student / schoolwork', 'Job search', 'Get my money/budget in order', 'Manage family life & parenting', 'Connect Claude to my apps (Gmail, Drive, Slack...)', 'Learn AI for everyday life', "I've never used Claude before", 'Not sure yet']
   },
   {
     q: "Got it. How do you mainly use Claude right now?",
@@ -1495,12 +1708,24 @@ function runQuiz(step, answer) {
     } else if (goal.includes('content')) {
       rec = "You need the <strong>Content Machine Pack ($39)</strong> — it's built specifically for what you're doing. Blogs, hooks, newsletters, video scripts, 30-day calendars. One Claude session = a full week of content. Our best seller.";
       spotlight = '#card-content'; btn = 'Get Content Machine →';
+    } else if (goal.includes('novel') || goal.includes('story')) {
+      rec = "The <strong>Creative Writer's Pack ($34)</strong> is your match — story outlining, character development, dialogue polishing, line edits, beta-reader feedback, and query letter writing. 10 skills built for fiction, not marketing copy.";
+      spotlight = '#card-writer'; btn = "Get Creative Writer's Pack →";
     } else if (goal.includes('student') || goal.includes('school')) {
       rec = "The <strong>Student Success Pack ($34)</strong> is your match — essay outlines, study guides &amp; flashcards from your own notes, citation formatting, and an exam cram planner. 12 skills built for actual student life.";
       spotlight = '#card-student'; btn = 'Get Student Success Pack →';
     } else if (goal.includes('job')) {
       rec = "The <strong>Job Seeker's Career Pack ($34)</strong> is your match — resume tailoring, cover letters, interview prep, salary negotiation scripts, and a job search tracker. 12 skills covering the whole search.";
       spotlight = '#card-jobseeker'; btn = "Get Job Seeker's Career Pack →";
+    } else if (goal.includes('money') || goal.includes('budget')) {
+      rec = "The <strong>Money Mastery Pack ($34)</strong> is your match — budgeting, debt payoff, bill negotiation scripts, and investing basics, all explained in plain English with the math done for you. 10 skills.";
+      spotlight = '#card-money'; btn = 'Get Money Mastery Pack →';
+    } else if (goal.includes('family') || goal.includes('parenting')) {
+      rec = "The <strong>Family Life Pack ($34)</strong> is your match — meal planning, tough conversations, homework help, and a family calendar coordinator. 10 skills built for the daily mental load of parenting.";
+      spotlight = '#card-family'; btn = 'Get Family Life Pack →';
+    } else if (goal.includes('connect')) {
+      rec = "The <strong>Claude Connected Pack ($39)</strong> is your match — 8 guided workflows for linking Claude to your real Gmail, Calendar, Drive, Slack, and Notion, so it can actually use them, not just chat about them.";
+      spotlight = '#card-connected'; btn = 'Get Claude Connected Pack →';
     } else if (goal.includes('everyday')) {
       rec = "The <strong>55+ AI Starter Kit ($29)</strong> is perfect for this. Simple, practical skills for everyday life — recipes, email replies, travel planning, research. No tech experience needed, and it works with the free Claude plan.";
       spotlight = '#card-starter'; btn = 'Get 55+ Starter Kit →';
@@ -1579,7 +1804,11 @@ function showTyping() {
   return div;
 }
 
+const MORE_TAB_CARDS = ['#card-money', '#card-family', '#card-writer'];
 function scrollToSpotlight(selector) {
+  if (MORE_TAB_CARDS.includes(selector)) {
+    showProductTab('more', document.getElementById('tab-btn-more'));
+  }
   const el = document.querySelector(selector);
   if (!el) return;
   el.classList.add('spotlight-active');

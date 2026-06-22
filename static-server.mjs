@@ -16,6 +16,7 @@ const REFERRALS_PATH = path.join(DATA_DIR, 'referrals.json');
 const REFERRAL_COUPON_ID_PATH = path.join(DATA_DIR, 'referral-coupon-id.txt');
 const SUBSCRIBERS_PATH = path.join(DATA_DIR, 'subscribers.json');
 const SUPPORT_ESCALATIONS_PATH = path.join(DATA_DIR, 'support-escalations.json');
+const OG_IMAGE_PATH = path.join(DATA_DIR, 'og-image.png');
 const MAX_DYNAMIC_ARTICLES = 90; // a few months of daily content before the oldest roll off
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -30,6 +31,10 @@ const PRODUCTS = {
   student: { name: 'Student Success Pack', amount: 3400, description: '12 done-for-you Claude skills + bonus, for academic life.' },
   jobseeker: { name: "Job Seeker's Career Pack", amount: 3400, description: '12 done-for-you Claude skills + bonus, for resumes, interviews, and the job search.' },
   poweruser: { name: 'Claude Power User Pack', amount: 2900, description: '8 advanced skills: real Claude Skills format, token efficiency, agentic workflows, and more.' },
+  money: { name: 'Money Mastery Pack', amount: 3400, description: '10 done-for-you Claude skills for budgeting, debt payoff, investing basics, and everyday financial planning.' },
+  family: { name: 'Family Life Pack', amount: 3400, description: '10 done-for-you Claude skills for meal planning, tough conversations, schedules, and the daily mental load of parenting.' },
+  connected: { name: 'Claude Connected Pack', amount: 3900, description: '8 guided workflows for using Claude with real Gmail, Calendar, Drive, Slack, and Notion connectors.' },
+  writer: { name: "Creative Writer's Pack", amount: 3400, description: '10 done-for-you Claude skills for fiction and long-form writing — outlining, character work, line edits, and querying.' },
 };
 
 function loadJson(filePath, fallback) {
@@ -118,6 +123,10 @@ const DOWNLOAD_SETS = {
   student: { files: ['bundles/student-success-pack/SKILLS.md', 'bundles/student-success-pack/SETUP-GUIDE.md'] },
   jobseeker: { files: ['bundles/job-seekers-career-pack/SKILLS.md', 'bundles/job-seekers-career-pack/SETUP-GUIDE.md'] },
   poweruser: { files: ['bundles/power-user-pack/SKILLS.md', 'bundles/power-user-pack/SETUP-GUIDE.md'] },
+  money: { files: ['bundles/money-mastery-pack/SKILLS.md', 'bundles/money-mastery-pack/SETUP-GUIDE.md'] },
+  family: { files: ['bundles/family-life-pack/SKILLS.md', 'bundles/family-life-pack/SETUP-GUIDE.md'] },
+  connected: { files: ['bundles/claude-connected-pack/SKILLS.md', 'bundles/claude-connected-pack/SETUP-GUIDE.md'] },
+  writer: { files: ['bundles/creative-writers-pack/SKILLS.md', 'bundles/creative-writers-pack/SETUP-GUIDE.md'] },
 };
 
 async function sendPurchaseEmail(toEmail, productSlug, productName) {
@@ -257,7 +266,7 @@ app.post('/api/inbound-email', express.text({ type: '*/*', limit: '2mb' }), asyn
   }
 });
 
-app.use(express.json({ limit: '200kb' }));
+app.use(express.json({ limit: '6mb' })); // article/share images are embedded as base64 — 200kb was too small and silently dropped them
 
 app.get('/checkout/:product', async (req, res) => {
   const product = PRODUCTS[req.params.product];
@@ -361,6 +370,27 @@ app.post('/api/articles', (req, res) => {
   });
   saveArticles(articles.slice(0, MAX_DYNAMIC_ARTICLES));
   res.json({ ok: true, count: articles.length });
+});
+
+app.post('/api/og-image', (req, res) => {
+  const token = req.get('X-OpenClaw-Token');
+  if (!process.env.ARTICLES_API_TOKEN || token !== process.env.ARTICLES_API_TOKEN) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const { imageBase64 } = req.body || {};
+  if (!imageBase64) return res.status(400).json({ error: 'imageBase64 is required' });
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(OG_IMAGE_PATH, Buffer.from(imageBase64, 'base64'));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/og-image.png', (req, res) => {
+  if (!fs.existsSync(OG_IMAGE_PATH)) return res.status(404).send('Not generated yet');
+  res.sendFile(OG_IMAGE_PATH);
 });
 
 app.use('/marketing', (req, res) => res.status(404).send('Not found'));

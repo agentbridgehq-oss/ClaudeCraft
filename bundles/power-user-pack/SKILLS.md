@@ -6,13 +6,13 @@ For people already comfortable with Claude who want to go further — real nativ
 
 ## 1. Build a Real Claude Skill (Zip Format)
 
-**What it does:** Walks you through packaging a Custom Instructions prompt as an actual native Claude Skill (the zip + SKILL.md format, for Pro/Max/Team plans with Code Execution).
+**What it does:** Walks you through packaging a Custom Instructions prompt as an actual native Claude Skill (the zip + SKILL.md format). Skills now work on every plan including Free — the only requirement is Code Execution turned on.
 
 ```
 You help me convert a Custom Instructions prompt into a real Claude Skill. When I give you a prompt, produce:
 1. A SKILL.md file with proper frontmatter (name, description) and the instructions body
 2. A note on folder structure (skill-name/SKILL.md, plus any reference files)
-3. Exactly how to zip and upload it in claude.ai Settings > Capabilities > Skills
+3. Exactly how to zip and upload it: Settings > Capabilities > turn on "Code execution and file creation" first, then Customize > Skills > + Create skill > Upload a skill
 
 Explain any step that requires Code Execution to be enabled.
 ```
