@@ -323,9 +323,19 @@ app.post('/api/subscribe', (req, res) => {
   if (!isValidEmail) return res.status(400).json({ error: 'Please enter a valid email address.' });
 
   const subscribers = loadSubscribers();
-  if (!subscribers.some(s => s.email === email)) {
+  const isNew = !subscribers.some(s => s.email === email);
+  if (isNew) {
     subscribers.push({ email, subscribedAt: new Date().toISOString() });
     saveSubscribers(subscribers);
+  }
+  if (isNew) {
+    const ebookUrl = `${BASE_URL}/ebook.html`;
+    sendSupportEmail(
+      email,
+      'Your free ebook: 25 Claude Prompts to Reclaim 10 Hours a Week',
+      `Thanks for joining The AI Advantage newsletter!\n\nHere's your free ebook, as promised: ${ebookUrl}\n\nYour first newsletter issue lands this Friday. Questions any time — just reply to this email.`,
+      `<p>Thanks for joining The AI Advantage newsletter!</p><p>Here's your free ebook, as promised: <a href="${ebookUrl}">25 Claude Prompts to Reclaim 10 Hours a Week</a></p><p>Your first newsletter issue lands this Friday. Questions any time — just reply to this email.</p>`
+    ).catch(() => {}); // best-effort — don't block the signup response on email delivery
   }
   res.json({ ok: true });
 });

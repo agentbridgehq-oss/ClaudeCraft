@@ -539,6 +539,8 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
           <p>Anthropic shipped a real, native "Agent Skills" feature for Claude — and it's genuinely different from just pasting instructions into a Custom Instructions box. A native Skill is a small folder containing a <strong>SKILL.md</strong> file plus optional scripts and resources, uploaded as a zip. Claude scans the metadata of every installed Skill and only pulls in the full content when it's actually relevant to what you're doing — a technique called progressive disclosure.</p>
           <p>Good news as of the latest update: native Skills now work on every plan, including <strong>Free</strong> — not just paid tiers like before. The catch is they still require <strong>Code Execution</strong> turned on (Settings → Capabilities → "Code execution and file creation"), and building your own custom Skill still means packaging a zip file — genuinely not something most non-technical users want to deal with on day one, even though Anthropic's docs now note "no coding required for simple skills."</p>
           <p>That's exactly why every ClaudeCraft bundle still ships in the simple copy-paste Custom Instructions format: zero setup beyond pasting text, works the moment you turn it on, no zip files, no toggles to hunt for. But we're watching the native Skills format closely — it's the more "official" long-term direction, and our roadmap includes a Skills-format upgrade path. If you're curious how to package your own Custom Instructions as a real Skill someday, that's a great sign you're ready to graduate from beginner tools — which is also exactly what our <strong>Claude Co-Work Beginner's Guide</strong> is designed to get you to.</p>
+          <p>Anthropic has also started shipping its own pre-built Skills directly — ready-made ones for Excel, Word, PowerPoint, and PDF workflows, alongside partner-built Skills from companies like Notion, Figma, and Atlassian that are designed to work hand-in-hand with Connectors (more on those in our Claude Connected Pack). For Team and Enterprise plans, an organization owner can even push a standardized set of Skills out to every member at once — meaning the gap between "person who knows a clever Claude trick" and "company that's standardized on AI workflows" is closing fast.</p>
+          <p>So what should you actually do with this, today? If you're new, ignore native Skills entirely for now — every skill in our bundles works identically well without them, and you'll get to real results faster. If you're already comfortable with Claude and curious about the more technical format, our <strong>Power User Pack</strong> includes a skill that walks you through packaging your first real Claude Skill, start to finish, including the Code Execution toggle most people never knew existed.</p>
         </div>
       </details>
 
@@ -1097,7 +1099,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
     <div class="nl-card">
       <span class="tag tag-live" style="margin-bottom:20px; display:inline-flex;"><span class="dot"></span>Free · No Spam · Every Friday</span>
       <div class="nl-title">The <span class="grad-text">AI Advantage</span> Newsletter</div>
-      <div class="nl-sub">One new Claude skill. One AI tip you can use today. The week's best AI news — in plain English. 100% free, delivered every Friday morning.</div>
+      <div class="nl-sub">One new Claude skill. One AI tip you can use today. The week's best AI news — in plain English. 100% free, delivered every Friday morning. <strong>Plus an instant free bonus: our "25 Claude Prompts to Reclaim 10 Hours a Week" ebook, the moment you join.</strong></div>
       <form class="nl-form" onsubmit="handleEmail(event)">
         <input type="email" class="nl-input" placeholder="your@email.com" required>
         <button type="submit" class="btn btn-primary btn-lg">Join Free →</button>
@@ -1257,7 +1259,7 @@ function handleEmail(e) {
     body: JSON.stringify({ email }),
   }).then(r => r.json()).then(data => {
     if (data.ok) {
-      card.innerHTML = `<div style="text-align:center; padding:20px 0;"><div style="font-size:3rem; margin-bottom:16px;">🎉</div><div style="font-size:1.3rem; font-weight:800; margin-bottom:8px;">You're in!</div><div style="color:var(--sub); font-size:.9rem;">Check your inbox this Friday. First issue is already queued.</div></div>`;
+      card.innerHTML = `<div style="text-align:center; padding:20px 0;"><div style="font-size:3rem; margin-bottom:16px;">🎉</div><div style="font-size:1.3rem; font-weight:800; margin-bottom:8px;">You're in!</div><div style="color:var(--sub); font-size:.9rem; margin-bottom:18px;">Check your inbox this Friday. First issue is already queued.</div><a href="/ebook.html" target="_blank" class="btn btn-primary btn-md">📖 Get Your Free Ebook Now →</a></div>`;
     } else {
       btn.textContent = originalBtnText;
       btn.disabled = false;

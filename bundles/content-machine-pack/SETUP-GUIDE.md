@@ -7,15 +7,19 @@ You do not need to install any software. Everything happens inside your web brow
 
 ## Step 1: Open Claude
 
-1. Go to **claude.ai** in your web browser.
-2. Log in (or click **Sign Up** if you're new — it's free).
+1. Open your web browser and go to **claude.ai**.
+2. If you're new, click **Sign Up** — email or an existing Google account both work, and it's free.
+3. Check your email for a verification link if asked, and click it to confirm.
+4. If you already have an account, click **Log In** instead.
 
 ---
 
 ## Step 2: Find "Projects"
 
 1. Look at the **left sidebar**.
-2. Click **Projects**. (If you don't see the sidebar, click the ☰ menu icon top-left first.)
+2. Click **Projects**.
+   - If you don't see the sidebar, click the ☰ menu icon top-left first to open it.
+   - On mobile or a narrow window, tap the menu icon to expand the sidebar.
 
 ---
 
@@ -24,6 +28,7 @@ You do not need to install any software. Everything happens inside your web brow
 1. Click **+ New Project**.
 2. Name it after the skill — for your first one, name it `Brand Voice Trainer`.
 3. Click **Create**.
+4. You're dropped into your new, empty Project.
 
 ---
 
@@ -31,10 +36,13 @@ You do not need to install any software. Everything happens inside your web brow
 
 1. Inside the project, click **Custom Instructions** (may be labeled **Project Instructions**).
 2. Open **SKILLS.md** from your download.
-3. Find **Skill #10: Brand Voice Trainer**.
-4. Copy everything inside the gray box (between the ``` marks) — not the headings around it.
-5. Paste it into the Custom Instructions box.
-6. Click **Save**.
+3. Find **Skill #10: Brand Voice Trainer** — it has its own numbered heading.
+4. Find the gray code box underneath it (between the ``` marks).
+5. Select all the text inside that box only — click before the first word and drag to the last, or click inside and press `Ctrl+A`. Don't copy the heading or description around it.
+6. Copy it with `Ctrl+C` (`Cmd+C` on Mac).
+7. Switch back to Claude, click inside the Custom Instructions box, and paste with `Ctrl+V` (`Cmd+V`).
+8. Confirm it pasted cleanly, start to finish.
+9. Click **Save**.
 
 ---
 
@@ -49,7 +57,7 @@ This is the one step order that matters in this whole bundle.
 
 ---
 
-## Setting Up the Rest of Your 13 Skills
+## Setting Up the Rest of Your 12 Skills (+2 Bonus)
 
 Repeat Steps 3-4 for each remaining skill — **one skill per project**. Most Content Machine customers set up these three first, in this order:
 
@@ -57,7 +65,7 @@ Repeat Steps 3-4 for each remaining skill — **one skill per project**. Most Co
 2. **Blog Post Writer** (Skill #1) or **LinkedIn System** (Skill #7), whichever matches your main platform
 3. **30-Day Content Calendar Builder** (Skill #4) — once you know your content pillars
 
-Add the rest as you need them. There's no rush to set up all 13 on day one.
+Add the rest as you need them — including the two bonus skills (Content Idea Rescue, and the Free Video Production Pipeline Planner if you're making video content). There's no rush to set up all 14 on day one.
 
 ---
 
@@ -71,6 +79,12 @@ You need to be inside a Project, not a regular chat — the option only shows up
 
 **"Can multiple skills share my brand voice?"**
 Yes — after running the Brand Voice Trainer, copy the voice profile summary it gives you and paste it at the top of your first message in any other skill's project: "Here's my voice profile: [paste]. Now write..."
+
+**"The Video Pipeline Planner mentioned a tool I've never heard of."**
+That's expected — it recommends from a short list of genuinely free tools (CapCut, DaVinci Resolve, Clipchamp, Pika, Runway). Ask it to explain any tool it recommends in more detail before you commit to using it.
+
+**"Can I use this on my phone?"**
+Yes — Claude works in any mobile browser or app, with the same Projects and skills wherever you log in.
 
 **Still stuck?** Email **support@claudecraft.ca** — real humans, usually same-day reply.
 
