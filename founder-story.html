@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How ClaudeCraft Was Actually Built — Founder's Story — ClaudeCraft</title>
+<meta name="description" content="An industrial worker with no engineering background built ClaudeCraft using Claude Code in VS Code. The honest version of how — including the brain fog, the sleep tradeoffs, and what went sideways.">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{ --brand:#FF6B1A; --brand-light:#FF8C42; --bg:#070A12; --text:#EDF0F7; --sub:#8B93A8; --glass-border:rgba(255,255,255,0.09); }
+body{ font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif; background:linear-gradient(180deg,#070A12 0%,#04060A 100%); color:var(--text); line-height:1.75; }
+.container{ max-width:720px; margin:0 auto; padding:60px 24px 100px; }
+header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; }
+.logo{ font-size:1.1rem; font-weight:800; color:var(--text); text-decoration:none; }
+.logo .orange{ color:var(--brand); }
+.back{ font-size:0.85rem; color:var(--sub); text-decoration:none; }
+.cover{ text-align:center; padding:48px 32px; background:rgba(255,255,255,0.04); border:1px solid var(--glass-border); border-radius:20px; margin-bottom:48px; }
+.eyebrow{ font-size:0.72rem; font-weight:800; letter-spacing:3px; text-transform:uppercase; color:var(--brand-light); margin-bottom:14px; }
+h1{ font-size:clamp(1.8rem,5vw,2.6rem); font-weight:900; letter-spacing:-1px; margin-bottom:14px; }
+.subtitle{ color:var(--sub); font-size:1.05rem; max-width:480px; margin:0 auto; }
+h2{ font-size:1.4rem; font-weight:900; margin:48px 0 16px; letter-spacing:-0.5px; }
+h3{ font-size:1.05rem; font-weight:800; margin:28px 0 8px; color:var(--brand-light); }
+p,li{ font-size:0.97rem; color:var(--sub); margin-bottom:14px; }
+strong{ color:var(--text); }
+ul{ margin-left:20px; margin-bottom:18px; }
+.cta{ text-align:center; margin-top:56px; padding:40px 28px; background:rgba(255,107,26,0.06); border:1px solid rgba(255,107,26,0.25); border-radius:18px; }
+.cta h3{ color:var(--text); font-size:1.3rem; margin-bottom:10px; }
+.btn{ display:inline-flex; margin-top:14px; background:linear-gradient(135deg,var(--brand-light),var(--brand)); color:#fff; font-weight:700; padding:14px 28px; border-radius:8px; text-decoration:none; font-size:0.9rem; }
+hr{ border:none; border-top:1px solid var(--glass-border); margin:36px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a href="/" class="logo">Claude<span class="orange">Craft</span></a>
+    <a href="/" class="back">← Back to home</a>
+  </header>
+
+  <div class="cover">
+    <div class="eyebrow">Founder's Story · ClaudeCraft</div>
+    <h1>How ClaudeCraft Was Actually Built</h1>
+    <p class="subtitle">An industrial worker, no engineering background, building a real selling website with Claude Code — including the brain fog, the sleep tradeoffs, and the parts that went sideways. The honest version, not the highlight reel.</p>
+  </div>
+
+  <h2>Why I'm Writing This</h2>
+  <p>I work an industrial job. Building this happened in the hours around that — early mornings before a shift, late nights after one, weekends when I had them. I'm telling you that up front because most "how I built my SaaS" content gets written by people who had nothing but time, and that's not realistic for most people reading this.</p>
+  <p>Some of it was genuinely hard in ways that had nothing to do with code. There were nights I sat down to work on this with real brain fog — tired in a way where reading a single paragraph twice still didn't land. The honest fix wasn't pushing through harder. It was smaller sessions, more often, and being okay with a night where the only thing that got done was one small fix instead of a big feature. Progress that's slow but doesn't stop beats a burst of effort that burns you out for a week afterward. I learned that the hard way, more than once.</p>
+  <p>I'm not sharing this because I think my story is special. I'm sharing it because I think the actual barrier for most people isn't intelligence or even time — it's believing the technical part is harder than it actually is now, and giving up before finding out it isn't. I genuinely want this to close that gap for you. Not a sales pitch — an honest map of the terrain, including the potholes.</p>
+
+  <hr>
+
+  <h2>Where the Idea Came From</h2>
+  <p>I went looking for other people's Claude prompt setups and found a flood of cheap, dumped-out prompt PDFs on Etsy and Gumroad — no setup help, no guarantee, no real person behind them. I figured: if I was annoyed by that, other people building real workflows around Claude probably were too. So I decided to build the thing I actually wanted to buy — curated, tested, with a real setup guide and a real person standing behind it if something didn't work.</p>
+
+  <h2>How It Was Actually Built</h2>
+  <p>Every part of this site — the chatbot, the checkout, the article system, the refund flow — was built by describing what was needed in plain English to Claude Code, reviewing what came back, and correcting it. Not hand-writing thousands of lines line by line. That loop — <strong>describe, review, correct</strong> — is the entire skill underneath everything below. Everything else is detail on top of that one idea.</p>
+
+  <hr>
+
+  <h2>Part 1: Understanding Your Computer's File System</h2>
+  <p>This is the part almost every tutorial skips, and it's exactly the part that quietly stops beginners cold later on.</p>
+  <h3>What a file system actually is</h3>
+  <p>Every file lives inside a folder, and every folder lives inside another folder, all the way back to one root location. A "path" is just the full address of where a file lives — e.g. <code>C:\Users\YourName\Desktop\my-project\index.html</code> tells you exactly where to find it.</p>
+  <h3>Navigating in VS Code</h3>
+  <p><strong>File → Open Folder</strong>, select your project. The sidebar now shows everything inside it — click to open, right-click for New File/Folder/Rename/Delete.</p>
+  <h3>Navigating in the terminal</h3>
+  <ul>
+    <li><code>cd my-project</code> — moves into a folder named "my-project"</li>
+    <li><code>cd ..</code> — moves UP one level</li>
+    <li><code>dir</code> (Windows) or <code>ls</code> (Mac/Linux) — lists what's in your current folder</li>
+  </ul>
+  <p>That's the whole list you actually need to memorize. Claude Code handles the complex commands for you when you ask.</p>
+
+  <h2>Part 2: Getting Access to Claude Code</h2>
+  <p><strong>Option A — Claude Pro/Max subscription</strong> ($20/mo or $100+/mo at claude.ai) includes Claude Code usage. Simplest if you're unsure how much you'll use it.</p>
+  <p><strong>Option B — Anthropic API billing</strong> (console.anthropic.com), pay-as-you-go per token, no monthly minimum. Better for occasional use. Either path works identically once set up.</p>
+
+  <h2>Part 3: Installing Claude Code in VS Code</h2>
+  <ul>
+    <li>Install VS Code free from code.visualstudio.com</li>
+    <li>Install Node.js (LTS version) from nodejs.org, then restart VS Code</li>
+    <li>In VS Code's terminal, run: <code>npm install -g @anthropic-ai/claude-code</code> — or install the "Claude Code" extension from the Extensions panel</li>
+    <li>Type <code>claude</code> in your project folder's terminal, log in via the browser prompt that opens</li>
+  </ul>
+
+  <h2>Part 4: What GitHub Actually Is, and Why It Matters</h2>
+  <p>GitHub stores a copy of your project online and keeps a complete history of every change ever made — like a save-game system for your whole project, not just one file. "Git" is the tracking tool itself (built into VS Code already); "GitHub" is the most popular website for hosting those tracked projects.</p>
+  <p>Why a non-engineer should care: if something breaks, you can go back to any earlier saved point — your work is never permanently lost to one bad change. It's also the standard way to hand your code to a hosting service so it can actually go live.</p>
+  <p>Sign up free at github.com, click <strong>New Repository</strong>, then ask Claude Code directly: "help me connect this project to the GitHub repo I just created and push my code to it." You don't need to memorize Git commands.</p>
+
+  <h2>Part 5: "Vibe Coding" — The Actual Workflow</h2>
+  <p>The real pattern, every single time: describe the feature in plain English. Claude Code reads your existing files first — it doesn't guess. It makes the change and explains what it touched. You check it for real, by actually loading the result and looking. If something's wrong, say exactly what's wrong, the same way you'd correct a person.</p>
+  <p>Big features get built with the exact same loop as small ones — just more rounds of it. The single most common beginner mistake: asking for five things in one giant request. Ask for one, test it, then ask for the next.</p>
+  <p>"Vibe" doesn't mean skip reviewing. The loose, conversational feel only works long-term if you still review every change, especially anything touching money, passwords, or user data.</p>
+
+  <h2>Part 6: Connecting Stripe for Real Payments</h2>
+  <p>Stripe is a payment processor — it handles someone's credit card safely so you never touch raw card numbers yourself. "Checkout" is the page Stripe shows your customer to pay. A "webhook" is Stripe notifying your server after a payment succeeds, so your code knows to deliver the product.</p>
+  <p>Sign up at stripe.com, toggle to <strong>Test mode</strong> first, copy your test Secret key (never paste a real key into any AI chat — keep it in environment variables instead). Test with card number <code>4242 4242 4242 4242</code> before ever switching to your live key.</p>
+
+  <h2>Part 7: Deploying for Real — Railway & GitHub</h2>
+  <p>ClaudeCraft runs on Railway (railway.app) — it deploys straight from a GitHub repo with minimal configuration. Create a free account, then ask Claude Code: "help me deploy this project to Railway." Add secret keys in Railway's own Variables tab — never inside your code files.</p>
+
+  <h2>Part 8: Setting Up Your Own Scheduled Agent</h2>
+  <p>ClaudeCraft has a small companion script that runs automatically once a day, pulls fresh information, and publishes a new article with zero manual work. A "cron job" is just an instruction to a hosting service: "run this script automatically, on this schedule, forever." You don't need to memorize the schedule syntax — ask Claude Code to write it for you.</p>
+  <p>Keep it simple on purpose: one script with a few clearly-named functions inside it is easier to maintain than splitting every task into its own separate service.</p>
+
+  <h2>Getting Through the Tough Spots</h2>
+  <p><strong>Brain fog is real — plan around it instead of fighting it.</strong> On low-energy nights, shrink the task instead of pushing through. "Fix this one small thing" is a completable session. "Build the whole feature" on no sleep usually isn't.</p>
+  <p><strong>Protecting sleep and your actual job.</strong> This got built around a real industrial job, not instead of one. Smaller, more frequent sessions beat rare giant ones that eat sleep before a shift. Consistency is the actual goal, not speed.</p>
+  <p><strong>Why share this honestly.</strong> The real barrier for most people isn't intelligence or even time — it's believing the technical side is harder than it actually is now, and quitting before finding out otherwise. If this helps even one person finish something, sharing the messy, honest version was worth more than a polished highlight reel.</p>
+
+  <div class="cta">
+    <h3>That's the real process behind this entire site.</h3>
+    <p style="color:var(--sub); margin-bottom:0;">If you want the done-for-you version instead of building your own from scratch, every ClaudeCraft bundle is exactly that — tested Claude skills with a real setup guide, ready in 5 minutes.</p>
+    <a href="/#products" class="btn">Browse the Bundles →</a>
+  </div>
+</div>
+</body>
+</html>
