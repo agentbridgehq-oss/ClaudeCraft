@@ -162,6 +162,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
 .trust-badge { display:inline-flex; align-items:center; gap:7px; font-size:0.78rem; color:var(--sub); font-weight:600; }
 .trust-badge .ic { color:var(--green); }
 .products-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:32px; align-items:stretch; animation: tabFadeIn .4s cubic-bezier(.16,1,.3,1); }
+.grid-divider { grid-column:1/-1; height:1px; background:var(--glass-border); margin:20px 0; }
 @keyframes tabFadeIn { 0%{opacity:0; transform:translateY(10px);} 100%{opacity:1; transform:translateY(0);} }
 @media(max-width:980px){ .products-grid { grid-template-columns:repeat(2,1fr); } }
 @media(max-width:560px){ .products-grid { grid-template-columns:1fr; } }
@@ -817,6 +818,8 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
           </div>
         </div>
       </div>
+
+      <div class="grid-divider"></div>
 
       <div class="product-card reveal" id="card-solo">
         <div class="card-stripe"></div>
