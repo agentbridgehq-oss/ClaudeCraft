@@ -245,6 +245,12 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
 .faq-q { font-size:0.92rem; font-weight:700; margin-bottom:10px; }
 .faq-a { font-size:0.86rem; color:var(--sub); line-height:1.6; }
 
+.why-section { padding:20px 0 80px; text-align:center; }
+.why-headline { font-size:clamp(1.5rem,3vw,2rem); font-weight:900; letter-spacing:-0.5px; margin-bottom:16px; }
+.why-text { color:var(--sub); font-size:1rem; line-height:1.8; max-width:640px; margin:0 auto 20px; }
+.why-link { color:var(--brand-light); font-weight:700; font-size:0.92rem; text-decoration:none; }
+.why-link:hover { text-decoration:underline; }
+
 .final-cta { padding:120px 0; text-align:center; position:relative; overflow:hidden; }
 .final-cta::before { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:800px; height:600px; background:radial-gradient(ellipse,rgba(255,107,26,0.1) 0%,transparent 65%); pointer-events:none; }
 .final-cta-badge { margin-bottom:20px; display:block; }
@@ -382,17 +388,17 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 .nav-drawer-trigger {
   display: flex; align-items: center; justify-content: center; width: 38px; height: 38px;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r-md);
-  color: var(--text); cursor: pointer; transition: background .2s, border-color .2s; flex-shrink: 0; margin-left: 10px;
+  color: var(--text); cursor: pointer; transition: background .2s, border-color .2s; flex-shrink: 0; margin-right: 10px;
   font-family: var(--font-sans);
 }
 .nav-drawer-trigger:hover { background: rgba(255,107,26,0.12); border-color: rgba(255,107,26,0.4); }
 .nav-drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; backdrop-filter: blur(2px); }
 .nav-drawer-overlay.visible { display: block; }
 .nav-drawer {
-  position: fixed; top: 0; right: 0; height: 100vh; width: 320px; max-width: 86vw;
-  background: #0B0C15; border-left: 1px solid rgba(255,107,26,0.22);
-  box-shadow: -24px 0 70px rgba(0,0,0,0.55);
-  z-index: 1101; transform: translateX(100%); transition: transform .35s cubic-bezier(.16,1,.3,1);
+  position: fixed; top: 0; left: 0; height: 100vh; width: 320px; max-width: 86vw;
+  background: #0B0C15; border-right: 1px solid rgba(255,107,26,0.22);
+  box-shadow: 24px 0 70px rgba(0,0,0,0.55);
+  z-index: 1101; transform: translateX(-100%); transition: transform .35s cubic-bezier(.16,1,.3,1);
   display: flex; flex-direction: column;
 }
 .nav-drawer.open { transform: translateX(0); }
@@ -505,33 +511,35 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 </div>
 
 <nav>
-  <div class="nav-logo">
-    <span class="nav-logo-icon" aria-hidden="true">
-      <svg viewBox="0 0 32 32" width="18" height="18">
-        <defs>
-          <linearGradient id="ccLogoGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#FFD9B0"/>
-            <stop offset="55%" stop-color="#FF8C42"/>
-            <stop offset="100%" stop-color="#E05A2B"/>
-          </linearGradient>
-        </defs>
-        <circle cx="16" cy="16" r="13" fill="none" stroke="url(#ccLogoGrad)" stroke-width="3"/>
-        <path d="M21 11a7 7 0 1 0 0 10" fill="none" stroke="#0B0C15" stroke-width="3" stroke-linecap="round"/>
-      </svg>
-    </span>
-    Claudecraft
+  <div style="display:flex; align-items:center; gap:14px;">
+    <button class="nav-drawer-trigger" onclick="toggleNavDrawer()" aria-label="Open menu" title="Menu">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+    <a href="/" class="nav-logo">
+      <span class="nav-logo-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="18" height="18">
+          <defs>
+            <linearGradient id="ccLogoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#FFD9B0"/>
+              <stop offset="55%" stop-color="#FF8C42"/>
+              <stop offset="100%" stop-color="#E05A2B"/>
+            </linearGradient>
+          </defs>
+          <circle cx="16" cy="16" r="13" fill="none" stroke="url(#ccLogoGrad)" stroke-width="3"/>
+          <path d="M21 11a7 7 0 1 0 0 10" fill="none" stroke="#0B0C15" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Claudecraft
+    </a>
   </div>
   <div class="nav-links">
-    <a href="#articles">Articles</a>
-    <a href="#products">Bundles</a>
-    <a href="#how">How It Works</a>
-    <a href="#testimonials">Reviews</a>
-    <a href="#faq">FAQ</a>
+    <a href="/articles.html">Articles</a>
+    <a href="/bundles.html">Bundles</a>
+    <a href="/how-it-works.html">How It Works</a>
+    <a href="/reviews.html">Reviews</a>
+    <a href="/faq.html">FAQ</a>
   </div>
-  <a href="#products" class="btn btn-primary btn-md"><span class="btn-icon-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>Browse Bundles</a>
-  <button class="nav-drawer-trigger" onclick="toggleNavDrawer()" aria-label="Open menu" title="Menu">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-  </button>
+  <a href="/bundles.html" class="btn btn-primary btn-md"><span class="btn-icon-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>Browse Bundles</a>
 </nav>
 
 <div class="nav-drawer-overlay" id="nav-drawer-overlay" onclick="toggleNavDrawer()"></div>
@@ -541,11 +549,12 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
     <button class="nav-drawer-close" onclick="toggleNavDrawer()" aria-label="Close menu">✕</button>
   </div>
   <nav class="nav-drawer-links">
-    <a href="#articles" onclick="toggleNavDrawer()">📰 Articles</a>
-    <a href="#products" onclick="toggleNavDrawer()">⚡ Bundles</a>
-    <a href="#how" onclick="toggleNavDrawer()">🧭 How It Works</a>
-    <a href="#testimonials" onclick="toggleNavDrawer()">⭐ Reviews</a>
-    <a href="#faq" onclick="toggleNavDrawer()">❓ FAQ</a>
+    <a href="/articles.html" onclick="toggleNavDrawer()">📰 Articles</a>
+    <a href="/bundles.html" onclick="toggleNavDrawer()">⚡ Bundles</a>
+    <a href="/how-it-works.html" onclick="toggleNavDrawer()">🧭 How It Works</a>
+    <a href="/reviews.html" onclick="toggleNavDrawer()">⭐ Reviews</a>
+    <a href="/faq.html" onclick="toggleNavDrawer()">❓ FAQ</a>
+    <a href="/why-claudecraft.html" onclick="toggleNavDrawer()">💡 Why ClaudeCraft</a>
     <a href="/founder-story.html" onclick="toggleNavDrawer()">👋 Founder's Story</a>
     <a href="/refund.html" onclick="toggleNavDrawer()">↩️ Refund a Purchase</a>
   </nav>
@@ -1147,11 +1156,15 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
         <div class="faq-q">Is there a bundle discount if I want more than one?</div>
         <div class="faq-a">Email us at support@claudecraft.ca after purchase and we'll apply a 20% bundle discount on any additional packs. Just mention your order.</div>
       </div>
-      <div class="faq-item reveal">
-        <div class="faq-q">How is this different from a $7 prompt pack on Etsy, or just using Claude's built-in Skills feature?</div>
-        <div class="faq-a">Generic prompt dumps give you a PDF and leave you to figure it out. We give you a curated, tested set of skills with a real setup walkthrough, working examples, free updates, and a 30-day guarantee. We also track Claude's native Skills feature closely — if you're on a paid plan, our skills work there too. You're not buying prompts, you're buying a working result in 5 minutes.</div>
-      </div>
     </div>
+  </div>
+</section>
+
+<section class="why-section z1">
+  <div class="container">
+    <h2 class="why-headline">Not another $7 prompt pack.</h2>
+    <p class="why-text">Generic prompt dumps give you a PDF and leave you to figure it out. We give you a curated, tested set of skills with a real setup walkthrough, working examples, free updates, and a 30-day guarantee — and we track Claude's native Skills feature closely too. You're not buying prompts. You're buying a working result in 5 minutes.</p>
+    <a href="/why-claudecraft.html" class="why-link">Read the full breakdown →</a>
   </div>
 </section>
 

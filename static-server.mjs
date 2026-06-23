@@ -578,6 +578,79 @@ function getAllArticles() {
   return [...dynamic, ...STATIC_ARTICLES];
 }
 
+const NAV_PAGES = [
+  { href: '/articles.html', label: '📰 Articles', key: 'articles' },
+  { href: '/bundles.html', label: '⚡ Bundles', key: 'bundles' },
+  { href: '/how-it-works.html', label: '🧭 How It Works', key: 'how' },
+  { href: '/reviews.html', label: '⭐ Reviews', key: 'reviews' },
+  { href: '/faq.html', label: '❓ FAQ', key: 'faq' },
+  { href: '/why-claudecraft.html', label: '💡 Why ClaudeCraft', key: 'why' },
+  { href: '/founder-story.html', label: '👋 Founder\'s Story', key: 'founder' },
+  { href: '/refund.html', label: '↩️ Refund a Purchase', key: 'refund' },
+];
+
+function pageShell(activeKey, title, description, bodyContent) {
+  const drawerLinks = NAV_PAGES.map(p => `<a href="${p.href}"${p.key === activeKey ? ' class="active"' : ''} onclick="toggleNavDrawer()">${p.label}</a>`).join('\n    ');
+  const topNavLinks = NAV_PAGES.slice(0, 5).map(p => `<a href="${p.href}"${p.key === activeKey ? ' class="active"' : ''}>${p.label.replace(/^\S+\s/, '')}</a>`).join('\n    ');
+  return `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title} — ClaudeCraft</title>
+<meta name="description" content="${description}">
+<link rel="stylesheet" href="/shared.css">
+</head><body>
+<div class="dot-grid"></div>
+<nav>
+  <div class="nav-left">
+    <button class="nav-drawer-trigger" onclick="toggleNavDrawer()" aria-label="Open menu" title="Menu">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+    <a href="/" class="nav-logo">Claude<span style="color:var(--brand)">Craft</span></a>
+  </div>
+  <div class="nav-links">
+    ${topNavLinks}
+  </div>
+  <a href="/checkout/cowork" class="btn btn-primary btn-md">Browse Bundles ⚡</a>
+</nav>
+
+<div class="nav-drawer-overlay" id="nav-drawer-overlay" onclick="toggleNavDrawer()"></div>
+<aside class="nav-drawer" id="nav-drawer" role="dialog" aria-label="Site menu">
+  <div class="nav-drawer-head">
+    <span class="nav-drawer-title">Menu</span>
+    <button class="nav-drawer-close" onclick="toggleNavDrawer()" aria-label="Close menu">✕</button>
+  </div>
+  <nav class="nav-drawer-links">
+    ${drawerLinks}
+  </nav>
+  <div class="nav-drawer-footer">
+    <a href="/#products" class="btn btn-primary btn-md" onclick="toggleNavDrawer()" style="width:100%; justify-content:center;">Browse Bundles ⚡</a>
+  </div>
+</aside>
+
+${bodyContent}
+
+<footer class="z1">
+  <div class="footer-brand">Claude<span class="orange">Craft</span></div>
+  <div class="footer-copy">© 2026 ClaudeCraft. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/refund.html">Refunds</a>
+    <a href="mailto:support@claudecraft.ca">Support</a>
+  </div>
+</footer>
+
+<script>
+let navDrawerOpen = false;
+function toggleNavDrawer() {
+  navDrawerOpen = !navDrawerOpen;
+  document.getElementById('nav-drawer').classList.toggle('open', navDrawerOpen);
+  document.getElementById('nav-drawer-overlay').classList.toggle('visible', navDrawerOpen);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && navDrawerOpen) toggleNavDrawer(); });
+</script>
+</body></html>`;
+}
+
 function articlePageShell(title, bodyContent) {
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -598,6 +671,427 @@ h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:900;letter-spacing:-1px;margin
 .cta a{display:inline-block;margin-top:12px;background:linear-gradient(135deg,var(--brand-light),var(--brand));color:#fff;font-weight:700;padding:12px 26px;border-radius:8px;text-decoration:none;font-size:0.9rem;}
 </style></head><body><div class="wrap">${bodyContent}</div></body></html>`;
 }
+
+app.get('/how-it-works.html', (req, res) => {
+  const body = `
+<div class="page-header z1 container">
+  <span class="tag tag-live" style="display:inline-flex; margin-bottom:20px;"><span class="dot"></span>Simple Process</span>
+  <h1>Up and Running in 3 Steps</h1>
+  <p>No coding. No complexity. Just results — from the first session.</p>
+</div>
+<section class="how-section z1">
+  <div class="container">
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-title">Buy Your Bundle</div>
+        <div class="step-desc">Instant download after checkout. No waiting. No subscriptions on top of your Claude account. Pay once, use forever.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-title">Follow the Setup Guide</div>
+        <div class="step-desc">5-minute install inside Claude. Our plain-English guide walks every step. Works with Claude Free, Pro, and Team plans.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-title">Start Saving Time</div>
+        <div class="step-desc">Use your skills immediately. Most customers save 10+ hours in their first week. Results are guaranteed — or your money back.</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="guarantee-section z1">
+  <div class="container">
+    <div class="guarantee-card glass-card">
+      <div class="guarantee-shield">🛡️</div>
+      <div>
+        <div class="guarantee-title">30-Day Money-Back Guarantee</div>
+        <div class="guarantee-text">If you install your skill bundle, follow the setup guide, and don't save at least 5 hours in your first week — email us and we'll refund every cent. No questions asked.</div>
+      </div>
+    </div>
+  </div>
+</section>`;
+  res.send(pageShell('how', 'How It Works', 'How ClaudeCraft works — buy, install, start saving time in 3 simple steps.', body));
+});
+
+app.get('/reviews.html', (req, res) => {
+  const reviews = [
+    { stars: 5, quote: "Bought the Solo Entrepreneur Pack on a Tuesday. By Friday I'd sent 6 proposals and closed 2 of them using the Claude scripts. Genuinely changed how I run my business.", avatar: '🏆', name: 'Marcus T.', role: 'Freelance Consultant · Ontario, Canada' },
+    { stars: 5, quote: "The Content Machine basically replaced my VA. Blogs, newsletters, Instagram captions — all done in one Claude session now. I genuinely don't know how I ran my business before this.", avatar: '🚀', name: 'Sandra K.', role: 'Life & Business Coach · Vancouver, BC' },
+    { stars: 5, quote: "My daughter bought me the 55+ Starter Kit and I was honestly skeptical. Now I use Claude every single morning. The recipe skill alone was worth the whole $29.", avatar: '🌟', name: 'Barbara W.', role: 'Retired Teacher · Age 67' },
+  ];
+  const cards = reviews.map(r => `
+      <div class="t-card">
+        <div class="t-stars">${'★ '.repeat(r.stars).trim()}</div>
+        <p class="t-quote">"${r.quote}"</p>
+        <div class="t-author">
+          <div class="t-avatar">${r.avatar}</div>
+          <div><div class="t-name">${r.name}</div><div class="t-role">${r.role}</div></div>
+        </div>
+      </div>`).join('');
+  const body = `
+<div class="page-header z1 container">
+  <span class="tag tag-live" style="display:inline-flex; margin-bottom:20px;"><span class="dot"></span>Real Results</span>
+  <h1>What Customers Are Saying</h1>
+  <p>From solopreneurs to retirees. Real people. Real time savings.</p>
+</div>
+<section class="testimonials-section z1">
+  <div class="container">
+    <div class="testi-grid">${cards}</div>
+  </div>
+</section>`;
+  res.send(pageShell('reviews', 'Reviews', 'What ClaudeCraft customers are saying — real results from real bundle owners.', body));
+});
+
+app.get('/faq.html', (req, res) => {
+  const faqs = [
+    ['Do I need a paid Claude subscription?', 'Nope. All bundles work with the free Claude plan. Claude Pro users will get faster responses, but every skill works on the free tier.'],
+    ['How long does setup take?', 'Most customers are fully set up and using their first skill within 5–10 minutes. Our plain-English guide walks every single step — no tech background needed.'],
+    ['What exactly do I receive?', 'A ZIP file containing your skill files, a PDF setup guide, and a real-world examples document. Everything you need is included — nothing to figure out yourself.'],
+    ['Can I use these skills on multiple devices?', "Yes. Once installed, your Claude skills follow your Claude account — accessible on any device where you're signed in to Claude."],
+    ['What if the skills stop working after an update?', 'We monitor Claude updates and push skill updates when needed. All customers who bought a bundle receive updates for free, forever.'],
+    ['Is there a bundle discount if I want more than one?', "Email us at support@claudecraft.ca after purchase and we'll apply a 20% bundle discount on any additional packs. Just mention your order."],
+  ];
+  const items = faqs.map(([q, a]) => `
+      <div class="faq-item">
+        <div class="faq-q">${q}</div>
+        <div class="faq-a">${a}</div>
+      </div>`).join('');
+  const body = `
+<div class="page-header z1 container">
+  <span class="tag tag-live" style="display:inline-flex; margin-bottom:20px;"><span class="dot"></span>Common Questions</span>
+  <h1>Everything You Need to Know</h1>
+</div>
+<section class="faq-section z1">
+  <div class="container">
+    <div class="faq-grid">${items}</div>
+  </div>
+</section>
+<section class="why-section z1">
+  <div class="container">
+    <h2 class="why-headline">Not another $7 prompt pack.</h2>
+    <p class="why-text">Generic prompt dumps give you a PDF and leave you to figure it out. We give you a curated, tested set of skills with a real setup walkthrough, working examples, free updates, and a 30-day guarantee — and we track Claude's native Skills feature closely too.</p>
+    <a href="/why-claudecraft.html" class="why-link">Read the full breakdown →</a>
+  </div>
+</section>`;
+  res.send(pageShell('faq', 'FAQ', 'Frequently asked questions about ClaudeCraft bundles, setup, and policies.', body));
+});
+
+app.get('/why-claudecraft.html', (req, res) => {
+  const body = `
+<div class="page-header z1 container">
+  <span class="tag tag-live" style="display:inline-flex; margin-bottom:20px;"><span class="dot"></span>The Honest Breakdown</span>
+  <h1>Not Another $7 Prompt Pack</h1>
+  <p>Why ClaudeCraft is built differently, and what that actually means for you.</p>
+</div>
+<section class="page-content z1">
+  <div class="container" style="max-width:720px;">
+    <p style="color:var(--sub); font-size:1.02rem; line-height:1.8; margin-bottom:24px;">There's a real, valid skepticism around the whole "AI prompt pack" category right now, and it's earned. Etsy and Gumroad are flooded with "1,200 ChatGPT Prompts!!" PDFs that get dumped out of a spreadsheet by someone who's never actually used half of what they're selling. No setup help, no guarantee, no real person on the other end if something doesn't work.</p>
+    <p style="color:var(--sub); font-size:1.02rem; line-height:1.8; margin-bottom:24px;"><strong style="color:var(--text);">Here's the actual difference, point by point:</strong></p>
+    <p style="color:var(--sub); font-size:1.02rem; line-height:1.8; margin-bottom:24px;"><strong style="color:var(--text);">Curated and tested, not dumped.</strong> Every bundle has 8-15 skills, each one actually used to build the workflows it claims to solve — not a pile of prompts nobody has personally verified.</p>
+    <p style="color:var(--sub); font-size:1.02rem; line-height:1.8; margin-bottom:24px;"><strong style="color:var(--text);">A real setup walkthrough, not a PDF that leaves you guessing.</strong> Every bundle ships with a plain-English guide — exact clicks, not vague instructions.</p>
+    <p style="color:var(--sub); font-size:1.02rem; line-height:1.8; margin-bottom:24px;"><strong style="color:var(--text);">A real, working 30-day money-back guarantee.</strong> Self-serve, automated, instant — not a policy that only exists on paper. <a href="/refund.html" style="color:var(--brand-light);">Try it yourself any time.</a></p>
+    <p style="color:var(--sub); font-size:1.02rem; line-height:1.8; margin-bottom:24px;"><strong style="color:var(--text);">Free updates, forever.</strong> When Claude changes in a way that breaks a skill, we fix it and push the update to everyone who already bought it — no extra charge, no resubscribing.</p>
+    <p style="color:var(--sub); font-size:1.02rem; line-height:1.8; margin-bottom:24px;"><strong style="color:var(--text);">We track Anthropic's native Skills feature closely.</strong> If you're on a paid Claude plan, the more technical native Skills format is an option too — covered in depth in the Power User Pack and the Claude Code Builder's Guide.</p>
+    <p style="color:var(--sub); font-size:1.02rem; line-height:1.8; margin-bottom:24px;">You're not buying a pile of prompts you have to figure out alone. You're buying a working result in 5 minutes, with a real person standing behind it if it isn't.</p>
+    <div class="cta" style="margin-top:48px; padding:28px; background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; text-align:center;">
+      <a href="/bundles.html" class="btn btn-primary btn-md">Browse the Bundles →</a>
+    </div>
+  </div>
+</section>`;
+  res.send(pageShell('why', 'Why ClaudeCraft', 'Why ClaudeCraft is built differently from generic $7 prompt packs, point by point.', body));
+});
+
+app.get('/bundles.html', (req, res) => {
+  const body = `
+<div class="page-header z1 container">
+  <span class="tag tag-live" style="display:inline-flex; margin-bottom:20px;"><span class="dot"></span>The Bundles</span>
+  <h1>Pick Your Power Pack</h1>
+  <p>Every bundle includes ready-to-use Claude skills, a plain-English setup guide, and real examples you can use today.</p>
+</div>
+<section class="products-section z1">
+  <div class="container">
+    <div class="products-grid">
+
+      <div class="product-card" id="card-cowork">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Claude Co-Work Beginner's Guide</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Foundations · Long-Form Step-by-Step Guide</div>
+          <div class="card-desc">Never used Claude before? Start here. A complete, deeply detailed walkthrough that takes you from "never opened claude.ai" to genuinely working with it every day.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>8 full Parts — setup, Projects, prompting &amp; more</li>
+            <li><span class="cf-icon">✦</span>Every step broken into numbered substeps</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$19</span><span class="price-was">$39</span></div>
+            <a href="/checkout/cowork" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-starter">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">55+ AI Starter Kit</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Everyday Life · 10 Skills · Senior-Friendly</div>
+          <div class="card-desc">Simple, powerful AI skills for real everyday life. No tech jargon. No confusing setup.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Recipes from whatever's already in your fridge</li>
+            <li><span class="cf-icon">✦</span>Large-print cheat sheet PDF included</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$29</span><span class="price-was">$59</span></div>
+            <a href="/checkout/starter" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-poweruser">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Claude Power User Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Advanced · 8 Skills</div>
+          <div class="card-desc">Already comfortable with Claude? Go further — real native Skills format, token efficiency, agentic workflows.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Package a real Claude Skill (zip + SKILL.md)</li>
+            <li><span class="cf-icon">✦</span>Multi-step agentic workflow builder</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$29</span></div>
+            <a href="/checkout/poweruser" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-student">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Student Success Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Academic Life · 12 Skills</div>
+          <div class="card-desc">From essay outlines to exam crams — a full toolkit built for actual student life.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Study guide &amp; flashcard generator from your notes</li>
+            <li><span class="cf-icon">✦</span>Citation formatter (APA, MLA, Chicago)</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$34</span><span class="price-was">$69</span></div>
+            <a href="/checkout/student" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-jobseeker">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Job Seeker's Career Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Career &amp; Job Search · 12 Skills</div>
+          <div class="card-desc">Resume, cover letter, interview prep, salary negotiation, and the follow-through most job seekers skip.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Resume tailoring matched to any real job posting</li>
+            <li><span class="cf-icon">✦</span>STAR-method interview prep coach</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$34</span><span class="price-was">$69</span></div>
+            <a href="/checkout/jobseeker" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card is-featured" id="card-content">
+        <div class="card-stripe card-stripe-always"></div>
+        <div class="featured-crown">⭐ Best Seller</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">The Content Machine</div></div>
+            <span class="tag tag-hot" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>🔥 Hot</span>
+          </div>
+          <div class="card-cat">Content Creation · 12 Skills</div>
+          <div class="card-desc">Turn one idea into a full week of content in 20 minutes. Blogs, social, YouTube, newsletters, email.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>YouTube script generator with viral structure</li>
+            <li><span class="cf-icon">✦</span>30-day content calendar builder (automated)</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$39</span><span class="price-was">$79</span></div>
+            <a href="/checkout/content" class="btn btn-primary btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-solo">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Solo Entrepreneur Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Business Automation · 15 Skills</div>
+          <div class="card-desc">Run your business like a team of 5 — without hiring anyone.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Proposals &amp; contracts that close deals faster</li>
+            <li><span class="cf-icon">✦</span>Invoice &amp; follow-up automation scripts</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$49</span><span class="price-was">$97</span></div>
+            <a href="/checkout/solo" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card is-featured" id="card-connected">
+        <div class="card-stripe card-stripe-always"></div>
+        <div class="featured-crown">✦ New</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Claude Connected Pack</div></div>
+            <span class="tag tag-hot" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Hot</span>
+          </div>
+          <div class="card-cat">App Connectors · 8 Workflows</div>
+          <div class="card-desc">Link Claude to your real Gmail, Calendar, Drive, Slack &amp; Notion — then let it actually use them.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Inbox triage &amp; calendar command center</li>
+            <li><span class="cf-icon">✦</span>Full connector setup &amp; troubleshooting guide</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$39</span><span class="price-was">$79</span></div>
+            <a href="/checkout/connected" class="btn btn-primary btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-money">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Money Mastery Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Personal Finance · 10 Skills</div>
+          <div class="card-desc">Budgeting, debt payoff, bill negotiation, and investing basics — math done for you.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Budget builder &amp; debt payoff planner</li>
+            <li><span class="cf-icon">✦</span>Bill negotiation scripts that actually get used</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$34</span><span class="price-was">$69</span></div>
+            <a href="/checkout/money" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-family">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Family Life Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Parenting &amp; Home · 10 Skills</div>
+          <div class="card-desc">Meal planning, tough conversations, schedules, and homework help.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Weekly family meal planner + shopping list</li>
+            <li><span class="cf-icon">✦</span>Tough conversation script writer</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$34</span><span class="price-was">$69</span></div>
+            <a href="/checkout/family" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-writer">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Creative Writer's Pack</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Fiction &amp; Long-Form · 10 Skills</div>
+          <div class="card-desc">Outlining, character work, dialogue, line edits, and querying.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Story outline builder &amp; character developer</li>
+            <li><span class="cf-icon">✦</span>Query letter &amp; synopsis writer</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$34</span><span class="price-was">$69</span></div>
+            <a href="/checkout/writer" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" id="card-startup">
+        <div class="card-stripe"></div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Startup Founder's Toolkit</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Startups &amp; Fundraising · 10 Skills</div>
+          <div class="card-desc">Pitch decks, investor updates, fundraising math, and cofounder conflict scripts.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Pitch deck outline builder &amp; investor update writer</li>
+            <li><span class="cf-icon">✦</span>Cofounder conflict resolution scripts</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$39</span><span class="price-was">$79</span></div>
+            <a href="/checkout/startup" class="btn btn-orange-outline btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card is-featured" id="card-builder">
+        <div class="card-stripe card-stripe-always"></div>
+        <div class="featured-crown">🛠️ Behind the Scenes</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Claude Code Builder's Guide</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Meta · How This Site Was Actually Built</div>
+          <div class="card-desc">The real, step-by-step story of how ClaudeCraft itself was built using Claude Code inside VS Code.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Get Claude Code running in VS Code, start to finish</li>
+            <li><span class="cf-icon">✦</span>Deploying for real, via GitHub &amp; Railway</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block"><span class="price-now grad-text">$24</span><span class="price-was">$49</span></div>
+            <a href="/checkout/builder" class="btn btn-primary btn-md">Get Bundle →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="vault-banner" style="margin-top:32px;">
+      <div class="vault-banner-text">
+        <span class="vault-banner-icon">🎁</span>
+        <div>
+          <div class="vault-banner-title">Claude Power Prompts Vault</div>
+          <div class="vault-banner-sub">50 advanced prompts &amp; multi-step workflows — the perfect $9 add-on to any bundle above.</div>
+        </div>
+      </div>
+      <a href="/checkout/vault" class="btn btn-orange-outline btn-md">Add for $9 →</a>
+    </div>
+  </div>
+</section>`;
+  res.send(pageShell('bundles', 'Bundles', 'All ClaudeCraft Claude skill bundles — pick the one built for your situation.', body));
+});
 
 app.get('/article/:id', (req, res) => {
   const article = getAllArticles().find(a => a.id === req.params.id);
