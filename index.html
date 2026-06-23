@@ -138,6 +138,16 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
 .stat-num { font-size:2.4rem; font-weight:900; letter-spacing:-1px; line-height:1; margin-bottom:6px; }
 .stat-lbl { font-size:0.72rem; color:var(--muted); font-weight:600; letter-spacing:1.5px; text-transform:uppercase; }
 
+.featured-article {
+  display:flex; flex-direction:column; gap:10px; text-decoration:none; color:inherit;
+  background:linear-gradient(135deg, rgba(255,107,26,0.07), var(--glass)); border:1px solid rgba(255,107,26,0.22);
+  border-radius:var(--r-xl); padding:32px 36px; margin:48px 0; transition:border-color .3s, transform .3s;
+}
+.featured-article:hover { border-color:rgba(255,107,26,0.4); transform:translateY(-2px); }
+.featured-article-badge { display:inline-flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:800; color:var(--brand-light); text-transform:uppercase; letter-spacing:1.5px; }
+.featured-article-title { font-size:clamp(1.3rem,3vw,1.7rem); font-weight:900; letter-spacing:-0.5px; line-height:1.3; }
+.featured-article-excerpt { color:var(--sub); font-size:0.95rem; line-height:1.7; max-width:680px; }
+.featured-article-cta { display:inline-flex; align-items:center; gap:6px; color:var(--brand-light); font-weight:700; font-size:0.88rem; margin-top:4px; }
 .s-header { text-align:center; margin-bottom:56px; }
 .s-eyebrow { font-size:0.75rem; font-weight:800; letter-spacing:5px; text-transform:uppercase; background:linear-gradient(135deg,var(--brand-light),var(--brand)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:14px; display:block; }
 .s-title { font-size:clamp(2rem,4vw,2.8rem); font-weight:900; letter-spacing:-1px; margin-bottom:14px; }
@@ -591,6 +601,10 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
   </div>
   <svg class="sparkle-accent" style="right:6%; bottom:8%; width:28px; height:28px;" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l1.8 9.2L24 12l-10.2 1.8L12 24l-1.8-10.2L0 12l10.2-1.8L12 0z"/></svg>
 </section>
+
+<div class="container z1" id="featured-article-wrap" style="display:none;">
+  <a class="featured-article" id="featured-article"></a>
+</div>
 
 <div class="stats-section z1">
   <div class="stats-grid">
@@ -1217,6 +1231,21 @@ fetch('/api/recent-sales').then(r => r.json()).then(data => {
 
 fetch('/api/articles/preview').then(r => r.json()).then(articles => {
   if (!Array.isArray(articles) || articles.length === 0) return;
+
+  const featured = articles[0];
+  const featuredEl = document.getElementById('featured-article');
+  if (featuredEl && featured) {
+    const plain = featured.bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    featuredEl.href = `/article/${featured.id}`;
+    featuredEl.innerHTML = `
+      <span class="featured-article-badge">🔄 Updated ${featured.date} · ${featured.tag}</span>
+      <span class="featured-article-title">${featured.title}</span>
+      <span class="featured-article-excerpt">${plain.length > 280 ? plain.slice(0, 280).trimEnd() + '…' : plain}</span>
+      <span class="featured-article-cta">Read Today's Article →</span>
+    `;
+    document.getElementById('featured-article-wrap').style.display = 'block';
+  }
+
   const grid = document.getElementById('articles-grid');
   if (!grid) return;
   const fragment = document.createDocumentFragment();
