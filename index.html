@@ -153,7 +153,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
 .product-tab.active { color:#fff; background:linear-gradient(135deg,var(--brand-light),var(--brand)); box-shadow:0 6px 18px rgba(255,107,26,0.25); }
 .tab-count { font-size:0.7rem; opacity:0.75; }
 .trust-badge-row { display:flex; align-items:center; justify-content:center; gap:26px; flex-wrap:wrap; margin:-16px auto 36px; }
-.vault-banner { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; background:rgba(245,200,66,0.06); border:1px solid rgba(245,200,66,0.25); border-radius:var(--r-lg); padding:20px 28px; margin:36px 0; }
+.vault-banner { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; background:rgba(245,200,66,0.06); border:1px solid rgba(245,200,66,0.25); border-radius:var(--r-lg); padding:20px 28px; margin:56px 0; }
 .vault-banner-text { display:flex; align-items:center; gap:16px; }
 .vault-banner-icon { font-size:1.8rem; flex-shrink:0; }
 .vault-banner-title { font-weight:800; font-size:1rem; margin-bottom:3px; }
@@ -474,6 +474,16 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 .article-title { font-size:1.02rem; font-weight:800; color:var(--text); line-height:1.4; }
 .article-excerpt { font-size:0.85rem; color:var(--sub); line-height:1.6; flex:1; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .article-meta { font-size:0.76rem; color:var(--muted); }
+.article-card { text-decoration:none; color:inherit; display:block; }
+.view-all-articles {
+  display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+  margin-top:28px; padding:22px; background:var(--glass); border:1px solid var(--glass-border);
+  border-radius:var(--r-lg); color:var(--text); text-decoration:none; font-weight:800; font-size:0.95rem;
+  transition:border-color .2s,background .2s;
+}
+.view-all-articles:hover { border-color:rgba(255,107,26,0.35); background:rgba(255,107,26,0.06); }
+.view-all-arrow { color:var(--brand-light); transition:transform .2s; }
+.view-all-articles:hover .view-all-arrow { transform:translateX(4px); }
 
 /* ── NEW PRODUCT CARD addition styling reuses .product-card, no overrides needed ── */
 </style>
@@ -596,65 +606,13 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
     <div class="s-header">
       <span class="s-eyebrow">Free, No Purchase Needed</span>
       <h2 class="s-title">Claude &amp; AI — News and Tech Tips</h2>
-      <p class="s-desc">Added value, on the house. Click any article to expand it.</p>
+      <p class="s-desc">Added value, on the house. Click any article to read the full piece.</p>
     </div>
-    <div class="articles-grid stagger" id="articles-grid">
-
-      <div class="article-card reveal">
-        <div class="article-card-inner">
-          <span class="article-tag">Feature Explainer</span>
-          <span class="article-title">What Are Claude "Skills," Really?</span>
-          <span class="article-excerpt">Native Skills now work on every plan, including Free — but still require Code Execution turned on and packaging a zip file to build your own.</span>
-          <span class="article-meta">6 min read</span>
-        </div>
-      </div>
-
-      <div class="article-card reveal">
-        <div class="article-card-inner">
-          <span class="article-tag">Tech Tip</span>
-          <span class="article-title">5 Prompting Habits That Instantly Improve Your Results</span>
-          <span class="article-excerpt">Give Role, Task, Context, and Format every time, paste a sample of your own voice, and iterate instead of restarting — small habits that change everything.</span>
-          <span class="article-meta">4 min read</span>
-        </div>
-      </div>
-
-      <div class="article-card reveal">
-        <div class="article-card-inner">
-          <span class="article-tag">Tech Tip</span>
-          <span class="article-title">How to Save Tokens (and Money) When Using Claude</span>
-          <span class="article-excerpt">Trim your input, ask for the format you actually need, and stop re-pasting context that's already in the conversation — five ways to spend fewer tokens.</span>
-          <span class="article-meta">5 min read</span>
-        </div>
-      </div>
-
-      <div class="article-card reveal">
-        <div class="article-card-inner">
-          <span class="article-tag">Comparison</span>
-          <span class="article-title">Claude vs ChatGPT vs Gemini: What Actually Matters</span>
-          <span class="article-excerpt">Writing quality, long-document handling, and Projects vs. Custom GPTs vs. Gems — here's what actually moves the needle for everyday, non-technical use.</span>
-          <span class="article-meta">5 min read</span>
-        </div>
-      </div>
-
-      <div class="article-card reveal">
-        <div class="article-card-inner">
-          <span class="article-tag">Product Tip</span>
-          <span class="article-title">The "Brand Voice Trainer" Trick That Changes Everything</span>
-          <span class="article-excerpt">Teach Claude your actual voice once, in its own dedicated Project — then reuse that voice profile on every writing request from then on.</span>
-          <span class="article-meta">3 min read</span>
-        </div>
-      </div>
-
-      <div class="article-card reveal">
-        <div class="article-card-inner">
-          <span class="article-tag">Feature Explainer</span>
-          <span class="article-title">Claude Projects 101: The Feature Most People Never Turn On</span>
-          <span class="article-excerpt">Most regular users settle into 3–10 active Projects covering their most repeated tasks. If you've never set one up, it changes how the entire tool feels.</span>
-          <span class="article-meta">4 min read</span>
-        </div>
-      </div>
-
-    </div>
+    <div class="articles-grid stagger" id="articles-grid"></div>
+    <a href="/articles.html" class="view-all-articles">
+      <span>View All Articles</span>
+      <span class="view-all-arrow">→</span>
+    </a>
   </div>
 </section>
 
@@ -686,7 +644,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 
     <div class="product-tabs">
       <button class="product-tab active" id="tab-btn-popular" onclick="showProductTab('popular', this)">Most Popular</button>
-      <button class="product-tab" id="tab-btn-more" onclick="showProductTab('more', this)">More Bundles <span class="tab-count">+5</span></button>
+      <button class="product-tab" id="tab-btn-more" onclick="showProductTab('more', this)">More Bundles <span class="tab-count">+4</span></button>
     </div>
 
     <div class="trust-badge-row">
@@ -1038,30 +996,6 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
         </div>
       </div>
 
-      <div class="product-card is-soon reveal">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-head">
-            <div><div class="card-name">Agent Bridge Pro</div></div>
-            <span class="tag" style="font-size:.65rem; padding:4px 10px; color:var(--muted);">Coming Soon</span>
-          </div>
-          <div class="card-cat">Autonomous Business · Full-Stack AI</div>
-          <div class="card-desc">The most powerful bundle we've built. Full autonomous business operations — AI that scrapes, summarizes, emails, posts, and reports while you sleep.</div>
-          <ul class="card-features">
-            <li><span class="cf-icon" style="color:var(--muted);">✦</span>2× weekly AI news digest, auto-delivered</li>
-            <li><span class="cf-icon" style="color:var(--muted);">✦</span>Autonomous social posting pipeline</li>
-            <li><span class="cf-icon" style="color:var(--muted);">✦</span>Client reporting agent — zero manual work</li>
-            <li><span class="cf-icon" style="color:var(--muted);">✦</span>Lead research &amp; outreach automation</li>
-          </ul>
-          <div class="card-footer">
-            <div class="price-block">
-              <span class="price-now" style="color:var(--muted);">$99</span>
-            </div>
-            <a href="#nl-section" class="btn btn-ghost btn-md" onclick="scrollNl(event)">Notify Me →</a>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 </section>
@@ -1280,19 +1214,20 @@ fetch('/api/recent-sales').then(r => r.json()).then(data => {
   document.getElementById('recent-sales-widget').style.display = 'block';
 }).catch(() => {});
 
-fetch('/api/articles').then(r => r.json()).then(articles => {
+fetch('/api/articles/preview').then(r => r.json()).then(articles => {
   if (!Array.isArray(articles) || articles.length === 0) return;
   const grid = document.getElementById('articles-grid');
   if (!grid) return;
   const fragment = document.createDocumentFragment();
   articles.forEach((a, i) => {
-    const el = document.createElement('div');
+    const el = document.createElement('a');
+    el.href = `/article/${a.id}`;
     el.className = 'article-card reveal visible';
     const plainText = a.bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     const excerpt = plainText.length > 160 ? plainText.slice(0, 160).trimEnd() + '…' : plainText;
     el.innerHTML = `
       <div class="article-card-inner">
-        <span class="article-tag">🗞️ ${a.tag}</span>
+        <span class="article-tag">${a.isDynamic ? '🗞️ ' : ''}${a.tag}</span>
         <span class="article-title">${a.title}</span>
         <span class="article-excerpt">${excerpt}</span>
         <span class="article-meta">${a.date} · ${a.meta}</span>
@@ -1300,7 +1235,7 @@ fetch('/api/articles').then(r => r.json()).then(articles => {
     `;
     fragment.appendChild(el);
   });
-  grid.insertBefore(fragment, grid.firstChild);
+  grid.appendChild(fragment);
 }).catch(() => {});
 
 const revealEls = document.querySelectorAll('.reveal');

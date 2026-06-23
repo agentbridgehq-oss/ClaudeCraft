@@ -445,6 +445,148 @@ app.get('/api/articles', (req, res) => {
   res.json(loadArticles());
 });
 
+app.get('/api/articles/preview', (req, res) => {
+  res.json(getAllArticles().slice(0, 6));
+});
+
+// Evergreen articles — full content lives here (not just the homepage excerpt) so /article/:id can render the whole piece.
+const STATIC_ARTICLES = [
+  {
+    id: 'claude-skills-explainer',
+    tag: 'Feature Explainer',
+    title: 'What Are Claude "Skills," Really? (And Why It Matters For You)',
+    meta: '6 min read',
+    date: '2026-06-01',
+    bodyHtml: `
+      <p>Anthropic shipped a real, native "Agent Skills" feature for Claude — and it's genuinely different from just pasting instructions into a Custom Instructions box. A native Skill is a small folder containing a <strong>SKILL.md</strong> file plus optional scripts and resources, uploaded as a zip. Claude scans the metadata of every installed Skill and only pulls in the full content when it's actually relevant to what you're doing — a technique called progressive disclosure.</p>
+      <p>Good news as of the latest update: native Skills now work on every plan, including <strong>Free</strong> — not just paid tiers like before. The catch is they still require <strong>Code Execution</strong> turned on (Settings → Capabilities → "Code execution and file creation"), and building your own custom Skill still means packaging a zip file — genuinely not something most non-technical users want to deal with on day one, even though Anthropic's docs now note "no coding required for simple skills."</p>
+      <p>That's exactly why every ClaudeCraft bundle still ships in the simple copy-paste Custom Instructions format: zero setup beyond pasting text, works the moment you turn it on, no zip files, no toggles to hunt for. But we're watching the native Skills format closely — it's the more "official" long-term direction, and our roadmap includes a Skills-format upgrade path. If you're curious how to package your own Custom Instructions as a real Skill someday, that's a great sign you're ready to graduate from beginner tools — which is also exactly what our <strong>Claude Co-Work Beginner's Guide</strong> is designed to get you to.</p>
+      <p>Anthropic has also started shipping its own pre-built Skills directly — ready-made ones for Excel, Word, PowerPoint, and PDF workflows, alongside partner-built Skills from companies like Notion, Figma, and Atlassian that are designed to work hand-in-hand with Connectors (more on those in our Claude Connected Pack). For Team and Enterprise plans, an organization owner can even push a standardized set of Skills out to every member at once — meaning the gap between "person who knows a clever Claude trick" and "company that's standardized on AI workflows" is closing fast.</p>
+      <p>So what should you actually do with this, today? If you're new, ignore native Skills entirely for now — every skill in our bundles works identically well without them, and you'll get to real results faster. If you're already comfortable with Claude and curious about the more technical format, our <strong>Power User Pack</strong> includes a skill that walks you through packaging your first real Claude Skill, start to finish, including the Code Execution toggle most people never knew existed.</p>`,
+  },
+  {
+    id: 'five-prompting-habits',
+    tag: 'Tech Tip',
+    title: '5 Prompting Habits That Instantly Improve Your Results',
+    meta: '4 min read',
+    date: '2026-06-02',
+    bodyHtml: `
+      <p><strong>1. Give Role, Task, Context, and Format — every time.</strong> Most disappointing AI responses come from under-explaining, not from the AI being "bad." Tell it who it should act as, exactly what you want, the specific details that make it YOUR situation, and how you want it formatted.</p>
+      <p><strong>2. Paste a real example of your own voice.</strong> One paragraph of your own past writing, with "match this style," does more for output quality than almost any other single trick.</p>
+      <p><strong>3. Iterate instead of restarting.</strong> If a response isn't quite right, say what's off — "shorter," "less formal," "add urgency." Claude keeps the conversation's context, so corrections compound instead of starting from zero.</p>
+      <p><strong>4. Ask it to ask YOU questions first</strong> for anything complex or high-stakes. "Ask me 3 clarifying questions before you answer" consistently produces better results on nuanced requests.</p>
+      <p><strong>5. Separate jobs into separate Projects.</strong> A Project that does five different things does all five worse than five focused Projects would. Specialization beats generalization, every time.</p>`,
+  },
+  {
+    id: 'save-tokens-money',
+    tag: 'Tech Tip',
+    title: 'How to Save Tokens (and Money) When Using Claude',
+    meta: '5 min read',
+    date: '2026-06-03',
+    bodyHtml: `
+      <p>"Tokens" are roughly chunks of text — and on paid API plans or usage-limited tiers, they're what you're actually spending. Here's how to get more out of fewer of them:</p>
+      <p><strong>Trim your own input.</strong> Pasting an entire 40-page document when you only need page 12 burns tokens on content Claude never needed. Paste only the relevant section when you can.</p>
+      <p><strong>Ask for the format you actually need, not the most thorough one.</strong> "Summarize in 3 bullet points" costs a fraction of "explain in detail" — and is often more useful anyway.</p>
+      <p><strong>Don't re-paste context that's already in the conversation.</strong> Within one chat, Claude already has everything said so far — re-explaining it wastes tokens on both sides.</p>
+      <p><strong>Use Projects instead of re-explaining setup every time.</strong> Custom Instructions are loaded efficiently per-project — far cheaper over time than retyping the same setup paragraph into a fresh chat repeatedly.</p>
+      <p><strong>Close out chats that have drifted long and unfocused.</strong> Extremely long conversations carry their full history forward with every new message. If a chat has wandered far from its original purpose, starting fresh is often both cheaper and gets you a cleaner answer.</p>`,
+  },
+  {
+    id: 'claude-vs-chatgpt-vs-gemini',
+    tag: 'Comparison',
+    title: 'Claude vs ChatGPT vs Gemini: What Actually Matters for Everyday Use',
+    meta: '5 min read',
+    date: '2026-06-04',
+    bodyHtml: `
+      <p>Benchmark wars make headlines, but for everyday work, the practical differences come down to a few things that actually affect your day:</p>
+      <p><strong>Writing quality and tone control.</strong> Claude is widely regarded as strong at producing natural, non-robotic prose and reliably following nuanced tone instructions — useful for anything client-facing.</p>
+      <p><strong>Long document handling.</strong> Claude's large context window makes it comfortable working with long documents, contracts, or codebases in a single conversation without losing track of earlier details.</p>
+      <p><strong>Projects vs. Custom GPTs vs. Gems.</strong> All three major assistants now offer some version of "persistent specialist space" — Claude's Projects, ChatGPT's Custom GPTs, Gemini's Gems. The core idea (set it up once, reuse forever) is the same; pick based on which ecosystem you're already in for other tools.</p>
+      <p><strong>The honest answer:</strong> for most non-technical, everyday use — writing, planning, learning, document work — all three are genuinely capable now. The bigger factor is usually which one you actually build a habit around, which is exactly what our Co-Work Beginner's Guide and skill bundles are designed to help with.</p>`,
+  },
+  {
+    id: 'brand-voice-trainer-trick',
+    tag: 'Product Tip',
+    title: 'The "Brand Voice Trainer" Trick That Changes Everything',
+    meta: '3 min read',
+    date: '2026-06-05',
+    bodyHtml: `
+      <p>If you create any kind of content regularly, here's the single highest-leverage thing you can do before anything else: teach Claude your actual voice, once, in its own dedicated Project.</p>
+      <p>Ask it to interview you — tone, a creator whose voice you admire, words you love, words you hate, and one example of your own writing that feels exactly right. Have it summarize that back as a short "voice profile."</p>
+      <p>From then on, paste that voice profile at the start of any writing request, anywhere — blog posts, emails, social captions, even cover letters. The difference between generic-AI-sounding output and content that genuinely sounds like you almost always comes down to this one step, which most people skip entirely. (This exact skill — fully built — is Skill #10 in our Content Machine Pack.)</p>`,
+  },
+  {
+    id: 'claude-projects-101',
+    tag: 'Feature Explainer',
+    title: 'Claude Projects 101: The Feature Most People Never Turn On',
+    meta: '4 min read',
+    date: '2026-06-06',
+    bodyHtml: `
+      <p>The single biggest gap between someone who's "tried Claude a few times" and someone who "works with Claude every day" is almost always one feature: Projects.</p>
+      <p>Without it, every new chat starts from zero — you re-explain context, re-paste instructions, and the whole thing feels like a novelty instead of a tool. With it, you set up a dedicated specialist once — Custom Instructions describing exactly what the job is — and every future chat inside that Project already knows the rules.</p>
+      <p>Most regular users settle into somewhere between 3 and 10 active Projects covering their most repeated tasks: client emails, content drafts, weekly planning, whatever shows up over and over in their actual work. If you've never set one up, it's a five-minute investment that changes how the entire tool feels. Our <strong>Claude Co-Work Beginner's Guide</strong> walks the exact clicks, step by step, in Part 3.</p>`,
+  },
+];
+
+function getAllArticles() {
+  const dynamic = loadArticles().map(a => ({ ...a, isDynamic: true }));
+  return [...dynamic, ...STATIC_ARTICLES];
+}
+
+function articlePageShell(title, bodyContent) {
+  return `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title} — ClaudeCraft</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--brand:#FF6B1A;--brand-light:#FF8C42;--bg:#070A12;--glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.07);--text:#EDF0F7;--sub:#8B93A8;--muted:#4A5268;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:680px;margin:0 auto;padding:56px 24px 100px;}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--sub);text-decoration:none;font-size:0.88rem;font-weight:600;margin-bottom:36px;}
+.back-link:hover{color:var(--brand-light);}
+.tag{font-size:0.7rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:1.5px;}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:900;letter-spacing:-1px;margin:14px 0 10px;line-height:1.2;}
+.meta{font-size:0.82rem;color:var(--muted);margin-bottom:36px;}
+.article-content p{margin-bottom:20px;font-size:1.02rem;color:var(--sub);}
+.article-content strong{color:var(--text);}
+.cta{margin-top:48px;padding:28px;background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;text-align:center;}
+.cta a{display:inline-block;margin-top:12px;background:linear-gradient(135deg,var(--brand-light),var(--brand));color:#fff;font-weight:700;padding:12px 26px;border-radius:8px;text-decoration:none;font-size:0.9rem;}
+</style></head><body><div class="wrap">${bodyContent}</div></body></html>`;
+}
+
+app.get('/article/:id', (req, res) => {
+  const article = getAllArticles().find(a => a.id === req.params.id);
+  if (!article) return res.status(404).send(articlePageShell('Not Found', '<a class="back-link" href="/articles.html">← Back to Articles</a><h1>Article not found</h1>'));
+  const body = `
+    <a class="back-link" href="/articles.html">← Back to Articles</a>
+    <span class="tag">${article.tag}</span>
+    <h1>${article.title}</h1>
+    <div class="meta">${article.date} · ${article.meta}</div>
+    <div class="article-content">${article.bodyHtml}${article.sourcesHtml ? `<p style="font-size:0.8rem;">${article.sourcesHtml}</p>` : ''}</div>
+    <div class="cta">Want done-for-you Claude skills, not just tips?<br><a href="/#products">Browse Bundles →</a></div>`;
+  res.send(articlePageShell(article.title, body));
+});
+
+app.get('/articles.html', (req, res) => {
+  const cards = getAllArticles().map(a => `
+    <a class="list-card" href="/article/${a.id}">
+      <span class="tag">${a.tag}</span>
+      <h3>${a.title}</h3>
+      <div class="meta">${a.date} · ${a.meta}</div>
+    </a>`).join('');
+  const body = `
+    <a class="back-link" href="/#articles">← Back to ClaudeCraft</a>
+    <h1>All Articles</h1>
+    <div class="list-grid">${cards}</div>
+    <style>
+      .list-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:24px;}
+      .list-card{display:block;background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:22px;text-decoration:none;color:inherit;transition:border-color .2s,transform .2s;}
+      .list-card:hover{border-color:rgba(255,107,26,0.35);transform:translateY(-2px);}
+      .list-card h3{font-size:1rem;font-weight:800;color:var(--text);margin:10px 0 8px;line-height:1.4;}
+    </style>`;
+  res.send(articlePageShell('All Articles', body));
+});
+
 app.post('/api/articles', (req, res) => {
   const token = req.get('X-OpenClaw-Token');
   if (!process.env.ARTICLES_API_TOKEN || token !== process.env.ARTICLES_API_TOKEN) {
