@@ -29,7 +29,7 @@
   --bg:    #070A12;
   --bg2:   #0B0C15;
   --bg3:   #0F1120;
-  --glass: rgba(255,255,255,0.04);
+  --glass: rgba(255,255,255,0.03);
   --glass-border: rgba(255,255,255,0.07);
   --glass-hover:  rgba(255,255,255,0.07);
   --text:  #EDF0F7;
@@ -178,6 +178,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
 .card-desc { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
 .product-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-xl); overflow:hidden; transition:border-color .3s, box-shadow .3s, transform .3s; display:flex; flex-direction:column; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); position:relative; }
 .product-card:hover { border-color:rgba(255,107,26,0.35); transform:translateY(-2px); box-shadow:0 8px 32px rgba(255,107,26,0.07); }
+.product-card:active { border-color:rgba(255,107,26,0.55); box-shadow:0 0 24px rgba(255,107,26,0.18); transform:translateY(0) scale(0.99); transition:all .1s; }
 .card-stripe { height:3px; background:linear-gradient(90deg,transparent,var(--brand),var(--brand-light),transparent); opacity:0; transition:opacity .3s; }
 .product-card:hover .card-stripe { opacity:1; }
 .card-stripe-always { opacity:1 !important; }
@@ -204,18 +205,15 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
 .paypal-alt span { color:#009CDE; font-weight:700; }
 
 .how-section { padding:100px 0; background:linear-gradient(180deg,transparent 0%,rgba(255,107,26,0.03) 50%,transparent 100%); }
-.steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:2px; border:1px solid var(--glass-border); border-radius:var(--r-xl); overflow:hidden; }
-.step-card { padding:40px 32px; background:var(--glass); transition:background .3s; border-right:1px solid var(--glass-border); }
-.step-card:last-child { border-right:none; }
-.step-card:hover { background:rgba(255,255,255,0.05); }
-.step-num { width:48px; height:48px; border-radius:12px; background:var(--brand-dim); border:1px solid rgba(255,107,26,0.3); display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:900; color:var(--brand); margin-bottom:20px; }
-.step-title { font-size:1rem; font-weight:800; margin-bottom:10px; }
-.step-desc { font-size:0.86rem; color:var(--sub); line-height:1.6; }
+.steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:48px; }
+.step-card { padding:0; }
+.step-num { font-size:0.85rem; font-weight:800; color:var(--brand-light); letter-spacing:1px; margin-bottom:14px; }
+.step-title { font-size:1.1rem; font-weight:800; margin-bottom:10px; }
+.step-desc { font-size:0.9rem; color:var(--sub); line-height:1.7; }
 
 .testimonials-section { padding:100px 0; }
 .testi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
-.t-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-lg); padding:28px; transition:border-color .3s,transform .3s; }
-.t-card:hover { border-color:rgba(255,107,26,0.25); transform:translateY(-3px); }
+.t-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-lg); padding:28px; backdrop-filter:blur(10px); }
 .t-stars { color:var(--gold); font-size:0.9rem; letter-spacing:3px; margin-bottom:14px; }
 .t-quote { font-size:0.92rem; color:var(--sub); line-height:1.7; margin-bottom:20px; font-style:italic; }
 .t-author { display:flex; align-items:center; gap:12px; }
@@ -243,8 +241,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
 
 .faq-section { padding:100px 0; }
 .faq-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:12px; }
-.faq-item { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-md); padding:24px 26px; transition:border-color .2s; }
-.faq-item:hover { border-color:rgba(255,107,26,0.25); }
+.faq-item { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-md); padding:24px 26px; backdrop-filter:blur(10px); }
 .faq-q { font-size:0.92rem; font-weight:700; margin-bottom:10px; }
 .faq-a { font-size:0.86rem; color:var(--sub); line-height:1.6; }
 
@@ -477,6 +474,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 @media(max-width:560px){ .articles-grid > .article-card { flex-basis:100%; } }
 .article-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-lg); overflow:hidden; transition:border-color .3s,transform .3s; height:240px; }
 .article-card:hover { border-color:rgba(255,107,26,0.3); transform:translateY(-3px); }
+.article-card:active { border-color:rgba(255,107,26,0.5); box-shadow:0 0 20px rgba(255,107,26,0.15); transform:translateY(-1px) scale(0.99); transition:all .1s; }
 .article-card-inner { padding:24px 26px; display:flex; flex-direction:column; gap:8px; height:100%; }
 .article-tag { font-size:0.68rem; font-weight:800; color:var(--brand); text-transform:uppercase; letter-spacing:1.5px; }
 .article-title { font-size:1.02rem; font-weight:800; color:var(--text); line-height:1.4; }
