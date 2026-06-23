@@ -41,6 +41,7 @@ const PRODUCTS = {
   family: { name: 'Family Life Pack', amount: 3400, description: '10 done-for-you Claude skills for meal planning, tough conversations, schedules, and the daily mental load of parenting.' },
   connected: { name: 'Claude Connected Pack', amount: 3900, description: '8 guided workflows for using Claude with real Gmail, Calendar, Drive, Slack, and Notion connectors.' },
   writer: { name: "Creative Writer's Pack", amount: 3400, description: '10 done-for-you Claude skills for fiction and long-form writing — outlining, character work, line edits, and querying.' },
+  builder: { name: "Claude Code Builder's Guide", amount: 2400, description: 'The real, step-by-step story of how ClaudeCraft itself was built using Claude Code in VS Code — from account setup to a live, deployed site.' },
 };
 
 function loadJson(filePath, fallback) {
@@ -139,6 +140,7 @@ const DOWNLOAD_SETS = {
   family: { files: ['bundles/family-life-pack/SKILLS.md', 'bundles/family-life-pack/SETUP-GUIDE.md'] },
   connected: { files: ['bundles/claude-connected-pack/SKILLS.md', 'bundles/claude-connected-pack/SETUP-GUIDE.md'] },
   writer: { files: ['bundles/creative-writers-pack/SKILLS.md', 'bundles/creative-writers-pack/SETUP-GUIDE.md'] },
+  builder: { files: ['bundles/claude-code-builders-guide/BUILDERS-GUIDE.md', 'bundles/claude-code-builders-guide/QUICK-START-CHECKLIST.md'] },
 };
 
 async function sendPurchaseEmail(toEmail, productSlug, productName) {
