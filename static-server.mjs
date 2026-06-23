@@ -24,6 +24,7 @@ const MAX_DYNAMIC_ARTICLES = 90; // a few months of daily content before the old
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || null;
 const BASE_URL = process.env.PUBLIC_BASE_URL || 'https://claudecraft.ca';
 
 const PRODUCTS = {
@@ -293,6 +294,48 @@ app.post('/api/inbound-email', express.text({ type: '*/*', limit: '2mb' }), asyn
 });
 
 app.use(express.json({ limit: '6mb' })); // article/share images are embedded as base64 — 200kb was too small and silently dropped them
+
+const CHAT_SYSTEM_PROMPT = `You are the ClaudeCraft AI guide on claudecraft.ca, a storefront selling done-for-you Claude AI skill bundles.
+
+Products: ${Object.entries(PRODUCTS).map(([k, p]) => `${p.name} ($${(p.amount / 100).toFixed(2)}) — ${p.description}`).join('; ')}.
+
+How it works: one-time payment via Stripe or PayPal, no subscription. Each bundle is ready-to-paste Claude prompts/Custom Instructions ("skills") — setup is claude.ai → Projects → New Project → Custom Instructions → paste the skill text → Save. Works on the free Claude plan. 30-day no-questions-asked refund (self-serve at /refund.html). Free updates forever. 20% discount on additional bundles for existing customers (email support@claudecraft.ca).
+
+You are also a genuinely capable general AI assistant — answer any question the visitor asks, on any topic (Claude, AI in general, coding, or anything else), the same way a top-tier AI chat assistant would, not just questions about ClaudeCraft. Be direct, accurate, and helpful. Keep replies conversational and reasonably concise (a few sentences to a short paragraph, not a wall of text) since this is a chat widget, not a document. When a question is actually about picking or using a bundle, naturally point to the relevant one.`;
+
+app.post('/api/chat', async (req, res) => {
+  if (!GEMINI_API_KEY) return res.status(503).json({ error: 'Chat AI is not configured yet.' });
+  const message = (req.body?.message || '').toString().slice(0, 2000);
+  const history = Array.isArray(req.body?.history) ? req.body.history.slice(-10) : [];
+  if (!message.trim()) return res.status(400).json({ error: 'message is required' });
+
+  try {
+    const contents = [
+      ...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: (h.text || '').toString().slice(0, 2000) }] })),
+      { role: 'user', parts: [{ text: message }] },
+    ];
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        systemInstruction: { parts: [{ text: CHAT_SYSTEM_PROMPT }] },
+        generationConfig: { maxOutputTokens: 500 },
+      }),
+    });
+    if (!r.ok) {
+      console.error('Gemini chat error:', r.status, await r.text());
+      return res.status(502).json({ error: 'Chat AI is temporarily unavailable.' });
+    }
+    const data = await r.json();
+    const reply = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('').trim();
+    if (!reply) return res.status(502).json({ error: 'Chat AI returned an empty response.' });
+    res.json({ reply });
+  } catch (err) {
+    console.error('Chat error:', err.message);
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
 
 app.get('/checkout/:product', async (req, res) => {
   const product = PRODUCTS[req.params.product];

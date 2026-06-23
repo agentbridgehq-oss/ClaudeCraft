@@ -1459,6 +1459,7 @@ let guideInited = false;
 let quizStep = 0;
 let quizAnswers = {};
 let isTyping = false;
+let chatHistory = [];
 
 function showProductTab(tab, btn) {
   // tab-popular (the 8 "Most Popular" cards) always stays visible — "More Bundles"
@@ -1944,24 +1945,43 @@ function processGuideInput(text) {
     if (score > bestScore) { bestScore = score; best = entry; }
   });
 
-  const delay = 600 + Math.random()*400;
-  setTimeout(() => {
-    typing.remove(); isTyping = false;
-    if (best && bestScore > 0) {
+  if (best && bestScore > 0) {
+    const delay = 600 + Math.random()*400;
+    setTimeout(() => {
+      typing.remove(); isTyping = false;
       if (best.action === 'QUIZ') {
         quizStep = 0; quizAnswers = {};
         runQuiz(0, null);
       } else {
         addBotMsg(best.response, best.quickReplies || ['Show me the bundles', 'How do I install?', 'Take the quiz'], null, best.spotlight);
       }
+    }, delay);
+    return;
+  }
+
+  // No local FAQ match — ask the real AI backend, so it can answer anything, not just ClaudeCraft FAQs.
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: text, history: chatHistory }),
+  }).then(r => r.json()).then(data => {
+    typing.remove(); isTyping = false;
+    if (data.reply) {
+      chatHistory.push({ role: 'user', text }, { role: 'assistant', text: data.reply });
+      addBotMsg(data.reply, ['Show me the bundles', 'How do I install?', 'Take the quiz']);
     } else {
       addBotMsg(
         "I'm not sure I caught that — but I've got answers on everything ClaudeCraft. Try one of these:",
-        ['Which bundle is right for me?', 'What\'s in the Solo Pack?', 'How do I install skills?', 'Pricing & guarantee'],
-        null, null
+        ['Which bundle is right for me?', 'What\'s in the Solo Pack?', 'How do I install skills?', 'Pricing & guarantee']
       );
     }
-  }, delay);
+  }).catch(() => {
+    typing.remove(); isTyping = false;
+    addBotMsg(
+      "I'm not sure I caught that — but I've got answers on everything ClaudeCraft. Try one of these:",
+      ['Which bundle is right for me?', 'What\'s in the Solo Pack?', 'How do I install skills?', 'Pricing & guarantee']
+    );
+  });
 }
 
 (function() {
