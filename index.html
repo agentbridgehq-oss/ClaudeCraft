@@ -158,16 +158,15 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
   background-size: 200% 100%, 100% 100%;
   background-position: -150% 0, 0 0;
   background-repeat: no-repeat;
-  animation: hero-shine-sweep .9s ease-in-out 1.05s 1 both;
 }
 .hero-title .grad-text { background-image: linear-gradient(120deg, transparent 42%, rgba(255,255,255,0.95) 50%, transparent 58%), linear-gradient(135deg,#FFFFFF 0%,#FF8A4C 45%,#E65100 100%); }
 .hero-title .grad-text-cool { background-image: linear-gradient(120deg, transparent 42%, rgba(255,255,255,0.95) 50%, transparent 58%), linear-gradient(135deg,#FFFFFF 0%,#C8D0E0 100%); }
 @keyframes hero-shine-sweep { from { background-position: -150% 0, 0 0; } to { background-position: 250% 0, 0 0; } }
 @keyframes heroDropSettle { 0%{opacity:0; transform:translateY(-44px);} 100%{opacity:1; transform:translateY(0);} }
 @keyframes heroFadeUp { 0%{opacity:0; transform:translateY(14px);} 100%{opacity:1; transform:translateY(0);} }
-.hero-line { display:inline-block; opacity:0; animation: heroDropSettle .65s cubic-bezier(.34,1.56,.64,1) forwards; }
-.hero-line-1 { animation-delay: .1s; }
-.hero-line-2 { animation-delay: .28s; }
+.hero-line { display:inline-block; opacity:0; animation: heroDropSettle .65s cubic-bezier(.34,1.56,.64,1) forwards, hero-shine-sweep .9s ease-in-out 1.05s 1 both; }
+.hero-line-1 { animation-delay: .1s, 1.05s; }
+.hero-line-2 { animation-delay: .28s, 1.05s; }
 .hero-bridge { font-size:0.85rem; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:0 auto 28px; display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; opacity:0; animation: heroFadeUp .5s cubic-bezier(.16,1,.3,1) forwards; animation-delay: .55s; }
 .hero-bridge::before,.hero-bridge::after { content:''; display:inline-block; width:40px; height:1px; background:var(--glass-border); }
 .hero-sub { font-size:clamp(1.05rem,2vw,1.3rem); color:var(--sub); max-width:560px; margin:0 auto 44px; font-weight:400; line-height:1.7; text-shadow:0 2px 16px rgba(0,0,0,0.6); opacity:0; animation: heroFadeUp .5s cubic-bezier(.16,1,.3,1) forwards; animation-delay: .7s; }
