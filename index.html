@@ -155,7 +155,14 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
     drop-shadow(0 2px 0 rgba(179,61,0,0.35))
     drop-shadow(0 8px 24px rgba(255,107,26,0.22))
     drop-shadow(0 0 40px rgba(255,107,26,0.16));
+  background-size: 200% 100%, 100% 100%;
+  background-position: -150% 0, 0 0;
+  background-repeat: no-repeat;
+  animation: hero-shine-sweep .9s ease-in-out 1.05s 1 both;
 }
+.hero-title .grad-text { background-image: linear-gradient(120deg, transparent 42%, rgba(255,255,255,0.95) 50%, transparent 58%), linear-gradient(135deg,#FFFFFF 0%,#FF8A4C 45%,#E65100 100%); }
+.hero-title .grad-text-cool { background-image: linear-gradient(120deg, transparent 42%, rgba(255,255,255,0.95) 50%, transparent 58%), linear-gradient(135deg,#FFFFFF 0%,#C8D0E0 100%); }
+@keyframes hero-shine-sweep { from { background-position: -150% 0, 0 0; } to { background-position: 250% 0, 0 0; } }
 @keyframes heroDropSettle { 0%{opacity:0; transform:translateY(-44px);} 100%{opacity:1; transform:translateY(0);} }
 @keyframes heroFadeUp { 0%{opacity:0; transform:translateY(14px);} 100%{opacity:1; transform:translateY(0);} }
 .hero-line { display:inline-block; opacity:0; animation: heroDropSettle .65s cubic-bezier(.34,1.56,.64,1) forwards; }

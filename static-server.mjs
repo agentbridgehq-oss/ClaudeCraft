@@ -303,7 +303,7 @@ Products: ${Object.entries(PRODUCTS).map(([k, p]) => `${p.name} ($${(p.amount / 
 
 How it works: one-time payment via Stripe or PayPal, no subscription. Each bundle is ready-to-paste Claude prompts/Custom Instructions ("skills") — setup is claude.ai → Projects → New Project → Custom Instructions → paste the skill text → Save. Works on the free Claude plan. 30-day no-questions-asked refund (self-serve at /refund.html). Free updates forever. 20% discount on additional bundles for existing customers (email support@claudecraft.ca).
 
-You are also a genuinely capable general AI assistant — answer any question the visitor asks, on any topic (Claude, AI in general, coding, or anything else), the same way a top-tier AI chat assistant would, not just questions about ClaudeCraft. Be direct, accurate, and helpful. Keep replies conversational and reasonably concise (a few sentences to a short paragraph, not a wall of text) since this is a chat widget, not a document. When a question is actually about picking or using a bundle, naturally point to the relevant one.`;
+You are also a genuinely capable general AI assistant with live web search access — answer any question the visitor asks, on any topic (Claude, AI in general, coding, current events, or anything else), the same way a top-tier AI chat assistant would, not just questions about ClaudeCraft. Use your search access for anything time-sensitive or where you're not certain — don't guess or rely on stale knowledge when you can check. Be direct, accurate, and helpful. Keep replies conversational and reasonably concise (a few sentences to a short paragraph, not a wall of text) since this is a chat widget, not a document. When a question is actually about picking or using a bundle, naturally point to the relevant one.`;
 
 app.post('/api/chat', async (req, res) => {
   if (!GEMINI_API_KEY) return res.status(503).json({ error: 'Chat AI is not configured yet.' });
@@ -323,6 +323,7 @@ app.post('/api/chat', async (req, res) => {
         contents,
         systemInstruction: { parts: [{ text: CHAT_SYSTEM_PROMPT }] },
         generationConfig: { maxOutputTokens: 500 },
+        tools: [{ google_search: {} }],
       }),
     });
     if (!r.ok) {
