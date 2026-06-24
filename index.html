@@ -376,6 +376,29 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 
 .guide-trigger { display: none !important; }
 
+.cc-chip-carousel-wrap {
+  width: 100%; max-width: 700px; margin: 0 auto 22px;
+  overflow: hidden; position: relative; padding: 8px 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+.cc-chip-carousel { display: flex; gap: 8px; flex-wrap: nowrap; width: max-content; will-change: transform; }
+.cc-chip-carousel .cc-chip { will-change: transform, opacity; }
+.cc-chip {
+  font-size: 12px; font-weight: 600; color: var(--sub);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px; padding: 7px 16px;
+  cursor: pointer; white-space: nowrap; font-family: var(--font-sans);
+  transition: all var(--t-magnetic);
+}
+.cc-chip:hover {
+  color: var(--brand-light);
+  border-color: rgba(255,107,26,0.5);
+  background: rgba(255,255,255,0.1);
+  transform: scale(1.04);
+}
 .cc-bottom-bar {
   max-width: 560px; margin: 0 auto 36px; z-index: 5;
   background: rgba(255,255,255,0.045); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -631,6 +654,24 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
     <p class="hero-sub">
       Done-for-you Claude skill bundles that install in <strong>5 minutes</strong> and save you <strong>10+ hours every week.</strong><br>No tech skills needed. Results from day one.
     </p>
+    <div class="cc-chip-carousel-wrap">
+      <div class="cc-chip-carousel" id="ccChipCarousel">
+        <button class="cc-chip" data-q="Which bundle is right for me?">Which bundle is right for me?</button>
+        <button class="cc-chip" data-q="What's in the Power User Pack?">What's in the Power User Pack?</button>
+        <button class="cc-chip" data-q="How do I install a Claude skill?">How do I install a skill?</button>
+        <button class="cc-chip" data-q="What's your refund policy?">Refund policy</button>
+        <button class="cc-chip" data-q="Do these work on the free Claude plan?">Works on free Claude?</button>
+        <button class="cc-chip" data-q="Compare the Starter Kit and Power User Pack">Compare bundles</button>
+        <button class="cc-chip" data-q="What's the multi-bundle discount?">Multi-bundle discount</button>
+        <button class="cc-chip" data-q="Which bundle is right for me?">Which bundle is right for me?</button>
+        <button class="cc-chip" data-q="What's in the Power User Pack?">What's in the Power User Pack?</button>
+        <button class="cc-chip" data-q="How do I install a Claude skill?">How do I install a skill?</button>
+        <button class="cc-chip" data-q="What's your refund policy?">Refund policy</button>
+        <button class="cc-chip" data-q="Do these work on the free Claude plan?">Works on free Claude?</button>
+        <button class="cc-chip" data-q="Compare the Starter Kit and Power User Pack">Compare bundles</button>
+        <button class="cc-chip" data-q="What's the multi-bundle discount?">Multi-bundle discount</button>
+      </div>
+    </div>
     <div class="cc-bottom-bar" id="cc-bottom-bar">
       <div class="cc-bar-avatar" onclick="toggleGuide()" title="Open AI Chat"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M12 2l1.8 5.6L19.4 9.4 13.8 11.2 12 17l-1.8-5.8L4.6 9.4l5.6-1.8L12 2z"/></svg></div>
       <input
@@ -1587,6 +1628,60 @@ function toggleGuide() {
 function openPanelIfClosed() {
   if (!guideOpen) toggleGuide();
 }
+
+function askChipQuestion(q) {
+  if (!guideOpen) toggleGuide();
+  setTimeout(() => processGuideInput(q), guideInited ? 50 : 380);
+}
+document.querySelectorAll('.cc-chip').forEach(btn => {
+  btn.addEventListener('click', () => askChipQuestion(btn.dataset.q || btn.textContent));
+});
+
+// Auto-scrolling chip carousel with arc motion — chips rise/scale near center,
+// sink/shrink toward the edges, simulating "passing behind" the viewport mask.
+(function initChipCarousel() {
+  const wrap  = document.querySelector('.cc-chip-carousel-wrap');
+  const track = document.getElementById('ccChipCarousel');
+  if (!wrap || !track) return;
+
+  let x = 0;
+  let halfWidth = 0;
+  let paused = false;
+  const SPEED = 0.4;
+
+  function measure() { halfWidth = track.scrollWidth / 2; }
+  measure();
+  window.addEventListener('resize', measure);
+
+  wrap.addEventListener('mouseenter', () => { paused = true; });
+  wrap.addEventListener('mouseleave', () => { paused = false; });
+
+  function tick() {
+    if (!paused && halfWidth > 0) {
+      x -= SPEED;
+      if (Math.abs(x) >= halfWidth) x += halfWidth;
+      track.style.transform = `translateX(${x}px)`;
+
+      const wrapRect = wrap.getBoundingClientRect();
+      const centerX  = wrapRect.left + wrapRect.width / 2;
+      const halfSpan = wrapRect.width / 2;
+
+      for (const chip of track.children) {
+        const r = chip.getBoundingClientRect();
+        const chipCenter = r.left + r.width / 2;
+        const d = Math.max(-1, Math.min(1, (chipCenter - centerX) / halfSpan));
+        const arc = 1 - d * d;
+        const y = (1 - arc) * 12;
+        const scale = 0.86 + arc * 0.14;
+        const opacity = 0.35 + arc * 0.65;
+        chip.style.transform = `translateY(${y}px) scale(${scale})`;
+        chip.style.opacity = String(opacity);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
 
 function sendBarMsg() {
   const barInput = document.getElementById('cc-bar-input');
