@@ -28,6 +28,7 @@
 :root {
   --brand:       #FF6B1A;
   --brand-light: #FF8C42;
+  --brand-deep:  #B8470A;
   --brand-dim:   rgba(255,107,26,0.18);
   --brand-glow:  rgba(255,107,26,0.35);
   --bg:    #070A12;
@@ -120,9 +121,9 @@ body::after {
 .btn-xl { font-size:1rem; padding:16px 36px; letter-spacing:.3px; }
 .btn-lg { font-size:0.9rem; padding:13px 28px; }
 .btn-md { font-size:0.82rem; padding:11px 22px; letter-spacing:.5px; }
-.btn-primary { background:linear-gradient(135deg,var(--brand-light),var(--brand)); color:#fff; box-shadow:0 1px 1px rgba(0,0,0,0.15),0 6px 18px rgba(255,107,26,0.22); }
+.btn-primary { background:linear-gradient(160deg,var(--brand-light) 0%,var(--brand) 55%,var(--brand-deep) 100%); color:#fff; border:1px solid rgba(255,255,255,0.16); box-shadow:0 1px 0 rgba(255,255,255,0.22) inset, 0 10px 28px rgba(0,0,0,0.38), 0 3px 12px rgba(184,71,10,0.22); }
 .btn-primary { transition: all var(--t-magnetic); }
-.btn-primary:hover { box-shadow:0 1px 1px rgba(0,0,0,0.15),0 10px 26px rgba(255,107,26,0.3); transform:translateY(-2px) scale(1.02); }
+.btn-primary:hover { box-shadow:0 1px 0 rgba(255,255,255,0.28) inset, 0 14px 34px rgba(0,0,0,0.42), 0 5px 16px rgba(184,71,10,0.3); transform:translateY(-2px) scale(1.02); }
 .btn-ghost { background:transparent; color:var(--text); border:1px solid var(--glass-border); }
 .btn-ghost:hover { border-color:rgba(255,107,26,0.4); color:var(--brand-light); }
 .btn-orange-outline { background:var(--brand-dim); color:var(--brand-light); border:1px solid rgba(255,107,26,0.35); }
@@ -163,11 +164,16 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline:2px solid r
 .hero-title .grad-text { background-image: linear-gradient(120deg, transparent 42%, rgba(255,255,255,0.95) 50%, transparent 58%), linear-gradient(135deg,#FFFFFF 0%,#FF8A4C 45%,#E65100 100%); }
 .hero-title .grad-text-cool { background-image: linear-gradient(120deg, transparent 42%, rgba(255,255,255,0.95) 50%, transparent 58%), linear-gradient(135deg,#FFFFFF 0%,#C8D0E0 100%); }
 @keyframes hero-shine-sweep { from { background-position: -150% 0, 0 0; } to { background-position: 250% 0, 0 0; } }
-@keyframes heroDropSettle { 0%{opacity:0;} 100%{opacity:1;} }
+@keyframes heroDropTop { 0%{opacity:0; transform:translateY(-70px);} 100%{opacity:1; transform:translateY(0);} }
+@keyframes heroDropBottom { 0%{opacity:0; transform:translateY(70px);} 100%{opacity:1; transform:translateY(0);} }
+@keyframes heroLetterBounce { 0%,100%{transform:translateY(0);} 15%{transform:translateY(-18px);} 30%{transform:translateY(0);} 45%{transform:translateY(-10px);} 60%{transform:translateY(0);} 72%{transform:translateY(-5px);} 84%{transform:translateY(0);} }
 @keyframes heroFadeUp { 0%{opacity:0; transform:translateY(14px);} 100%{opacity:1; transform:translateY(0);} }
-.hero-line { display:inline-block; opacity:0; animation: heroDropSettle 1.1s ease-out forwards, hero-shine-sweep .9s ease-in-out 1.05s 1 both; }
-.hero-line-1 { animation-delay: .1s, 1.05s; }
-.hero-line-2 { animation-delay: .28s, 1.05s; }
+.hero-line { display:inline-block; opacity:0; }
+.hero-line-1 { animation: heroDropTop .75s cubic-bezier(.34,1.56,.64,1) .1s forwards, hero-shine-sweep .9s ease-in-out 2.7s 1 both; }
+.hero-line-2 { animation: heroDropBottom .75s cubic-bezier(.34,1.56,.64,1) .55s forwards, hero-shine-sweep .9s ease-in-out 2.7s 1 both; }
+.hero-letter { display:inline-block; }
+.hero-letter-1 { animation: heroLetterBounce 1.1s ease-out 1.5s; }
+.hero-letter-2 { animation: heroLetterBounce 1.1s ease-out 1.65s; }
 .hero-bridge { font-size:0.85rem; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:0 auto 28px; display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; opacity:0; animation: heroFadeUp .5s cubic-bezier(.16,1,.3,1) forwards; animation-delay: .55s; }
 .hero-bridge::before,.hero-bridge::after { content:''; display:inline-block; width:40px; height:1px; background:var(--glass-border); }
 .hero-sub { font-size:clamp(1.05rem,2vw,1.3rem); color:var(--sub); max-width:560px; margin:0 auto 44px; font-weight:400; line-height:1.7; text-shadow:0 2px 16px rgba(0,0,0,0.6); opacity:0; animation: heroFadeUp .5s cubic-bezier(.16,1,.3,1) forwards; animation-delay: .7s; }
@@ -583,27 +589,22 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 </div>
 
 <nav>
-  <div style="display:flex; align-items:center; gap:14px;">
-    <button class="nav-drawer-trigger" onclick="toggleNavDrawer()" aria-label="Open menu" title="Menu">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-    </button>
-    <a href="/" class="nav-logo">
-      <span class="nav-logo-icon" aria-hidden="true">
-        <svg viewBox="0 0 32 32" width="18" height="18">
-          <defs>
-            <linearGradient id="ccLogoGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#FFD9B0"/>
-              <stop offset="55%" stop-color="#FF8C42"/>
-              <stop offset="100%" stop-color="#E05A2B"/>
-            </linearGradient>
-          </defs>
-          <circle cx="16" cy="16" r="13" fill="none" stroke="url(#ccLogoGrad)" stroke-width="3"/>
-          <path d="M21 11a7 7 0 1 0 0 10" fill="none" stroke="#0B0C15" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </span>
-      Claude<span class="orange">Craft</span>
-    </a>
-  </div>
+  <a href="/" class="nav-logo">
+    <span class="nav-logo-icon" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="18" height="18">
+        <defs>
+          <linearGradient id="ccLogoGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFD9B0"/>
+            <stop offset="55%" stop-color="#FF8C42"/>
+            <stop offset="100%" stop-color="#E05A2B"/>
+          </linearGradient>
+        </defs>
+        <circle cx="16" cy="16" r="13" fill="none" stroke="url(#ccLogoGrad)" stroke-width="3"/>
+        <path d="M21 11a7 7 0 1 0 0 10" fill="none" stroke="#0B0C15" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </span>
+    Claude<span class="orange">Craft</span>
+  </a>
   <div class="nav-links">
     <a href="/articles.html">Articles</a>
     <a href="/bundles.html">Bundles</a>
@@ -611,7 +612,12 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
     <a href="/reviews.html">Reviews</a>
     <a href="/faq.html">FAQ</a>
   </div>
-  <a href="/bundles.html" class="btn btn-primary btn-md"><span class="btn-icon-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>Browse Bundles</a>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button class="nav-drawer-trigger" onclick="toggleNavDrawer()" aria-label="Open menu" title="Menu" style="margin-right:0;">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+    <a href="/bundles.html" class="btn btn-primary btn-md"><span class="btn-icon-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>Browse Bundles</a>
+  </div>
 </nav>
 
 <div class="nav-drawer-overlay" id="nav-drawer-overlay" onclick="toggleNavDrawer()"></div>
@@ -641,7 +647,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
       <span class="tag tag-live"><span class="dot"></span>Skills Store — Live & Shipping</span>
     </div>
     <h1 class="hero-title">
-      <span class="grad-text-cool hero-line hero-line-1">Pre-Built Claude Skills</span><br>
+      <span class="grad-text-cool hero-line hero-line-1"><span class="hero-letter hero-letter-1">P</span><span class="hero-letter hero-letter-2">r</span>e-Built Claude Skills</span><br>
       <span class="grad-text hero-line hero-line-2">That Actually Work.</span>
     </h1>
     <p class="hero-bridge">
@@ -1617,7 +1623,9 @@ function pollReferralCode(sessionId, attemptsLeft) {
   const dlContainer = document.getElementById('download-links');
   set.files.forEach(f => {
     const a = document.createElement('a');
-    a.href = f.href; a.download = ''; a.className = 'dl-btn';
+    const filename = f.href.split('/').pop();
+    a.href = `/download/${product}/${filename}` + (sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '');
+    a.download = ''; a.className = 'dl-btn';
     a.innerHTML = `<span class="dl-icon">📥</span><div><div>${f.name}</div><span class="dl-sub">${f.sub}</span></div>`;
     dlContainer.appendChild(a);
   });

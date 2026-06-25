@@ -145,10 +145,10 @@ const DOWNLOAD_SETS = {
   commands: { files: ['bundles/claude-code-commands-mastery/COMMANDS-MASTERY-GUIDE.md', 'bundles/claude-code-commands-mastery/QUICK-REFERENCE.md'] },
 };
 
-async function sendPurchaseEmail(toEmail, productSlug, productName) {
+async function sendPurchaseEmail(toEmail, productSlug, productName, sessionId) {
   const set = DOWNLOAD_SETS[productSlug];
   if (!toEmail || !set) return;
-  const links = set.files.map(f => `${BASE_URL}/${f}`);
+  const links = set.files.map(f => `${BASE_URL}/download/${productSlug}/${path.basename(f)}?session_id=${encodeURIComponent(sessionId)}`);
   const text = `Thanks for buying ${productName}!\n\nYour download links:\n${links.join('\n')}\n\nKeep this email — these links work any time, no login needed. Questions? Reply to this email or contact support@claudecraft.ca.`;
   const html = `<p>Thanks for buying <strong>${productName}</strong>!</p><p>Your download links:</p><ul>${links.map(l => `<li><a href="${l}">${l}</a></li>`).join('')}</ul><p>Keep this email — these links work any time, no login needed. Questions? Reply to this email or contact support@claudecraft.ca.</p>`;
   await sendSupportEmail(toEmail, `Your ${productName} download links`, text, html);
@@ -187,7 +187,7 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
         const productSlug = session.metadata?.product;
         const buyerEmail = session.customer_details?.email;
         if (productSlug && buyerEmail && PRODUCTS[productSlug]) {
-          await sendPurchaseEmail(buyerEmail, productSlug, PRODUCTS[productSlug].name);
+          await sendPurchaseEmail(buyerEmail, productSlug, PRODUCTS[productSlug].name, session.id);
         }
 
         // 0.5. Record the purchase so the self-serve refund flow can verify eligibility later.
@@ -1173,6 +1173,32 @@ app.get('/og-image.png', (req, res) => {
 });
 
 app.use('/marketing', (req, res) => res.status(404).send('Not found'));
+
+// ── Gated bundle downloads ──────────────────────────────────────────────────
+// /bundles/* is blocked from direct static access below; every file must be
+// fetched through here, which verifies a real, paid Stripe session before
+// serving the file. Without this, anyone who knows or guesses a bundle's
+// file path could download it for free with no purchase at all.
+app.get('/download/:product/:filename', async (req, res) => {
+  const { product, filename } = req.params;
+  const set = DOWNLOAD_SETS[product];
+  if (!set) return res.status(404).send('Unknown product');
+  const relPath = set.files.find(f => path.basename(f) === filename);
+  if (!relPath) return res.status(404).send('File not found');
+
+  const sessionId = req.query.session_id;
+  if (!sessionId || !stripe) return res.status(403).send('A valid purchase session is required to download this file.');
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status !== 'paid' || session.metadata?.product !== product) {
+      return res.status(403).send('This link is not valid for this purchase.');
+    }
+  } catch {
+    return res.status(403).send('Could not verify your purchase. Contact support@claudecraft.ca.');
+  }
+  res.download(path.join(__dirname, relPath), filename);
+});
+app.use('/bundles', (req, res) => res.status(403).send('Direct access not allowed — use your purchase download link or the link emailed to you.'));
 
 app.use(express.static(__dirname, { extensions: ['html'] }));
 
