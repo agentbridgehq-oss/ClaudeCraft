@@ -18,6 +18,8 @@ const SUBSCRIBERS_PATH = path.join(DATA_DIR, 'subscribers.json');
 const SUPPORT_ESCALATIONS_PATH = path.join(DATA_DIR, 'support-escalations.json');
 const PURCHASES_PATH = path.join(DATA_DIR, 'purchases.json');
 const REFUND_LOG_PATH = path.join(DATA_DIR, 'refund-log.json');
+const LOYALTY_LOG_PATH = path.join(DATA_DIR, 'loyalty-discount-log.json');
+const LOYALTY_COUPON_ID_PATH = path.join(DATA_DIR, 'loyalty-coupon-id.txt');
 const LAUNCH_PROMO_CODE_PATH = path.join(DATA_DIR, 'launch-promo-code.txt');
 const OG_IMAGE_PATH = path.join(DATA_DIR, 'og-image.png');
 const REFUND_WINDOW_DAYS = 30;
@@ -69,6 +71,8 @@ const loadPurchases = () => loadJson(PURCHASES_PATH, []);
 const savePurchases = data => saveJson(PURCHASES_PATH, data);
 const loadRefundLog = () => loadJson(REFUND_LOG_PATH, []);
 const saveRefundLog = data => saveJson(REFUND_LOG_PATH, data);
+const loadLoyaltyLog = () => loadJson(LOYALTY_LOG_PATH, []);
+const saveLoyaltyLog = data => saveJson(LOYALTY_LOG_PATH, data);
 
 // ── AI support inbox knowledge base — kept narrow and factual on purpose ──
 const SUPPORT_KB = `You are the support AI for ClaudeCraft (claudecraft.ca), which sells done-for-you Claude AI skill bundles.
@@ -81,11 +85,11 @@ Referral program: every buyer gets a personal 10%-off code to share. When someon
 
 There's also a free "Articles" section on the site with daily AI news and a weekly free guide — no purchase needed.
 
-Published policies (you may confirm these exist, but never personally execute them — see ESCALATE rule below): 30-day no-questions-asked money-back guarantee; free skill updates forever for past buyers; a 20% discount on additional bundles for existing customers who email in.
+Published policies: 30-day no-questions-asked money-back guarantee (self-serve instantly at ${BASE_URL}/refund.html); free skill updates forever for past buyers; a 20% discount on additional bundles for existing customers (self-serve instantly at ${BASE_URL}/discount.html).
 
 Your job: read the inbound customer email and decide ONE of two things:
-1. EASY — general "how do I use this / what's included / how does the referral code work" questions you can answer confidently using ONLY the facts above, where no money, refund, discount code, or file re-send needs to actually happen. Write a short, warm, accurate reply signed "— ClaudeCraft Support".
-2. ESCALATE — refunds, the 20% discount, re-sending/replacing files, billing disputes, chargebacks, complaints, anger/frustration, or anything you're not fully confident about. For these, you may confirm in your reply that the policy applies and they're covered (e.g. "you're covered under our 30-day guarantee") but NEVER say the refund/discount/file has already been sent — only a human can actually execute that. Say a person will follow up within 24 hours to complete it.
+1. EASY — refund requests (point them to ${BASE_URL}/refund.html to get it processed instantly), the 20% loyalty discount (point them to ${BASE_URL}/discount.html to get their code instantly), and general "how do I use this / what's included / how does the referral code work" questions you can answer confidently using ONLY the facts above. Write a short, warm, accurate reply signed "— ClaudeCraft Support".
+2. ESCALATE — re-sending/replacing files, billing disputes, chargebacks, complaints, anger/frustration, or anything you're not fully confident about. For these, you may confirm in your reply that the policy applies and they're covered, but NEVER say the file has already been sent — only a human can actually execute that. Say a person will follow up within 24 hours to complete it.
 
 Respond with ONLY valid JSON, no markdown fences: {"category": "EASY" or "ESCALATE", "reply": "the customer-facing reply text if EASY, or a short polite holding reply if ESCALATE (e.g. confirming receipt and that a person will follow up within 24 hours)", "internalNote": "one sentence on why, for the human reviewing escalations"}`;
 
@@ -178,6 +182,17 @@ async function getOrCreateReferralCoupon() {
   return coupon.id;
 }
 
+async function getOrCreateLoyaltyCoupon() {
+  try {
+    const cached = fs.readFileSync(LOYALTY_COUPON_ID_PATH, 'utf8').trim();
+    if (cached) return cached;
+  } catch {}
+  const coupon = await stripe.coupons.create({ percent_off: 20, duration: 'once', name: 'ClaudeCraft Returning Customer — 20% Off' });
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(LOYALTY_COUPON_ID_PATH, coupon.id);
+  return coupon.id;
+}
+
 // ── Stripe webhook — MUST come before express.json() since it needs the raw body for signature verification ──
 app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) return res.status(500).send('Webhook not configured');
@@ -254,6 +269,15 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
               description: `Referral reward — a friend used your code ${usedCode}`,
             });
             console.log(`Credited $10 to referrer ${ownerEntry.ownerCustomerId} for code ${usedCode}`);
+          }
+
+          const loyaltyLog = loadLoyaltyLog();
+          const loyaltyEntry = loyaltyLog.find(l => l.code === usedCode && !l.redeemed);
+          if (loyaltyEntry) {
+            loyaltyEntry.redeemed = true;
+            loyaltyEntry.redeemedAt = new Date().toISOString();
+            saveLoyaltyLog(loyaltyLog);
+            console.log(`Loyalty code ${usedCode} redeemed by ${buyerEmail}`);
           }
         }
 
@@ -338,7 +362,7 @@ const CHAT_SYSTEM_PROMPT = `You are the ClaudeCraft AI guide on claudecraft.ca, 
 
 Products: ${Object.entries(PRODUCTS).map(([k, p]) => `${p.name} ($${(p.amount / 100).toFixed(2)}) — ${p.description}`).join('; ')}.
 
-How it works: one-time payment via Stripe or PayPal, no subscription. Each bundle is ready-to-paste Claude prompts/Custom Instructions ("skills") — setup is claude.ai → Projects → New Project → Custom Instructions → paste the skill text → Save. Works on the free Claude plan. 30-day no-questions-asked refund (self-serve at /refund.html). Free updates forever. 20% discount on additional bundles for existing customers (email support@claudecraft.ca).
+How it works: one-time payment via Stripe or PayPal, no subscription. Each bundle is ready-to-paste Claude prompts/Custom Instructions ("skills") — setup is claude.ai → Projects → New Project → Custom Instructions → paste the skill text → Save. Works on the free Claude plan. 30-day no-questions-asked refund (self-serve at /refund.html). Free updates forever. 20% discount on additional bundles for existing customers (self-serve instantly at /discount.html).
 
 You are also a genuinely capable general AI assistant with live web search access — answer any question the visitor asks, on any topic (Claude, AI in general, coding, current events, or anything else), the same way a top-tier AI chat assistant would, not just questions about ClaudeCraft. Use your search access for anything time-sensitive or where you're not certain — don't guess or rely on stale knowledge when you can check. Be direct, accurate, and helpful. Keep replies conversational and reasonably concise (a few sentences to a short paragraph, not a wall of text) since this is a chat widget, not a document. When a question is actually about picking or using a bundle, naturally point to the relevant one.`;
 
@@ -517,6 +541,66 @@ app.post('/api/self-refund', async (req, res) => {
   }
 });
 
+// ── Self-serve loyalty discount ─────────────────────────────────────────────
+// Rules-based, same spirit as self-refund above: only ever issues a code to
+// an email with a VERIFIED real purchase on file, one active code per email
+// at a time (re-requesting just resends the existing unredeemed one instead
+// of stacking new ones), and the Stripe coupon itself is single-use
+// (max_redemptions: 1) so it can only ever discount one future order.
+app.post('/api/loyalty-discount', async (req, res) => {
+  if (!stripe) return res.status(500).json({ error: 'Discounts are not configured yet.' });
+  const email = (req.body?.email || '').trim().toLowerCase();
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!isValidEmail) return res.status(400).json({ error: 'Please enter a valid email address.' });
+
+  const purchases = loadPurchases();
+  const hasPurchase = purchases.some(p => p.email === email);
+  if (!hasPurchase) {
+    return res.json({
+      ok: false,
+      message: "We couldn't find a purchase from this email. The loyalty discount is for existing customers on a future bundle — if you think this is wrong, email support@claudecraft.ca and a real person will check manually.",
+    });
+  }
+
+  const loyaltyLog = loadLoyaltyLog();
+  const existing = loyaltyLog.find(l => l.email === email && !l.redeemed);
+  if (existing) {
+    sendSupportEmail(
+      email,
+      'Your 20% ClaudeCraft loyalty code',
+      `As a returning customer, here's your 20% off code for your next bundle: ${existing.code}\n\nApply it at checkout on the Stripe payment page.`,
+      `<p>As a returning customer, here's your 20% off code for your next bundle: <strong>${existing.code}</strong></p><p>Apply it at checkout on the Stripe payment page.</p>`
+    ).catch(() => {});
+    return res.json({ ok: true, code: existing.code, message: `Your code is ${existing.code} — also just emailed to you. Apply it at checkout on any future bundle.` });
+  }
+
+  try {
+    const couponId = await getOrCreateLoyaltyCoupon();
+    const code = `LOYAL${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const promo = await stripe.promotionCodes.create({
+      coupon: couponId,
+      code,
+      max_redemptions: 1,
+      expires_at: Math.floor(Date.now() / 1000) + 90 * 24 * 60 * 60,
+    });
+
+    loyaltyLog.push({ email, code: promo.code, issuedAt: new Date().toISOString(), redeemed: false });
+    saveLoyaltyLog(loyaltyLog);
+
+    sendSupportEmail(
+      email,
+      'Your 20% ClaudeCraft loyalty code',
+      `As a returning customer, here's your 20% off code for your next bundle: ${promo.code}\n\nApply it at checkout on the Stripe payment page. Valid for 90 days, one-time use.`,
+      `<p>As a returning customer, here's your 20% off code for your next bundle: <strong>${promo.code}</strong></p><p>Apply it at checkout on the Stripe payment page. Valid for 90 days, one-time use.</p>`
+    ).catch(() => {});
+
+    res.json({ ok: true, code: promo.code, message: `Your code is ${promo.code} — also just emailed to you. Apply it at checkout on any future bundle.` });
+  } catch (err) {
+    console.error('Loyalty discount error:', err.message);
+    res.status(500).json({ ok: false, message: "Something went wrong generating this automatically. Email support@claudecraft.ca and a real person will sort it out." });
+  }
+});
+
 app.get('/api/subscribers', (req, res) => {
   const token = req.get('X-OpenClaw-Token');
   if (!process.env.ARTICLES_API_TOKEN || token !== process.env.ARTICLES_API_TOKEN) {
@@ -634,6 +718,7 @@ const NAV_PAGES = [
   { href: '/why-claudecraft.html', label: '💡 Why ClaudeCraft', key: 'why' },
   { href: '/founder-story.html', label: '👋 Founder\'s Story', key: 'founder' },
   { href: '/refund.html', label: '↩️ Refund a Purchase', key: 'refund' },
+  { href: '/discount.html', label: '🏷️ Loyalty Discount', key: 'discount' },
 ];
 
 function pageShell(activeKey, title, description, bodyContent) {
@@ -797,7 +882,7 @@ app.get('/faq.html', (req, res) => {
     ['What exactly do I receive?', 'A ZIP file containing your skill files, a PDF setup guide, and a real-world examples document. Everything you need is included — nothing to figure out yourself.'],
     ['Can I use these skills on multiple devices?', "Yes. Once installed, your Claude skills follow your Claude account — accessible on any device where you're signed in to Claude."],
     ['What if the skills stop working after an update?', 'We monitor Claude updates and push skill updates when needed. All customers who bought a bundle receive updates for free, forever.'],
-    ['Is there a bundle discount if I want more than one?', "Email us at support@claudecraft.ca after purchase and we'll apply a 20% bundle discount on any additional packs. Just mention your order."],
+    ['Is there a bundle discount if I want more than one?', 'Yes — existing customers get 20% off any additional bundle. Get your one-time code instantly, no waiting, at <a href="/discount.html">/discount.html</a>.'],
   ];
   const items = faqs.map(([q, a]) => `
       <div class="faq-item">

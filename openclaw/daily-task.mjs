@@ -27,7 +27,7 @@ import path from 'path';
 const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
-const SUPPORT_KB_FOR_REVIEW = `ClaudeCraft sells done-for-you Claude AI skill bundles, one-time payment, no subscription. Policy facts: 30-day money-back guarantee, no questions asked, if the customer installed the bundle and followed the setup guide and didn't save time. Multi-bundle buyers get a 20% discount on additional bundles (email-requested, human-applied). Files never expire and are free to re-send if lost. All bundles work on the free Claude plan.`;
+const SUPPORT_KB_FOR_REVIEW = `ClaudeCraft sells done-for-you Claude AI skill bundles, one-time payment, no subscription. Policy facts: 30-day money-back guarantee, no questions asked — fully self-serve and automatic at /refund.html, so it never needs human action. Multi-bundle buyers get a 20% discount on additional bundles — also fully self-serve and automatic at /discount.html. Files never expire and are free to re-send if lost. All bundles work on the free Claude plan. Escalations reaching this queue are the cases that don't fit those two automated flows (file re-sends, disputes, complaints, anything ambiguous).`;
 
 const SEGMENTS = [
   { name: 'Solo Entrepreneur Pack', subreddits: 'r/freelance, r/smallbusiness' },
