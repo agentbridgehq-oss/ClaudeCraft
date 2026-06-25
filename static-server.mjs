@@ -1280,6 +1280,18 @@ app.post('/api/articles', (req, res) => {
   res.json({ ok: true, count: articles.length });
 });
 
+// Moderation: remove a bad auto-published article (e.g. a malformed title or a near-duplicate).
+app.delete('/api/articles/:id', (req, res) => {
+  const token = req.get('X-OpenClaw-Token');
+  if (!process.env.ARTICLES_API_TOKEN || token !== process.env.ARTICLES_API_TOKEN) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const articles = loadArticles();
+  const next = articles.filter(a => a.id !== req.params.id);
+  saveArticles(next);
+  res.json({ ok: true, removed: articles.length - next.length, count: next.length });
+});
+
 app.post('/api/og-image', (req, res) => {
   const token = req.get('X-OpenClaw-Token');
   if (!process.env.ARTICLES_API_TOKEN || token !== process.env.ARTICLES_API_TOKEN) {

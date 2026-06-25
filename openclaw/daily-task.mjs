@@ -93,7 +93,7 @@ Review this ${contentType} before it's allowed to go out:
 ${content}
 ---
 ${context ? `Context: ${context}\n` : ''}
-Check: factual accuracy (no fabricated stats/claims), genuine usefulness (not just a pitch), tone (confident and premium, not cheap or spammy), platform fit, and anything that could embarrass the brand or get flagged as spam.
+Check: factual accuracy (no fabricated stats/claims), genuine usefulness (not just a pitch), tone (confident and premium, not cheap or spammy), platform fit, whether the headline/opening line is an actual clean headline and NOT leftover internal reasoning or meta-commentary (e.g. "I have two stories to choose from...", "Let me write about...") — reject immediately if so, whether it actually serves ClaudeCraft's goal of driving genuine reader interest back to the brand (a soft, natural connection — a relevant mention, a closing nudge to claudecraft.ca, or a bundle reference when genuinely on-topic — is good; completely generic content with zero tie-back anywhere should lower the score even if otherwise well-written), and anything that could embarrass the brand or get flagged as spam.
 
 Respond with ONLY this JSON, nothing else: {"approved": true or false, "score": 1-10, "feedback": "one or two specific sentences"}`,
       }],
@@ -104,6 +104,22 @@ Respond with ONLY this JSON, nothing else: {"approved": true or false, "score": 
   } catch (err) {
     return { approved: false, score: null, note: `Quality check itself failed to run (${err.message}) — treated as not-approved out of caution.` };
   }
+}
+
+// Catches the specific failure mode seen in production: the model's first line was leftover
+// internal reasoning ("I have two stories to choose from...") instead of a real headline, and
+// it slipped past the AI quality check too. This is a cheap, deterministic backstop — checked
+// in addition to (not instead of) qualityCheck above.
+const REASONING_LEAK_PATTERNS = [
+  /^i (have|need|want|should|'ll|will|am going to)\b/i,
+  /\blet me\b/i,
+  /\bi('ll| will) (write|choose|pick|go with|focus on)\b/i,
+  /\b(stories?|options?) to choose from\b/i,
+  /^(okay|alright|sure)[,.]/i,
+];
+function looksLikeReasoningLeak(title) {
+  if (!title || title.length > 140) return true;
+  return REASONING_LEAK_PATTERNS.some(p => p.test(title));
 }
 
 // ── Health check — notify-only, never auto-fixes or auto-deploys anything ──
@@ -220,7 +236,8 @@ Writing quality (this is what separates this from a generic news blurb — write
 - Don't just report what happened — give an honest, opinionated take on what it actually means and whether it's worth the reader's attention, the way a trusted analyst would, not a neutral wire report
 - If it's a new tool or feature, be concrete about what someone could actually DO with it today — practical, not hypothetical
 - Make the reader feel why this actually matters to THEM, not just what happened
-- Format: first line is a short, magnetic title (under 12 words, makes someone want to click) and nothing else, then a blank line, then the article body`,
+- Close with ONE natural, low-pressure sentence connecting back to ClaudeCraft — a relevant skill bundle when genuinely on-topic, or simply a line inviting the reader to browse claudecraft.ca — never a hard sell, and skip it entirely if there's truly no honest connection for this specific story
+- Format: first line is ONLY the final, polished headline (under 12 words, makes someone want to click) — never your reasoning about which story to pick, never "I have two stories..." or any other meta-commentary about the writing process itself. The very first line a reader sees must already be the finished headline.`,
       }],
     });
     const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n\n').trim();
@@ -228,6 +245,10 @@ Writing quality (this is what separates this from a generic news blurb — write
     const lines = text.split('\n');
     const title = lines[0].replace(/^#+\s*/, '').trim();
     const body = lines.slice(1).join('\n').trim();
+    if (looksLikeReasoningLeak(title)) {
+      console.log(`Discarded a drafted article — headline looked like a reasoning leak, not a real title: "${title.slice(0, 100)}"`);
+      return null;
+    }
     return { title, body };
   } catch (err) {
     console.log(`Could not draft news article: ${err.message}`);
@@ -344,6 +365,10 @@ Write a complete guide (450-750 words) for a non-technical, everyday reader — 
     const lines = text.split('\n');
     const title = lines[0].replace(/^#+\s*/, '').trim();
     const body = lines.slice(1).join('\n').trim();
+    if (looksLikeReasoningLeak(title)) {
+      console.log(`Discarded a drafted weekly guide — headline looked like a reasoning leak, not a real title: "${title.slice(0, 100)}"`);
+      return null;
+    }
     return { title, body };
   } catch (err) {
     console.log(`Could not draft weekly guide: ${err.message}`);
