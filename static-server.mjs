@@ -190,6 +190,28 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
           await sendPurchaseEmail(buyerEmail, productSlug, PRODUCTS[productSlug].name, session.id);
         }
 
+        // 0.25. Notify you of every sale, in real time.
+        if (process.env.SUPPORT_NOTIFY_EMAIL && productSlug && PRODUCTS[productSlug]) {
+          const productName = PRODUCTS[productSlug].name;
+          const amountStr = `$${(session.amount_total / 100).toFixed(2)}`;
+          const whenStr = new Date().toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'short' });
+          await sendSupportEmail(
+            process.env.SUPPORT_NOTIFY_EMAIL,
+            `New sale — ${productName} (${amountStr})`,
+            `New ClaudeCraft sale!\n\nProduct: ${productName}\nAmount: ${amountStr}\nBuyer: ${buyerEmail}\nTime: ${whenStr} ET\n\nPayment: https://dashboard.stripe.com/payments/${session.payment_intent}`,
+            `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a1a;">
+              <p style="font-size:16px;font-weight:700;margin:0 0 14px;">💰 New ClaudeCraft sale</p>
+              <table style="font-size:14px;border-collapse:collapse;">
+                <tr><td style="padding:4px 14px 4px 0;color:#666;">Product</td><td><strong>${productName}</strong></td></tr>
+                <tr><td style="padding:4px 14px 4px 0;color:#666;">Amount</td><td><strong>${amountStr}</strong></td></tr>
+                <tr><td style="padding:4px 14px 4px 0;color:#666;">Buyer</td><td>${buyerEmail}</td></tr>
+                <tr><td style="padding:4px 14px 4px 0;color:#666;">Time</td><td>${whenStr} ET</td></tr>
+              </table>
+              <p style="margin-top:16px;"><a href="https://dashboard.stripe.com/payments/${session.payment_intent}" style="color:#E65100;">View payment in Stripe →</a></p>
+            </div>`
+          );
+        }
+
         // 0.5. Record the purchase so the self-serve refund flow can verify eligibility later.
         if (productSlug && buyerEmail && session.payment_intent) {
           const purchases = loadPurchases();
@@ -417,8 +439,10 @@ app.post('/api/subscribe', (req, res) => {
 // ── Self-serve instant refund ──────────────────────────────────────────────
 // Rules-based, not AI-judgment-based: this only ever refunds a VERIFIED real
 // Stripe payment, only within the 30-day guarantee window, and only ONCE per
-// email ever — anything outside those three rules falls through to the
-// existing human-escalation support flow instead of being auto-approved.
+// purchase (a purchase already marked refunded is never picked again) —
+// anything outside those rules falls through to human-escalation support
+// instead of being auto-approved. Deliberately per-purchase, not per-email:
+// a customer with several separate purchases can self-serve each one once.
 app.post('/api/self-refund', async (req, res) => {
   if (!stripe) return res.status(500).json({ error: 'Refunds are not configured yet.' });
   const email = (req.body?.email || '').trim().toLowerCase();
@@ -426,14 +450,6 @@ app.post('/api/self-refund', async (req, res) => {
   if (!isValidEmail) return res.status(400).json({ error: 'Please enter a valid email address.' });
 
   const refundLog = loadRefundLog();
-  if (refundLog.some(r => r.email === email)) {
-    return res.json({
-      ok: false,
-      escalated: true,
-      message: "You've already used a self-serve refund before. We've flagged this for a real person to review personally — email support@claudecraft.ca and reference this request.",
-    });
-  }
-
   const purchases = loadPurchases();
   const now = Date.now();
   const windowMs = REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000;
