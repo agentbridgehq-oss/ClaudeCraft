@@ -65,12 +65,18 @@ body::after {
   opacity: 0.025;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  transform: translateZ(0); will-change: transform;
 }
 
+/* These five layers are static and full-viewport — promoting each to its
+   own GPU compositing layer (translateZ(0)) means the browser composites
+   them once and reuses that layer on scroll, instead of repainting fixed
+   blurred/masked content on every scroll frame. Pure performance, no
+   visual change — this is what was making scroll feel choppy. */
 .bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .hero-glow {
   position: fixed; top: 70px; left: 50%;
-  transform: translateX(-50%) rotate(-8deg);
+  transform: translateX(-50%) rotate(-8deg) translateZ(0); will-change: transform;
   width: 820px; height: 380px;
   background: radial-gradient(ellipse 62% 68% at 50% 44%,
     rgba(255,122,0,0.30) 0%,
@@ -81,9 +87,9 @@ body::after {
   pointer-events: none;
   z-index: 0;
 }
-.dot-grid { position:fixed; inset:0; z-index:0; pointer-events:none; background-image:radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px); background-size:32px 32px; mask-image:radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%); }
-.grid-lines { position:fixed; inset:0; z-index:0; pointer-events:none; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size:40px 40px; mask-image:radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 100%); }
-.star-field { position:fixed; inset:0; z-index:0; pointer-events:none;
+.dot-grid { position:fixed; inset:0; z-index:0; pointer-events:none; background-image:radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px); background-size:32px 32px; mask-image:radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%); transform: translateZ(0); will-change: transform; }
+.grid-lines { position:fixed; inset:0; z-index:0; pointer-events:none; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size:40px 40px; mask-image:radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 100%); transform: translateZ(0); will-change: transform; }
+.star-field { position:fixed; inset:0; z-index:0; pointer-events:none; transform: translateZ(0); will-change: transform;
   background-image:
     radial-gradient(1.5px 1.5px at 12% 22%, rgba(255,255,255,0.55), transparent),
     radial-gradient(1px 1px at 27% 64%, rgba(255,255,255,0.4), transparent),
@@ -1678,10 +1684,27 @@ document.querySelectorAll('.cc-chip').forEach(btn => {
 
   let x = 0;
   let halfWidth = 0;
+  let wrapWidth = 0;
   let paused = false;
+  let chipData = []; // cached {el, center, halfW} — measured once, not per frame
   const SPEED = 0.4;
 
-  function measure() { halfWidth = track.scrollWidth / 2; }
+  // Layout reads (getBoundingClientRect) happen only here — on load and on
+  // resize — never inside the per-frame tick() loop. Reading layout every
+  // animation frame forces a synchronous reflow 60x/sec, which competes
+  // with the browser's scroll compositing thread and is the classic cause
+  // of "choppy" scroll on pages with continuous rAF animations.
+  function measure() {
+    halfWidth = track.scrollWidth / 2;
+    wrapWidth = wrap.getBoundingClientRect().width;
+    let offset = 0;
+    chipData = Array.from(track.children).map(el => {
+      const w = el.getBoundingClientRect().width;
+      const center = offset + w / 2;
+      offset += w + 8; // 8px = the carousel's gap
+      return { el, center };
+    });
+  }
   measure();
   window.addEventListener('resize', measure);
 
@@ -1694,20 +1717,18 @@ document.querySelectorAll('.cc-chip').forEach(btn => {
       if (Math.abs(x) >= halfWidth) x += halfWidth;
       track.style.transform = `translateX(${x}px)`;
 
-      const wrapRect = wrap.getBoundingClientRect();
-      const centerX  = wrapRect.left + wrapRect.width / 2;
-      const halfSpan = wrapRect.width / 2;
-
-      for (const chip of track.children) {
-        const r = chip.getBoundingClientRect();
-        const chipCenter = r.left + r.width / 2;
-        const d = Math.max(-1, Math.min(1, (chipCenter - centerX) / halfSpan));
+      const halfSpan = wrapWidth / 2;
+      for (const { el, center } of chipData) {
+        // Analytic position (track offset + current scroll x, relative to
+        // the wrap's center) instead of a DOM read — same arc-motion math,
+        // zero layout cost per frame.
+        const d = Math.max(-1, Math.min(1, (center + x - halfSpan) / halfSpan));
         const arc = 1 - d * d;
         const y = (1 - arc) * 12;
         const scale = 0.86 + arc * 0.14;
         const opacity = 0.35 + arc * 0.65;
-        chip.style.transform = `translateY(${y}px) scale(${scale})`;
-        chip.style.opacity = String(opacity);
+        el.style.transform = `translateY(${y}px) scale(${scale})`;
+        el.style.opacity = String(opacity);
       }
     }
     requestAnimationFrame(tick);
