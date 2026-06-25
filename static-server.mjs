@@ -42,6 +42,7 @@ const PRODUCTS = {
   connected: { name: 'Claude Connected Pack', amount: 3900, description: '8 guided workflows for using Claude with real Gmail, Calendar, Drive, Slack, and Notion connectors.' },
   writer: { name: "Creative Writer's Pack", amount: 3400, description: '10 done-for-you Claude skills for fiction and long-form writing — outlining, character work, line edits, and querying.' },
   builder: { name: "Claude Code Builder's Guide", amount: 2400, description: 'The real, step-by-step story of how ClaudeCraft itself was built using Claude Code in VS Code — from account setup to a live, deployed site.' },
+  commands: { name: 'Claude Code Commands & Skills Mastery', amount: 3400, description: 'A long-form course on building your own custom Claude Code commands, skills, and subagents — 5 ready-made commands included.' },
 };
 
 function loadJson(filePath, fallback) {
@@ -141,6 +142,7 @@ const DOWNLOAD_SETS = {
   connected: { files: ['bundles/claude-connected-pack/SKILLS.md', 'bundles/claude-connected-pack/SETUP-GUIDE.md'] },
   writer: { files: ['bundles/creative-writers-pack/SKILLS.md', 'bundles/creative-writers-pack/SETUP-GUIDE.md'] },
   builder: { files: ['bundles/claude-code-builders-guide/BUILDERS-GUIDE.md', 'bundles/claude-code-builders-guide/QUICK-START-CHECKLIST.md'] },
+  commands: { files: ['bundles/claude-code-commands-mastery/COMMANDS-MASTERY-GUIDE.md', 'bundles/claude-code-commands-mastery/QUICK-REFERENCE.md'] },
 };
 
 async function sendPurchaseEmail(toEmail, productSlug, productName) {

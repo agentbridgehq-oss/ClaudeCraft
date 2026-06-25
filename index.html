@@ -748,7 +748,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 
     <div class="product-tabs">
       <button class="product-tab active" id="tab-btn-popular" onclick="showProductTab('popular', this)">Most Popular</button>
-      <button class="product-tab" id="tab-btn-more" onclick="showProductTab('more', this)">More Bundles <span class="tab-count">+5</span></button>
+      <button class="product-tab" id="tab-btn-more" onclick="showProductTab('more', this)">More Bundles <span class="tab-count">+6</span></button>
     </div>
 
     <div class="trust-badge-row">
@@ -1123,6 +1123,34 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
             </div>
             <div>
               <a href="/checkout/builder" class="btn btn-primary btn-md" id="buy-builder">Get Bundle →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card is-featured reveal" id="card-commands">
+        <div class="card-stripe card-stripe-always"></div>
+        <div class="featured-crown">⚡ Advanced</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div><div class="card-name">Claude Code Commands &amp; Skills Mastery</div></div>
+            <span class="tag tag-live" style="font-size:.65rem; padding:4px 10px;"><span class="dot"></span>Available</span>
+          </div>
+          <div class="card-cat">Advanced · Build Your Own Commands &amp; Subagents</div>
+          <div class="card-desc">A long-form course on Claude Code's deepest layer: build your own custom slash commands, skills, and subagents — 5 ready-made commands included, copy-paste ready.</div>
+          <ul class="card-features">
+            <li><span class="cf-icon">✦</span>Build real, working custom commands from scratch</li>
+            <li><span class="cf-icon">✦</span>Frontmatter, arguments, and dynamic context injection explained</li>
+            <li><span class="cf-icon">✦</span>Subagents — what they are and when to build your own</li>
+            <li><span class="cf-icon">✦</span>5 original, ready-to-use commands included</li>
+          </ul>
+          <div class="card-footer">
+            <div class="price-block">
+              <span class="price-now grad-text">$34</span>
+              <span class="price-was">$59</span>
+            </div>
+            <div>
+              <a href="/checkout/commands" class="btn btn-primary btn-md" id="buy-commands">Get Bundle →</a>
             </div>
           </div>
         </div>
@@ -1541,6 +1569,13 @@ const DOWNLOAD_SETS = {
     files: [
       { name: 'BUILDERS-GUIDE.md — How ClaudeCraft Was Actually Built', sub: 'The real, step-by-step story — account setup through a live deployed site', href: 'bundles/claude-code-builders-guide/BUILDERS-GUIDE.md' },
       { name: 'QUICK-START-CHECKLIST.md', sub: 'Printable checklist for your first session and first real project', href: 'bundles/claude-code-builders-guide/QUICK-START-CHECKLIST.md' },
+    ]
+  },
+  commands: {
+    title: 'Claude Code Commands & Skills Mastery — Ready to Download!',
+    files: [
+      { name: 'COMMANDS-MASTERY-GUIDE.md — The Full Course', sub: 'Build your own slash commands, skills, and subagents — 5 ready-made commands included', href: 'bundles/claude-code-commands-mastery/COMMANDS-MASTERY-GUIDE.md' },
+      { name: 'QUICK-REFERENCE.md — Cheat Sheet', sub: 'Fast lookup for frontmatter fields, arguments, and the 5 commands', href: 'bundles/claude-code-commands-mastery/QUICK-REFERENCE.md' },
     ]
   }
 };
