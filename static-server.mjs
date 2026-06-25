@@ -18,6 +18,7 @@ const SUBSCRIBERS_PATH = path.join(DATA_DIR, 'subscribers.json');
 const SUPPORT_ESCALATIONS_PATH = path.join(DATA_DIR, 'support-escalations.json');
 const PURCHASES_PATH = path.join(DATA_DIR, 'purchases.json');
 const REFUND_LOG_PATH = path.join(DATA_DIR, 'refund-log.json');
+const LAUNCH_PROMO_CODE_PATH = path.join(DATA_DIR, 'launch-promo-code.txt');
 const OG_IMAGE_PATH = path.join(DATA_DIR, 'og-image.png');
 const REFUND_WINDOW_DAYS = 30;
 const MAX_DYNAMIC_ARTICLES = 90; // a few months of daily content before the oldest roll off
@@ -152,6 +153,18 @@ async function sendPurchaseEmail(toEmail, productSlug, productName, sessionId) {
   const text = `Thanks for buying ${productName}!\n\nYour download links:\n${links.join('\n')}\n\nKeep this email — these links work any time, no login needed. Questions? Reply to this email or contact support@claudecraft.ca.`;
   const html = `<p>Thanks for buying <strong>${productName}</strong>!</p><p>Your download links:</p><ul>${links.map(l => `<li><a href="${l}">${l}</a></li>`).join('')}</ul><p>Keep this email — these links work any time, no login needed. Questions? Reply to this email or contact support@claudecraft.ca.</p>`;
   await sendSupportEmail(toEmail, `Your ${productName} download links`, text, html);
+}
+
+async function getOrCreateLaunchPromo() {
+  try {
+    const cached = fs.readFileSync(LAUNCH_PROMO_CODE_PATH, 'utf8').trim();
+    if (cached) return cached;
+  } catch {}
+  const coupon = await stripe.coupons.create({ percent_off: 25, duration: 'once', name: 'ClaudeCraft First 100 — 25% Off' });
+  const promo = await stripe.promotionCodes.create({ coupon: coupon.id, code: 'FIRST100', max_redemptions: 100 });
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(LAUNCH_PROMO_CODE_PATH, promo.code);
+  return promo.code;
 }
 
 async function getOrCreateReferralCoupon() {
@@ -390,6 +403,21 @@ app.get('/checkout/:product', async (req, res) => {
   } catch (err) {
     console.error('Stripe checkout error:', err.message);
     res.status(500).send('Something went wrong starting checkout. Please try again or email support@claudecraft.ca.');
+  }
+});
+
+app.get('/api/launch-promo-status', async (req, res) => {
+  if (!stripe) return res.json({ available: false });
+  try {
+    const code = await getOrCreateLaunchPromo();
+    const list = await stripe.promotionCodes.list({ code, limit: 1 });
+    const promo = list.data[0];
+    if (!promo) return res.json({ available: false });
+    const remaining = Math.max((promo.max_redemptions || 100) - (promo.times_redeemed || 0), 0);
+    res.json({ available: true, code: promo.code, remaining, active: promo.active && remaining > 0 });
+  } catch (err) {
+    console.error('Launch promo status error:', err.message);
+    res.json({ available: false });
   }
 });
 

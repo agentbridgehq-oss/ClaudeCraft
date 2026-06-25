@@ -583,8 +583,8 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 <div class="star-field"></div>
 
 <div class="announce-bar" id="announce">
-  <span class="announce-text"><span class="announce-dot"></span>Launch Special — 50% off all bundles. Ends in</span>
-  <span class="countdown" id="timer">23:47:12</span>
+  <span class="announce-text"><span class="announce-dot"></span>First 100 customers get an extra 25% off — <span id="promo-remaining">100</span> spots left. Code:</span>
+  <span class="countdown" id="promo-code">FIRST100</span>
   <a href="#products" style="color:#fff; font-size:.78rem; font-weight:700; text-decoration:underline; white-space:nowrap;">Grab it →</a>
 </div>
 
@@ -1367,22 +1367,16 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 </div>
 <script>
 (function() {
-  // Real, fixed launch-promo deadline — same for every visitor, does not reset per-person.
-  const deadline = new Date('2026-07-06T23:59:59-04:00');
+  // Real spot count from Stripe's actual promotion-code redemptions — same for every visitor.
   function update() {
-    const diff = deadline - Date.now();
-    const bar = document.getElementById('announce');
-    if (diff <= 0) { if (bar) bar.style.display = 'none'; return; }
-    const days = Math.floor(diff/86400000);
-    if (days >= 1) {
-      const h = Math.floor((diff%86400000)/3600000);
-      document.getElementById('timer').textContent = days + 'd ' + h + 'h';
-    } else {
-      const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-      document.getElementById('timer').textContent = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-    }
+    fetch('/api/launch-promo-status').then(r => r.json()).then(data => {
+      const bar = document.getElementById('announce');
+      if (!data.available || !data.active) { if (bar) bar.style.display = 'none'; return; }
+      document.getElementById('promo-remaining').textContent = data.remaining;
+      document.getElementById('promo-code').textContent = data.code;
+    }).catch(() => {});
   }
-  update(); setInterval(update, 1000);
+  update(); setInterval(update, 30000);
 })();
 
 fetch('/api/recent-sales').then(r => r.json()).then(data => {
@@ -1973,7 +1967,7 @@ const KB = [
   },
   {
     keys: ['price', 'cost', 'how much', 'cheap', 'expensive', 'discount', 'deal'],
-    response: "Current launch pricing:\n\n• <strong>Claude Co-Work Beginner's Guide</strong> — $19 (was $39)\n• <strong>55+ AI Starter Kit</strong> — $29 (was $59)\n• <strong>Claude Power User Pack</strong> — $29\n• <strong>Content Machine Pack</strong> — $39 (was $79) ⭐ Best Seller\n• <strong>Student Success Pack</strong> — $34 (was $69)\n• <strong>Job Seeker's Career Pack</strong> — $34 (was $69)\n• <strong>Money Mastery Pack</strong> — $34 (was $69)\n• <strong>Family Life Pack</strong> — $34 (was $69)\n• <strong>Solo Entrepreneur Pack</strong> — $49 (was $97)\n• <strong>Claude Connected Pack</strong> — $39 (was $79) ✦ New\n• <strong>Creative Writer's Pack</strong> — $34 (was $69)\n• <strong>Startup Founder's Toolkit</strong> — $39 (was $79)\n• <strong>Claude Power Prompts Vault</strong> — $9 (add-on or standalone)\n• <strong>Claude Code Builder's Guide</strong> — $24 (was $49)\n\n🔥 Prices are 50% off during launch. The countdown timer at the top shows exactly how long this lasts. After that, prices go back up.\n\nIf you buy multiple bundles, email support@claudecraft.ca and we'll apply a 20% discount on extras.",
+    response: "Current launch pricing:\n\n• <strong>Claude Co-Work Beginner's Guide</strong> — $19 (was $39)\n• <strong>55+ AI Starter Kit</strong> — $29 (was $59)\n• <strong>Claude Power User Pack</strong> — $29\n• <strong>Content Machine Pack</strong> — $39 (was $79) ⭐ Best Seller\n• <strong>Student Success Pack</strong> — $34 (was $69)\n• <strong>Job Seeker's Career Pack</strong> — $34 (was $69)\n• <strong>Money Mastery Pack</strong> — $34 (was $69)\n• <strong>Family Life Pack</strong> — $34 (was $69)\n• <strong>Solo Entrepreneur Pack</strong> — $49 (was $97)\n• <strong>Claude Connected Pack</strong> — $39 (was $79) ✦ New\n• <strong>Creative Writer's Pack</strong> — $34 (was $69)\n• <strong>Startup Founder's Toolkit</strong> — $39 (was $79)\n• <strong>Claude Power Prompts Vault</strong> — $9 (add-on or standalone)\n• <strong>Claude Code Builder's Guide</strong> — $24 (was $49)\n\n🔥 Prices above are already 50% off launch pricing. On top of that, the first 100 customers get an extra 25% off with code <strong>FIRST100</strong> at checkout — the banner at the top shows exactly how many spots are left.\n\nIf you buy multiple bundles, email support@claudecraft.ca and we'll apply a 20% discount on extras.",
     spotlight: '#products',
     quickReplies: ['Buy Solo Entrepreneur ($49)', 'Buy Content Machine ($39)', 'Buy 55+ Starter ($29)', 'Take the quiz']
   },

@@ -70,6 +70,42 @@ async function reviewSupportEscalations() {
   }
 }
 
+// ── Quality control master agent ────────────────────────────────────────────
+// Every piece of marketing material — articles, the weekly guide, Reddit/X/
+// LinkedIn drafts — passes through here before it's allowed to publish or be
+// marked ready-to-post. This is content-quality review only; it does NOT
+// make external posting safe on its own (see the posting restriction at the
+// top of this file) — it just means nothing low-quality or inaccurate gets
+// auto-published to our own site, and nothing reaches the report marked
+// "ready" unless it actually clears a real bar first.
+async function qualityCheck(content, contentType, context) {
+  if (!anthropic || !content) return { approved: true, score: null, note: 'Quality check skipped — Anthropic not configured or no content.' };
+  try {
+    const msg = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 300,
+      messages: [{
+        role: 'user',
+        content: `You are ClaudeCraft's senior marketing quality-control reviewer — an expert across copywriting, SEO, online business, blogs, articles, social posts, landing pages, ad copy, and brand voice. ClaudeCraft sells done-for-you Claude AI skill bundles and wants a premium, trustworthy brand feel — never cheap, hypey, spammy, or "AI slop."
+
+Review this ${contentType} before it's allowed to go out:
+---
+${content}
+---
+${context ? `Context: ${context}\n` : ''}
+Check: factual accuracy (no fabricated stats/claims), genuine usefulness (not just a pitch), tone (confident and premium, not cheap or spammy), platform fit, and anything that could embarrass the brand or get flagged as spam.
+
+Respond with ONLY this JSON, nothing else: {"approved": true or false, "score": 1-10, "feedback": "one or two specific sentences"}`,
+      }],
+    });
+    const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+    const parsed = JSON.parse(text.replace(/^```json\s*|\s*```$/g, ''));
+    return { approved: !!parsed.approved, score: parsed.score ?? null, note: parsed.feedback || '' };
+  } catch (err) {
+    return { approved: false, score: null, note: `Quality check itself failed to run (${err.message}) — treated as not-approved out of caution.` };
+  }
+}
+
 async function getSalesSummary() {
   if (!stripe) return { available: false, text: 'Stripe not configured — skipped.' };
   try {
@@ -91,7 +127,7 @@ async function getSalesSummary() {
 }
 
 async function draftMarketingPack(segment, salesContext) {
-  if (!anthropic) return 'Anthropic API not configured — skipped.';
+  if (!anthropic) return { text: 'Anthropic API not configured — skipped.', approved: false, score: null, note: '' };
   try {
     const msg = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
@@ -114,9 +150,11 @@ LINKEDIN POST:
 Slightly more professional tone than the other two, 150-200 words, framed around a work/productivity angle. Skip if this segment genuinely doesn't fit LinkedIn (e.g. a casual everyday-life segment) — say so plainly instead of forcing it.`,
       }],
     });
-    return msg.content[0]?.text || '(no response)';
+    const text = msg.content[0]?.text || '(no response)';
+    const qc = await qualityCheck(text, 'a daily marketing content pack (Reddit + X + LinkedIn post)', `Focus segment: ${segment.name}`);
+    return { text, approved: qc.approved, score: qc.score, note: qc.note };
   } catch (err) {
-    return `Could not generate marketing pack: ${err.message}`;
+    return { text: `Could not generate marketing pack: ${err.message}`, approved: false, score: null, note: '' };
   }
 }
 
@@ -217,6 +255,8 @@ async function refreshShareImage() {
 
 async function publishArticle(article, tag, meta) {
   if (!article || !process.env.ARTICLES_API_TOKEN) return 'Skipped — no article or no ARTICLES_API_TOKEN configured.';
+  const qc = await qualityCheck(`${article.title}\n\n${article.body}`, 'news/guide article for ClaudeCraft\'s own public Articles section', `Section: ${tag}`);
+  if (!qc.approved) return `REJECTED by quality control (score ${qc.score ?? '?'}/10) — NOT published. Reason: ${qc.note}`;
   try {
     const imageDataUrl = await generateArticleImage(article.title);
     const imageHtml = imageDataUrl ? `<img src="${imageDataUrl}" alt="" style="width:100%;border-radius:12px;margin-bottom:16px;display:block;">` : '';
@@ -227,7 +267,7 @@ async function publishArticle(article, tag, meta) {
       body: JSON.stringify({ tag, title: article.title, meta, bodyHtml }),
     });
     if (!res.ok) return `Publish failed: ${res.status} ${await res.text()}`;
-    return `Published successfully: "${article.title}"`;
+    return `Published successfully: "${article.title}" — quality control score ${qc.score ?? '?'}/10 (${qc.note})`;
   } catch (err) {
     return `Could not publish article: ${err.message}`;
   }
@@ -350,11 +390,12 @@ ${aiArticle ? `Title: "${aiArticle.title}"` : '(none drafted — no genuinely re
 Publish result: ${aiPublishResult}
 ${weeklySection}
 ## Today's Marketing Pack — Reddit + X Thread + LinkedIn (focus: ${segment.name}) — NOT POSTED anywhere, copy/edit/post yourself
+Quality control: ${draft.approved ? `✅ APPROVED (score ${draft.score ?? '?'}/10) — ${draft.note}` : `❌ REJECTED (score ${draft.score ?? '?'}/10) — ${draft.note} — do not post as-is, revise first`}
 
-${draft}
+${draft.text}
 
 ---
-*Generated automatically by OpenClaw. The news article and weekly guide publish automatically to ClaudeCraft's own Articles section. Everything else only drafts and reports — never posts publicly, sends messages, or takes any action outside this container.*
+*Generated automatically by OpenClaw. Every article, guide, and marketing draft is reviewed by a quality-control pass before it's published or marked ready — rejected pieces are flagged above, not silently used. The news article and weekly guide publish automatically to ClaudeCraft's own Articles section. Everything else only drafts and reports — never posts publicly, sends messages, or takes any action outside this container.*
 `;
 
   // Print the full report to stdout — on Railway, view it anytime with:
