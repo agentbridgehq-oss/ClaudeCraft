@@ -1340,8 +1340,6 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
   </div>
 </div>
 
-<div class="guide-hamburger" onclick="toggleGuide()" title="Open AI Chat" aria-label="Open AI Chat"><span></span><span></span><span></span></div>
-
 <div class="cc-panel-overlay" id="cc-panel-overlay" onclick="toggleGuide()"></div>
 
 <div class="guide-panel" id="guide-panel" role="dialog" aria-label="ClaudeCraft AI Guide">
@@ -1762,8 +1760,8 @@ function sendBarMsg() {
 
 function guideWelcome() {
   addBotMsg(
-    "Hey! 👋 I'm your ClaudeCraft guide — I know every skill in every bundle.\n\nWant to see what these actually do? I can show you a <strong>free skill</strong> right now, before you buy anything.",
-    ['🎁 Show me a free skill', 'Help me choose a bundle', 'What\'s in the Solo Pack?', 'How do I install?']
+    "Hey! 👋 I'm your ClaudeCraft guide. What are you looking for?",
+    ['📚 Courses & Guides', '⚡ Prompt Packs', '🛠️ Power User Tools', '🎁 Show me a free skill', 'Help me choose a bundle']
   );
 }
 
@@ -1855,6 +1853,21 @@ const KB = [
   {
     keys: ['quiz', 'choose', 'which', 'recommend', 'help me pick', 'not sure', 'decide', 'best for me', 'right bundle'],
     action: 'QUIZ'
+  },
+  {
+    keys: ['courses & guides', 'courses and guides', '📚'],
+    response: "Here's everything that's a course or step-by-step guide rather than a prompt collection:\n\n• <strong>Claude Co-Work Beginner's Guide ($19)</strong> — never used Claude before, start here\n• <strong>Claude Code Builder's Guide ($24)</strong> — the real story of how ClaudeCraft itself was built with Claude Code\n• <strong>Claude Code Commands &amp; Skills Mastery ($34)</strong> — build your own custom commands, skills, and subagents\n\nAll three are long-form, step-by-step, and beginner-followable.",
+    quickReplies: ['What\'s the Builder\'s Guide?', '⚡ Prompt Packs', 'Take the quiz']
+  },
+  {
+    keys: ['prompt pack', 'prompt packs', '⚡'],
+    response: "The dedicated prompt collection is the <strong>Claude Power Prompts Vault ($9)</strong> — 50 advanced Claude prompts and multi-step workflows, the cheapest add-on to any bundle.\n\nEvery other bundle (Solo, Content Machine, Student, etc.) is also a set of ready-to-paste skill prompts for that specific use case — the Vault is the general-purpose one that doesn't target one audience.",
+    quickReplies: ['📚 Courses & Guides', '🛠️ Power User Tools', 'Take the quiz']
+  },
+  {
+    keys: ['power user tool', 'power user tools', '🛠️', 'agent', 'advanced'],
+    response: "For people who already know Claude and want to go further:\n\n• <strong>Claude Power User Pack ($29)</strong> — real Claude Skills format, token efficiency, agentic workflows\n• <strong>Claude Connected Pack ($39)</strong> — guided workflows using Claude with Gmail, Calendar, Drive, Slack, Notion\n• <strong>Claude Code Commands &amp; Skills Mastery ($34)</strong> — build your own custom commands, skills, and subagents\n\nThere's no separate \"build an agent\" tool on the site yet — that's on the roadmap, not live today.",
+    quickReplies: ['What\'s in Power User Pack?', '📚 Courses & Guides', 'Take the quiz']
   },
   {
     keys: ['solo', 'entrepreneur', 'freelance', 'business', 'proposal', 'contract', 'client', 'invoice', 'sales call'],
