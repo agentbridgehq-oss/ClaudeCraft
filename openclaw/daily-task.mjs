@@ -106,6 +106,43 @@ Respond with ONLY this JSON, nothing else: {"approved": true or false, "score": 
   }
 }
 
+// ── Health check — notify-only, never auto-fixes or auto-deploys anything ──
+// Catches the cheap, high-signal failure modes: site down, Stripe unreachable,
+// recent declined/failed payments worth a glance, required keys missing in
+// this container. Anything it finds just gets flagged at the top of the
+// report for a human to investigate — same drafting-not-executing pattern
+// as the rest of OpenClaw.
+async function checkSystemHealth() {
+  const issues = [];
+  const base = process.env.PUBLIC_BASE_URL || 'https://claudecraft-production.up.railway.app';
+  try {
+    const res = await fetch(`${base}/healthz`, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) issues.push(`Site health check failed: HTTP ${res.status} from ${base}/healthz`);
+  } catch (err) {
+    issues.push(`Site unreachable at ${base}: ${err.message}`);
+  }
+
+  if (stripe) {
+    try {
+      const since = Math.floor(Date.now() / 1000) - 24 * 60 * 60;
+      const failed = await stripe.events.list({ type: 'payment_intent.payment_failed', created: { gte: since }, limit: 10 });
+      if (failed.data.length > 0) issues.push(`${failed.data.length} failed payment attempt(s) in the last 24h (could just be declined cards — worth a glance in Stripe).`);
+    } catch (err) {
+      issues.push(`Could not reach Stripe API: ${err.message}`);
+    }
+  } else {
+    issues.push('STRIPE_SECRET_KEY not set in this container.');
+  }
+
+  const requiredKeys = ['ANTHROPIC_API_KEY', 'STRIPE_SECRET_KEY', 'ARTICLES_API_TOKEN', 'PUBLIC_BASE_URL'];
+  const missing = requiredKeys.filter(k => !process.env[k]);
+  if (missing.length) issues.push(`Missing env vars in this container: ${missing.join(', ')}`);
+
+  return issues.length === 0
+    ? '✅ All clear — site reachable, Stripe reachable, no failed payments, all required keys present.'
+    : '⚠️ ' + issues.join(' | ');
+}
+
 async function getSalesSummary() {
   if (!stripe) return { available: false, text: 'Stripe not configured — skipped.' };
   try {
@@ -346,6 +383,7 @@ async function main() {
 
   console.log(`[${today}] Starting daily run. Today's content focus: ${segment.name}`);
 
+  const health = await checkSystemHealth();
   const sales = await getSalesSummary();
   const escalationReview = await reviewSupportEscalations();
   const draft = await draftMarketingPack(segment, sales.text);
@@ -374,6 +412,9 @@ ${shareImageResult}
 
 ## ⚠️ The Reddit/marketing draft below has NOT been posted anywhere — review before posting it yourself.
 ## The news article (and weekly guide, on Mondays) WAS auto-published to the live Articles section — that's the approved automation, since it's our own site, not a third-party platform.
+
+## System Health Check
+${health}
 
 ## Sales — Last 24 Hours
 ${sales.text}
