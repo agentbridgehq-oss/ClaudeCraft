@@ -274,6 +274,31 @@ Write a complete guide (450-750 words) for a non-technical, everyday reader — 
   }
 }
 
+async function emailDailyReport(report, today) {
+  if (!process.env.RESEND_API_KEY || !process.env.SUPPORT_NOTIFY_EMAIL) {
+    return 'Skipped — RESEND_API_KEY and/or SUPPORT_NOTIFY_EMAIL not configured, report only logged.';
+  }
+  try {
+    const html = '<pre style="font-family:monospace;white-space:pre-wrap;font-size:13px;line-height:1.5;">' +
+      report.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+      body: JSON.stringify({
+        from: process.env.SUPPORT_FROM_EMAIL || 'ClaudeCraft OpenClaw <support@claudecraft.ca>',
+        to: process.env.SUPPORT_NOTIFY_EMAIL,
+        subject: `ClaudeCraft Daily Report — ${today}`,
+        text: report,
+        html,
+      }),
+    });
+    if (!res.ok) return `Email send failed: ${res.status} ${await res.text()}`;
+    return `Emailed to ${process.env.SUPPORT_NOTIFY_EMAIL}.`;
+  } catch (err) {
+    return `Email send error: ${err.message}`;
+  }
+}
+
 async function main() {
   const today = new Date().toISOString().slice(0, 10);
   const dayIndex = new Date().getDay() % SEGMENTS.length;
@@ -346,6 +371,9 @@ ${draft}
   } catch (err) {
     console.log('(Skipped writing report to disk — fine on Railway, expected if the filesystem is read-only or ephemeral.)');
   }
+
+  const emailResult = await emailDailyReport(report, today);
+  console.log(`Daily report email: ${emailResult}`);
 }
 
 main().catch(err => {
