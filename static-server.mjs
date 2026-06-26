@@ -763,6 +763,7 @@ ${bodyContent}
 <footer class="z1">
   <div class="footer-brand">Claude<span class="orange">Craft</span></div>
   <div class="footer-copy">© 2026 ClaudeCraft. All rights reserved.</div>
+  <div class="footer-disclaimer" style="font-size:0.68rem; color:var(--muted); opacity:0.55; max-width:640px; margin:0 auto; line-height:1.5;">ClaudeCraft is an independent product and is not affiliated with, endorsed by, or sponsored by Anthropic PBC. "Claude" is a trademark of Anthropic, referenced here solely to describe compatibility.</div>
   <div class="footer-links">
     <a href="/terms">Terms</a>
     <a href="/privacy">Privacy</a>
