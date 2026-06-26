@@ -277,7 +277,7 @@ Writing quality (this is what separates this from a generic news blurb — write
 - Don't just report what happened — give an honest, opinionated take on what it actually means and whether it's worth the reader's attention, the way a trusted analyst would, not a neutral wire report
 - If it's a new tool or feature, be concrete about what someone could actually DO with it today — practical, not hypothetical
 - Make the reader feel why this actually matters to THEM, not just what happened
-- Close with ONE natural, low-pressure sentence connecting back to ClaudeCraft — a relevant skill bundle when genuinely on-topic, or simply a line inviting the reader to browse claudecraft.ca — never a hard sell, and skip it entirely if there's truly no honest connection for this specific story
+- Close with ONE natural, low-pressure sentence connecting back to ClaudeCraft, and this part is NON-NEGOTIABLE — every single article must end with a real https://claudecraft.ca link (either a specific relevant bundle URL when genuinely on-topic, or a plain link to https://claudecraft.ca itself when no specific bundle fits) — never a hard sell, but never omit the link either
 - Format: first line is ONLY the final, polished headline (under 12 words, makes someone want to click) — never your reasoning about which story to pick, never "I have two stories..." or any other meta-commentary about the writing process itself. The very first line a reader sees must already be the finished headline.`,
       }],
     });
@@ -358,8 +358,18 @@ async function refreshShareImage() {
   }
 }
 
-async function publishArticle(article, tag, meta) {
+// Deterministic backstop for the "every article must link back to claudecraft.ca" rule — don't
+// just trust the model's own prompt-following, verify it the same way looksLikeReasoningLeak
+// and verifySourcesReachable verify their own rules.
+function hasClaudeCraftLink(body) {
+  return /https?:\/\/(www\.)?claudecraft\.ca/i.test(body);
+}
+
+async function publishArticle(article, tag, meta, requireLink = true) {
   if (!article || !process.env.ARTICLES_API_TOKEN) return 'Skipped — no article or no ARTICLES_API_TOKEN configured.';
+  if (requireLink && !hasClaudeCraftLink(article.body)) {
+    article.body += `\n\nWant more like this? Browse all of ClaudeCraft's done-for-you Claude skill bundles at https://claudecraft.ca.`;
+  }
   const qc = await qualityCheck(`${article.title}\n\n${article.body}`, 'news/guide article for ClaudeCraft\'s own public Articles section', `Section: ${tag}`);
   if (!qc.approved) return `REJECTED by quality control (score ${qc.score ?? '?'}/10) — NOT published. Reason: ${qc.note}`;
   try {
@@ -424,6 +434,78 @@ Write a complete guide (450-750 words) for a non-technical, everyday reader — 
   }
 }
 
+async function draftInsiderDigest() {
+  if (!anthropic) return null;
+  try {
+    const msg = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 900,
+      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],
+      messages: [{
+        role: 'user',
+        content: `Search for genuinely recent (last 7 days) Claude/Anthropic news and write a short "what changed in Claude this week" digest (200-350 words) for ClaudeCraft Insider subscribers — paying members who want to stay current without digging for it themselves.
+
+Non-negotiable: every claim must be accurate to what you actually find via search — if nothing genuinely new happened this week, say so plainly instead of inventing something.
+Format: first line is a short title (under 12 words) and nothing else, then the digest body — direct, practical, no fluff, no reasoning-leak meta-commentary as the opening line.`,
+      }],
+    });
+    const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n\n').trim();
+    if (!text) return null;
+    const lines = text.split('\n');
+    const title = lines[0].replace(/^#+\s*/, '').trim();
+    const body = lines.slice(1).join('\n').trim();
+    if (looksLikeReasoningLeak(title)) return null;
+    return { title, body };
+  } catch (err) {
+    console.log(`Could not draft Insider digest: ${err.message}`);
+    return null;
+  }
+}
+
+async function draftInsiderMonthlyGuide() {
+  if (!anthropic) return null;
+  try {
+    const msg = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1600,
+      messages: [{
+        role: 'user',
+        content: `Write a long-form, genuinely advanced guide (600-900 words) for ClaudeCraft Insider — paying subscribers who already know the basics and want real depth: an advanced prompting technique, a multi-step Claude workflow, or a power-user trick not commonly known.
+
+Format: first line is a short, magnetic title (under 12 words) and nothing else, then the guide body. Be specific and practical — real examples, not generic advice. No reasoning-leak meta-commentary as the opening line.`,
+      }],
+    });
+    const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n\n').trim();
+    if (!text) return null;
+    const lines = text.split('\n');
+    const title = lines[0].replace(/^#+\s*/, '').trim();
+    const body = lines.slice(1).join('\n').trim();
+    if (looksLikeReasoningLeak(title)) return null;
+    return { title, body };
+  } catch (err) {
+    console.log(`Could not draft Insider monthly guide: ${err.message}`);
+    return null;
+  }
+}
+
+async function publishInsiderContent(piece, tag) {
+  if (!piece || !process.env.ARTICLES_API_TOKEN) return 'Skipped — no piece or no ARTICLES_API_TOKEN configured.';
+  const qc = await qualityCheck(`${piece.title}\n\n${piece.body}`, 'members-only Insider library entry', `Section: ${tag}`);
+  if (!qc.approved) return `REJECTED by quality control (score ${qc.score ?? '?'}/10) — NOT published. Reason: ${qc.note}`;
+  try {
+    const bodyHtml = piece.body.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+    const res = await fetch(`${process.env.PUBLIC_BASE_URL || 'https://claudecraft-production.up.railway.app'}/api/insider-content`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-OpenClaw-Token': process.env.ARTICLES_API_TOKEN },
+      body: JSON.stringify({ tag, title: piece.title, bodyHtml }),
+    });
+    if (!res.ok) return `Publish failed: ${res.status} ${await res.text()}`;
+    return `Published successfully: "${piece.title}" — quality control score ${qc.score ?? '?'}/10 (${qc.note})`;
+  } catch (err) {
+    return `Could not publish Insider content: ${err.message}`;
+  }
+}
+
 async function emailDailyReport(report, today) {
   if (!process.env.RESEND_API_KEY || !process.env.SUPPORT_NOTIFY_EMAIL) {
     return 'Skipped — RESEND_API_KEY and/or SUPPORT_NOTIFY_EMAIL not configured, report only logged.';
@@ -469,8 +551,19 @@ async function main() {
   let weeklySection = '';
   if (isWeeklyRun) {
     const guide = await draftWeeklyGuide();
-    const guidePublishResult = await publishArticle(guide, 'Weekly Guide', 'New This Week — Free');
+    const guidePublishResult = await publishArticle(guide, 'Weekly Guide', 'New This Week — Free', false);
     const shareImageResult = await refreshShareImage();
+
+    const insiderDigest = await draftInsiderDigest();
+    const insiderDigestResult = await publishInsiderContent(insiderDigest, 'Insider Digest');
+    const isFirstMondayOfMonth = new Date().getDate() <= 7;
+    let insiderMonthlySection = '';
+    if (isFirstMondayOfMonth) {
+      const monthlyGuide = await draftInsiderMonthlyGuide();
+      const monthlyGuideResult = await publishInsiderContent(monthlyGuide, 'Insider Guide');
+      insiderMonthlySection = `\n## Insider Monthly Guide Drop (first Monday only)\n${monthlyGuide ? `Title: "${monthlyGuide.title}"` : '(none drafted)'}\nPublish result: ${monthlyGuideResult}\n`;
+    }
+
     weeklySection = `
 ## Weekly Free Guide (Mondays only)
 ${guide ? `Title: "${guide.title}"` : '(none drafted)'}
@@ -478,7 +571,11 @@ Publish result: ${guidePublishResult}
 
 ## Weekly Social Share Image Refresh (Mondays only)
 ${shareImageResult}
-`;
+
+## Insider Weekly Digest (Mondays only, members-only)
+${insiderDigest ? `Title: "${insiderDigest.title}"` : '(none drafted)'}
+Publish result: ${insiderDigestResult}
+${insiderMonthlySection}`;
   }
 
   const report = `# ClaudeCraft Daily Report — ${today}

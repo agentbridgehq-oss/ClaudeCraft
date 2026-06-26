@@ -217,6 +217,9 @@ const DOWNLOAD_SETS = {
   writer: { files: ['bundles/creative-writers-pack/SKILLS.md', 'bundles/creative-writers-pack/SETUP-GUIDE.md'] },
   builder: { files: ['bundles/claude-code-builders-guide/BUILDERS-GUIDE.md', 'bundles/claude-code-builders-guide/QUICK-START-CHECKLIST.md'] },
   commands: { files: ['bundles/claude-code-commands-mastery/COMMANDS-MASTERY-GUIDE.md', 'bundles/claude-code-commands-mastery/QUICK-REFERENCE.md'] },
+  promptguide: { files: ['bundles/ai-prompt-engineering-guide/PROMPT-ENGINEERING-GUIDE.md'] },
+  selfimprovement: { files: ['bundles/self-improvement-guide/AI-CONTINUOUS-LEARNING-GUIDE.md'] },
+  checklist: { files: ['bundles/digital-product-checklist/DIGITAL-PRODUCT-LAUNCH-CHECKLIST.md'] },
 };
 
 async function sendPurchaseEmail(toEmail, productSlug, productName, sessionId) {
@@ -913,6 +916,7 @@ function getAllArticles() {
 const NAV_PAGES = [
   { href: '/articles.html', label: '📰 Articles', key: 'articles' },
   { href: '/bundles.html', label: '⚡ Bundles', key: 'bundles' },
+  { href: '/insider.html', label: '👑 Insider', key: 'insider' },
   { href: '/how-it-works.html', label: '🧭 How It Works', key: 'how' },
   { href: '/reviews.html', label: '✨ Examples', key: 'reviews' },
   { href: '/faq.html', label: '❓ FAQ', key: 'faq' },
@@ -1005,6 +1009,91 @@ h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:900;letter-spacing:-1px;margin
 .cta a{display:inline-block;margin-top:12px;background:linear-gradient(135deg,var(--brand-light),var(--brand));color:#fff;font-weight:700;padding:12px 26px;border-radius:8px;text-decoration:none;font-size:0.9rem;}
 </style></head><body><div class="wrap">${bodyContent}</div></body></html>`;
 }
+
+const INSIDER_PWA_HEAD = `<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#070A12">
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>`;
+
+const INSIDER_STYLE = `*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--brand:#FF6B1A;--brand-light:#FF8C42;--bg:#070A12;--text:#EDF0F7;--sub:#8B93A8;--glass-border:rgba(255,255,255,0.09);}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:linear-gradient(180deg,#070A12 0%,#04060A 100%);color:var(--text);line-height:1.7;min-height:100vh;-webkit-font-smoothing:antialiased;}
+.container{max-width:680px;margin:0 auto;padding:60px 24px 100px;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;}
+.logo{font-size:1.1rem;font-weight:800;color:var(--text);text-decoration:none;}
+.logo .orange{color:var(--brand);}
+.back{font-size:0.85rem;color:var(--sub);text-decoration:none;}
+.card{background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:18px;padding:36px 32px;margin-bottom:24px;}
+h1{font-size:1.6rem;font-weight:900;letter-spacing:-0.5px;margin-bottom:10px;}
+p{color:var(--sub);font-size:0.92rem;margin-bottom:16px;}
+.insider-card{background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:16px;padding:26px 28px;margin-bottom:18px;}
+.insider-tag{font-size:0.68rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:8px;}
+.insider-card h3{font-size:1.15rem;font-weight:800;margin-bottom:6px;}
+.insider-meta{font-size:0.78rem;color:var(--sub);margin-bottom:14px;}
+.insider-body p{color:var(--sub);font-size:0.94rem;margin-bottom:14px;}
+.btn{display:inline-block;background:linear-gradient(135deg,var(--brand-light),var(--brand));color:#fff;font-weight:700;border:none;padding:13px 22px;border-radius:8px;font-size:0.9rem;cursor:pointer;text-decoration:none;font-family:inherit;}
+.btn-outline{background:transparent;border:1px solid var(--glass-border);color:var(--text);}
+label{display:block;font-size:0.82rem;font-weight:700;margin-bottom:8px;}
+input{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:8px;padding:13px 14px;color:var(--text);font-size:0.92rem;margin-bottom:14px;font-family:inherit;}
+.result{margin-top:16px;padding:14px 16px;border-radius:10px;font-size:0.86rem;display:none;}
+.result.err{background:rgba(255,107,26,0.08);border:1px solid rgba(255,107,26,0.3);display:block;}`;
+
+function insiderGatePage(message, showForm) {
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClaudeCraft Insider</title><meta name="robots" content="noindex">${INSIDER_PWA_HEAD}<style>${INSIDER_STYLE}</style></head><body>
+<div class="container">
+<header><a href="/" class="logo">Claude<span class="orange">Craft</span></a><a href="/" class="back">← Back to home</a></header>
+<div class="card">
+  <h1>ClaudeCraft Insider</h1>
+  <p>${message}</p>
+  ${showForm ? `<form id="login-form">
+    <label for="email">Your subscriber email</label>
+    <input type="email" id="email" placeholder="you@email.com" required>
+    <button type="submit" class="btn" id="submit-btn" style="width:100%;">Access My Library</button>
+  </form>
+  <div class="result" id="result"></div>
+  <p style="margin-top:20px;">Not a member yet? <a href="/checkout/insider" style="color:var(--brand-light);">Subscribe — $12/mo →</a></p>` : ''}
+</div>
+</div>
+<script>
+const f = document.getElementById('login-form');
+if (f) f.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const result = document.getElementById('result');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  fetch('/api/insider-login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email: document.getElementById('email').value }) })
+    .then(r => r.json()).then(data => {
+      if (data.ok) { window.location.href = '/insider/library'; return; }
+      result.textContent = data.message || 'Something went wrong.';
+      result.className = 'result err';
+      btn.disabled = false; btn.textContent = 'Access My Library';
+    }).catch(() => {
+      result.textContent = 'Something went wrong — please try again, or email support@claudecraft.ca.';
+      result.className = 'result err';
+      btn.disabled = false; btn.textContent = 'Access My Library';
+    });
+});
+</script>
+</body></html>`;
+}
+
+function insiderLibraryPage(entriesHtml, portalUrl) {
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Insider Library — ClaudeCraft</title><meta name="robots" content="noindex">${INSIDER_PWA_HEAD}<style>${INSIDER_STYLE}</style></head><body>
+<div class="container">
+<header><a href="/" class="logo">Claude<span class="orange">Craft</span></a>${portalUrl ? `<a href="${portalUrl}" class="back">Manage subscription →</a>` : '<a href="mailto:support@claudecraft.ca" class="back">Manage — email support →</a>'}</header>
+<div class="card" style="padding:28px 32px;">
+  <h1 style="margin-bottom:4px;">Your Insider Library</h1>
+  <p>A weekly digest plus a new in-depth guide every month — all in one place.</p>
+</div>
+${entriesHtml}
+</div>
+</body></html>`;
+}
+
+app.get('/insider.html', (req, res) => {
+  res.send(insiderGatePage('A weekly "what changed in Claude" digest plus a new in-depth guide every month — $12/mo, cancel anytime. Already a member?', true));
+});
 
 app.get('/how-it-works.html', (req, res) => {
   const body = `
@@ -1550,7 +1639,33 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+function seedInsiderContentIfEmpty() {
+  if (fs.existsSync(INSIDER_CONTENT_PATH)) return;
+  const seed = [
+    {
+      tag: 'Insider Digest',
+      title: 'Welcome to ClaudeCraft Insider — What This Library Is For',
+      date: new Date().toISOString().slice(0, 10),
+      bodyHtml: `<p>This is your members library — separate from the free daily articles on ClaudeCraft, and built specifically for people who want to stay genuinely current with Claude rather than just owning one set of skills.</p>
+        <p>Every week, you'll get a short "what changed in Claude this week" digest — real changes, new features, model updates, anything that actually affects how you use Claude day to day, written in plain language, no fluff.</p>
+        <p>Every month, a brand-new in-depth guide gets added here permanently — yours to keep reading as long as you're subscribed. Nothing here is a one-time download; it's a library that keeps growing the longer you stick around.</p>
+        <p>First weekly digest lands soon. In the meantime, here's one to start with below.</p>`,
+    },
+    {
+      tag: 'Insider Guide',
+      title: 'The 3 Claude Habits That Separate Casual Users From Power Users',
+      date: new Date().toISOString().slice(0, 10),
+      bodyHtml: `<p><strong>1. They live in Projects, not the default chat window.</strong> Casual users open a fresh chat every time and re-explain context from scratch. Power users set up a dedicated Project per recurring task — client emails, content drafts, planning — once, with Custom Instructions doing the re-explaining for them forever after.</p>
+        <p><strong>2. They iterate instead of restarting.</strong> A mediocre first response isn't a dead end — it's a starting point. "Make this shorter," "less formal," "add a concrete example" all compound on the existing context instead of throwing it away. Restarting from zero is almost always slower than correcting course.</p>
+        <p><strong>3. They separate jobs instead of stacking them.</strong> One Project that tries to handle five different kinds of work does all five worse than five focused Projects would. The instinct to consolidate everything into one mega-Project is understandable but backwards — specialization is what makes Custom Instructions actually work well.</p>
+        <p>None of this requires anything technical — just a five-minute setup change in how you organize your own usage. If you want this done for you instead of figuring it out from scratch, the Claude Co-Work Beginner's Guide and Claude Power User Pack in the main catalog both build this structure in for you directly.</p>`,
+    },
+  ];
+  saveInsiderContent(seed);
+}
+
 app.listen(port, () => {
+  seedInsiderContentIfEmpty();
   console.log(`ClaudeCraft static site listening on port ${port}`);
   console.log(`Stripe checkout: ${stripe ? 'configured' : 'NOT configured (missing STRIPE_SECRET_KEY)'}`);
   console.log(`Referral webhook: ${process.env.STRIPE_WEBHOOK_SECRET ? 'configured' : 'NOT configured (missing STRIPE_WEBHOOK_SECRET)'}`);
