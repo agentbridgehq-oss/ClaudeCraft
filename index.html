@@ -436,7 +436,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 @media(max-width:600px){ .cc-bottom-bar { margin: 0 auto 28px; max-width: 100%; } }
 
 .guide-panel {
-  position: fixed; top: 0; right: 0; height: 100vh; width: 400px; max-width: 90vw;
+  position: fixed; top: 0; right: 0; height: 100vh; height: 100dvh; width: 400px; max-width: 90vw;
   background: #0B0C15; border-left: 1px solid rgba(255,107,26,0.22); border-radius: 0;
   display: flex; flex-direction: column; overflow: hidden;
   box-shadow: -24px 0 70px rgba(0,0,0,0.55), 0 0 50px rgba(255,107,26,0.1);
@@ -521,7 +521,7 @@ footer { border-top:1px solid var(--glass-border); padding:24px 32px; display:fl
 .gm-chip { background: transparent; border: 1px solid rgba(255,107,26,0.4); color: var(--brand-light); border-radius: 20px; padding: 6px 13px; font-size: 0.77rem; font-weight: 600; cursor: pointer; font-family: var(--font-sans); transition: all .2s; }
 .gm-chip:hover { background: var(--brand-dim); border-color: var(--brand); }
 
-.gp-input-row { display: flex; gap: 8px; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+.gp-input-row { display: flex; gap: 8px; padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)) 16px; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
 .gp-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r-sm); color: var(--text); padding: 10px 14px; font-size: 0.85rem; font-family: var(--font-sans); outline: none; transition: border-color .2s; }
 .gp-input:focus { border-color: rgba(255,107,26,0.5); }
 .gp-input::placeholder { color: var(--muted); }
