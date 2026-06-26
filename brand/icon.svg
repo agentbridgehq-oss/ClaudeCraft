@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8C00"/>
+      <stop offset="100%" stop-color="#FF4500"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="200" height="200" rx="40" fill="#0f1015"/>
+
+  <!-- "C" letterform, thick and simple so it reads clearly at favicon size and survives a circular crop -->
+  <path d="M138 64
+           C 124 50, 100 46, 82 54
+           C 56 66, 44 92, 48 118
+           C 52 146, 76 166, 104 166
+           C 122 166, 136 158, 146 146"
+        fill="none" stroke="url(#orangeGrad)" stroke-width="22" stroke-linecap="round"/>
+
+  <!-- small spark accent, a quiet nod to "AI" without resorting to a generic robot/chip icon -->
+  <path d="M148 86 l6 14 l14 6 l-14 6 l-6 14 l-6 -14 l-14 -6 l14 -6 z" fill="#FFFFFF"/>
+</svg>
