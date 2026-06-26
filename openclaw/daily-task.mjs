@@ -122,6 +122,29 @@ function looksLikeReasoningLeak(title) {
   return REASONING_LEAK_PATTERNS.some(p => p.test(title));
 }
 
+// Deterministic fact-verification backstop: a "Sources:" section with fabricated or dead
+// URLs is the clearest possible sign an AI-written news article made something up. This
+// doesn't re-check every claim against the source content (that's a much bigger problem),
+// but it catches the cheap, common failure mode — invented or hallucinated citations —
+// without trusting the model to grade its own homework on accuracy.
+async function verifySourcesReachable(body) {
+  const urls = [...body.matchAll(/https?:\/\/[^\s<>")\]]+/g)].map(m => m[0].replace(/[.,;]+$/, ''));
+  if (urls.length === 0) return { ok: false, reason: 'No source URLs found in the article body — cannot verify it against real reporting.' };
+  const checks = await Promise.all(urls.slice(0, 8).map(async url => {
+    try {
+      const res = await fetch(url, { method: 'HEAD', redirect: 'follow', signal: AbortSignal.timeout(8000) });
+      if (res.ok) return true;
+      const res2 = await fetch(url, { method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(8000) });
+      return res2.ok;
+    } catch {
+      return false;
+    }
+  }));
+  const liveCount = checks.filter(Boolean).length;
+  if (liveCount === 0) return { ok: false, reason: `None of the ${urls.length} cited source URL(s) were actually reachable — likely fabricated.` };
+  return { ok: true, reason: `${liveCount}/${urls.length} cited source URL(s) verified reachable.` };
+}
+
 // ── Health check — notify-only, never auto-fixes or auto-deploys anything ──
 // Catches the cheap, high-signal failure modes: site down, Stripe unreachable,
 // recent declined/failed payments worth a glance, required keys missing in
@@ -249,6 +272,12 @@ Writing quality (this is what separates this from a generic news blurb — write
       console.log(`Discarded a drafted article — headline looked like a reasoning leak, not a real title: "${title.slice(0, 100)}"`);
       return null;
     }
+    const sourceCheck = await verifySourcesReachable(body);
+    if (!sourceCheck.ok) {
+      console.log(`Discarded a drafted article — source verification failed: ${sourceCheck.reason}`);
+      return null;
+    }
+    console.log(`Source verification passed: ${sourceCheck.reason}`);
     return { title, body };
   } catch (err) {
     console.log(`Could not draft news article: ${err.message}`);
