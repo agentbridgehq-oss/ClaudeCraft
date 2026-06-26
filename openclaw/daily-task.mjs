@@ -27,6 +27,39 @@ import path from 'path';
 const anthropic = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
+// Cheap/free text generation (escalation drafts, quality checks, marketing pack,
+// weekly guide — none of these need real web search). draftNewsArticle stays on
+// Anthropic's native web_search tool below since the source-URL verification it
+// feeds depends on a real grounded search, which OpenRouter free models don't do.
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3.1:free';
+const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+async function completeText(prompt, maxTokens) {
+  if (useOpenRouter) {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: OPENROUTER_MODEL,
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || '';
+  }
+  if (!anthropic) throw new Error('No AI provider configured (OPENROUTER_API_KEY or ANTHROPIC_API_KEY)');
+  const msg = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: maxTokens,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  return msg.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim();
+}
+
 const SUPPORT_KB_FOR_REVIEW = `ClaudeCraft sells done-for-you Claude AI skill bundles, one-time payment, no subscription. Policy facts: 30-day money-back guarantee, no questions asked — fully self-serve and automatic at /refund.html, so it never needs human action. Multi-bundle buyers get a 20% discount on additional bundles — also fully self-serve and automatic at /discount.html. Files never expire and are free to re-send if lost. All bundles work on the free Claude plan. Escalations reaching this queue are the cases that don't fit those two automated flows (file re-sends, disputes, complaints, anything ambiguous).`;
 
 const SEGMENTS = [
@@ -39,7 +72,7 @@ const SEGMENTS = [
 ];
 
 async function reviewSupportEscalations() {
-  if (!anthropic || !process.env.ARTICLES_API_TOKEN) return 'Skipped — Anthropic or ARTICLES_API_TOKEN not configured.';
+  if ((!anthropic && !useOpenRouter) || !process.env.ARTICLES_API_TOKEN) return 'Skipped — no AI provider or ARTICLES_API_TOKEN not configured.';
   try {
     const base = process.env.PUBLIC_BASE_URL || 'https://claudecraft-production.up.railway.app';
     const res = await fetch(`${base}/api/support-escalations`, {
@@ -53,15 +86,10 @@ async function reviewSupportEscalations() {
     const recent = escalations.slice(0, 5);
     const drafts = [];
     for (const e of recent) {
-      const msg = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 400,
-        messages: [{
-          role: 'user',
-          content: `${SUPPORT_KB_FOR_REVIEW}\n\nA customer support email was escalated to a human. Here it is:\n\nFrom: ${e.from}\nSubject: ${e.subject}\nBody: ${e.body}\n\nAI's internal note from initial triage: ${e.internalNote}\n\nDraft TWO things for the human reviewing this (this is a recommendation only — nothing will be sent or processed automatically):\n1. A ready-to-send reply the human can copy/edit/send themselves\n2. A clear refund/discount/action recommendation: state plainly whether this looks like a legitimate request that fits ClaudeCraft's 30-day guarantee policy, and what specific action (refund amount, discount %, file re-send) the human should consider taking — or say clearly if you're not confident and why.\n\nFormat as:\nSUGGESTED REPLY:\n<reply text>\n\nRECOMMENDATION:\n<your recommendation>`,
-        }],
-      });
-      const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+      const text = await completeText(
+        `${SUPPORT_KB_FOR_REVIEW}\n\nA customer support email was escalated to a human. Here it is:\n\nFrom: ${e.from}\nSubject: ${e.subject}\nBody: ${e.body}\n\nAI's internal note from initial triage: ${e.internalNote}\n\nDraft TWO things for the human reviewing this (this is a recommendation only — nothing will be sent or processed automatically):\n1. A ready-to-send reply the human can copy/edit/send themselves\n2. A clear refund/discount/action recommendation: state plainly whether this looks like a legitimate request that fits ClaudeCraft's 30-day guarantee policy, and what specific action (refund amount, discount %, file re-send) the human should consider taking — or say clearly if you're not confident and why.\n\nFormat as:\nSUGGESTED REPLY:\n<reply text>\n\nRECOMMENDATION:\n<your recommendation>`,
+        400,
+      );
       drafts.push(`### From: ${e.from} — "${e.subject}" (received ${e.receivedAt})\n${text}`);
     }
     return drafts.join('\n\n---\n\n');
@@ -79,14 +107,10 @@ async function reviewSupportEscalations() {
 // auto-published to our own site, and nothing reaches the report marked
 // "ready" unless it actually clears a real bar first.
 async function qualityCheck(content, contentType, context) {
-  if (!anthropic || !content) return { approved: true, score: null, note: 'Quality check skipped — Anthropic not configured or no content.' };
+  if ((!anthropic && !useOpenRouter) || !content) return { approved: true, score: null, note: 'Quality check skipped — no AI provider configured.' };
   try {
-    const msg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 300,
-      messages: [{
-        role: 'user',
-        content: `You are ClaudeCraft's senior marketing quality-control reviewer — an expert across copywriting, SEO, online business, blogs, articles, social posts, landing pages, ad copy, and brand voice. ClaudeCraft sells done-for-you Claude AI skill bundles and wants a premium, trustworthy brand feel — never cheap, hypey, spammy, or "AI slop."
+    const text = await completeText(
+      `You are ClaudeCraft's senior marketing quality-control reviewer — an expert across copywriting, SEO, online business, blogs, articles, social posts, landing pages, ad copy, and brand voice. ClaudeCraft sells done-for-you Claude AI skill bundles and wants a premium, trustworthy brand feel — never cheap, hypey, spammy, or "AI slop."
 
 Review this ${contentType} before it's allowed to go out:
 ---
@@ -96,9 +120,8 @@ ${context ? `Context: ${context}\n` : ''}
 Check: factual accuracy (no fabricated stats/claims), genuine usefulness (not just a pitch), tone (confident and premium, not cheap or spammy), platform fit, whether the headline/opening line is an actual clean headline and NOT leftover internal reasoning or meta-commentary (e.g. "I have two stories to choose from...", "Let me write about...") — reject immediately if so, whether it actually serves ClaudeCraft's goal of driving genuine reader interest back to the brand (a soft, natural connection — a relevant mention, a closing nudge to claudecraft.ca, or a bundle reference when genuinely on-topic — is good; completely generic content with zero tie-back anywhere should lower the score even if otherwise well-written), and anything that could embarrass the brand or get flagged as spam.
 
 Respond with ONLY this JSON, nothing else: {"approved": true or false, "score": 1-10, "feedback": "one or two specific sentences"}`,
-      }],
-    });
-    const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+      300,
+    );
     const parsed = JSON.parse(text.replace(/^```json\s*|\s*```$/g, ''));
     return { approved: !!parsed.approved, score: parsed.score ?? null, note: parsed.feedback || '' };
   } catch (err) {
@@ -203,14 +226,10 @@ async function getSalesSummary() {
 }
 
 async function draftMarketingPack(segment, salesContext) {
-  if (!anthropic) return { text: 'Anthropic API not configured — skipped.', approved: false, score: null, note: '' };
+  if (!anthropic && !useOpenRouter) return { text: 'No AI provider configured — skipped.', approved: false, score: null, note: '' };
   try {
-    const msg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1500,
-      messages: [{
-        role: 'user',
-        content: `You are drafting a daily marketing content pack for ClaudeCraft, a site selling done-for-you Claude AI skill bundles. Today's focus segment: "${segment.name}" (relevant Reddit communities: ${segment.subreddits}).
+    const text = await completeText(
+      `You are drafting a daily marketing content pack for ClaudeCraft, a site selling done-for-you Claude AI skill bundles. Today's focus segment: "${segment.name}" (relevant Reddit communities: ${segment.subreddits}).
 
 Recent sales context: ${salesContext}
 
@@ -224,9 +243,8 @@ A 4-6 tweet thread. Tweet 1 is the hook (must work as a standalone tweet, no "th
 
 LINKEDIN POST:
 Slightly more professional tone than the other two, 150-200 words, framed around a work/productivity angle. Skip if this segment genuinely doesn't fit LinkedIn (e.g. a casual everyday-life segment) — say so plainly instead of forcing it.`,
-      }],
-    });
-    const text = msg.content[0]?.text || '(no response)';
+      1500,
+    );
     const qc = await qualityCheck(text, 'a daily marketing content pack (Reddit + X + LinkedIn post)', `Focus segment: ${segment.name}`);
     return { text, approved: qc.approved, score: qc.score, note: qc.note };
   } catch (err) {
@@ -369,16 +387,12 @@ const WEEKLY_GUIDE_TOPICS = [
 ];
 
 async function draftWeeklyGuide() {
-  if (!anthropic) return null;
+  if (!anthropic && !useOpenRouter) return null;
   const weekNumber = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
   const topic = WEEKLY_GUIDE_TOPICS[weekNumber % WEEKLY_GUIDE_TOPICS.length];
   try {
-    const msg = await anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1600,
-      messages: [{
-        role: 'user',
-        content: `You are writing a free, genuinely useful guide for ClaudeCraft's "Articles" section (a site that also sells done-for-you Claude skill bundles, but this piece is 100% free standalone value — no pitch, no bundle mention). This week's topic: ${topic}
+    const text = await completeText(
+      `You are writing a free, genuinely useful guide for ClaudeCraft's "Articles" section (a site that also sells done-for-you Claude skill bundles, but this piece is 100% free standalone value — no pitch, no bundle mention). This week's topic: ${topic}
 
 Write a complete guide (450-750 words) for a non-technical, everyday reader — written with enough quality and pull that someone reads the whole thing and comes back next week for more, not just skims it.
 
@@ -387,9 +401,8 @@ Write a complete guide (450-750 words) for a non-technical, everyday reader — 
 - Write with momentum and personality, like a sharp person explaining something they're genuinely excited about — never like a corporate help-center article
 - Never sacrifice accuracy or usefulness for style — every technique or claim must actually work as described
 - Format: first line is a short, magnetic title (under 12 words) and nothing else, then a blank line, then the guide body using clear paragraphs.`,
-      }],
-    });
-    const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n\n').trim();
+      1600,
+    );
     if (!text) return null;
     const lines = text.split('\n');
     const title = lines[0].replace(/^#+\s*/, '').trim();
