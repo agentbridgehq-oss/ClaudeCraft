@@ -713,7 +713,7 @@ const NAV_PAGES = [
   { href: '/articles.html', label: '📰 Articles', key: 'articles' },
   { href: '/bundles.html', label: '⚡ Bundles', key: 'bundles' },
   { href: '/how-it-works.html', label: '🧭 How It Works', key: 'how' },
-  { href: '/reviews.html', label: '⭐ Reviews', key: 'reviews' },
+  { href: '/reviews.html', label: '✨ Examples', key: 'reviews' },
   { href: '/faq.html', label: '❓ FAQ', key: 'faq' },
   { href: '/why-claudecraft.html', label: '💡 Why ClaudeCraft', key: 'why' },
   { href: '/founder-story.html', label: '👋 Founder\'s Story', key: 'founder' },
@@ -848,14 +848,13 @@ app.get('/how-it-works.html', (req, res) => {
 });
 
 app.get('/reviews.html', (req, res) => {
-  const reviews = [
-    { stars: 5, quote: "Bought the Solo Entrepreneur Pack on a Tuesday. By Friday I'd sent 6 proposals and closed 2 of them using the Claude scripts. Genuinely changed how I run my business.", avatar: '🏆', name: 'Marcus T.', role: 'Freelance Consultant · Ontario, Canada' },
-    { stars: 5, quote: "The Content Machine basically replaced my VA. Blogs, newsletters, Instagram captions — all done in one Claude session now. I genuinely don't know how I ran my business before this.", avatar: '🚀', name: 'Sandra K.', role: 'Life & Business Coach · Vancouver, BC' },
-    { stars: 5, quote: "My daughter bought me the 55+ Starter Kit and I was honestly skeptical. Now I use Claude every single morning. The recipe skill alone was worth the whole $29.", avatar: '🌟', name: 'Barbara W.', role: 'Retired Teacher · Age 67' },
+  const scenarios = [
+    { quote: "Paste in a client name, project description, and rough budget — get back a complete, ready-to-send proposal in under a minute. No blank-page staring, no generic templates.", avatar: '🏆', name: 'Proposal Writer', role: 'Part of the Solo Entrepreneur Pack' },
+    { quote: "Give it one bullet point about your business and get back a LinkedIn post, an Instagram caption, a tweet, and three more content ideas — all matched to your voice.", avatar: '🚀', name: 'Social Content Engine', role: 'Part of the Solo Entrepreneur Pack' },
+    { quote: "Tell it what's already in your fridge and get a real recipe back — no new ingredients to buy, no tech jargon, just dinner sorted.", avatar: '🌟', name: 'Recipe Generator', role: 'Part of the 55+ AI Starter Kit' },
   ];
-  const cards = reviews.map(r => `
+  const cards = scenarios.map(r => `
       <div class="t-card">
-        <div class="t-stars">${'★ '.repeat(r.stars).trim()}</div>
         <p class="t-quote">"${r.quote}"</p>
         <div class="t-author">
           <div class="t-avatar">${r.avatar}</div>
@@ -864,16 +863,16 @@ app.get('/reviews.html', (req, res) => {
       </div>`).join('');
   const body = `
 <div class="page-header z1 container">
-  <span class="tag tag-live" style="display:inline-flex; margin-bottom:20px;"><span class="dot"></span>Real Results</span>
-  <h1>What Customers Are Saying</h1>
-  <p>From solopreneurs to retirees. Real people. Real time savings.</p>
+  <span class="tag tag-live" style="display:inline-flex; margin-bottom:20px;"><span class="dot"></span>Real Scenarios</span>
+  <h1>What These Skills Actually Help You Do</h1>
+  <p>Not customer reviews — just real examples of what happens when you actually use these skills.</p>
 </div>
 <section class="testimonials-section z1">
   <div class="container">
     <div class="testi-grid">${cards}</div>
   </div>
 </section>`;
-  res.send(pageShell('reviews', 'Reviews', 'What ClaudeCraft customers are saying — real results from real bundle owners.', body));
+  res.send(pageShell('reviews', 'Examples', 'What ClaudeCraft skills actually help you do — real scenarios, not fabricated reviews.', body));
 });
 
 app.get('/faq.html', (req, res) => {
