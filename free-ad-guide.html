@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Playbook: YouTube, TikTok & Facebook Ads — ClaudeCraft</title>
+<meta name="description" content="A free step-by-step playbook for running YouTube, TikTok, and Facebook ads as one connected funnel.">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{ --brand:#FF6B1A; --brand-light:#FF8C42; --bg:#070A12; --text:#EDF0F7; --sub:#8B93A8; --glass-border:rgba(255,255,255,0.09); }
+body{ font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif; background:linear-gradient(180deg,#070A12 0%,#04060A 100%); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+.card{ max-width:560px; width:100%; text-align:center; padding:56px 36px; background:rgba(255,255,255,0.04); border:1px solid var(--glass-border); border-radius:22px; }
+.logo{ font-size:1.05rem; font-weight:800; color:var(--text); text-decoration:none; margin-bottom:28px; display:inline-block; }
+.logo .orange{ color:var(--brand); }
+.eyebrow{ font-size:0.72rem; font-weight:800; letter-spacing:3px; text-transform:uppercase; color:var(--brand-light); margin-bottom:14px; }
+h1{ font-size:clamp(1.7rem,5vw,2.3rem); font-weight:900; letter-spacing:-1px; margin-bottom:16px; line-height:1.2; }
+.subtitle{ color:var(--sub); font-size:1rem; max-width:440px; margin:0 auto 28px; line-height:1.6; }
+.bullets{ text-align:left; max-width:380px; margin:0 auto 30px; }
+.bullets li{ color:var(--sub); font-size:0.92rem; margin-bottom:10px; list-style:none; padding-left:26px; position:relative; }
+.bullets li::before{ content:"✓"; position:absolute; left:0; color:var(--brand-light); font-weight:800; }
+form{ display:flex; flex-direction:column; gap:12px; max-width:380px; margin:0 auto; }
+input[type=email]{ padding:14px 16px; border-radius:10px; border:1px solid var(--glass-border); background:rgba(255,255,255,0.03); color:var(--text); font-size:0.95rem; }
+input[type=email]:focus{ outline:none; border-color:var(--brand); }
+button{ background:linear-gradient(135deg,var(--brand-light),var(--brand)); color:#fff; font-weight:700; padding:14px 28px; border-radius:10px; border:none; font-size:0.95rem; cursor:pointer; }
+button:disabled{ opacity:0.6; cursor:not-allowed; }
+.fine{ font-size:0.78rem; color:var(--sub); margin-top:14px; opacity:0.8; }
+.msg{ font-size:0.9rem; margin-top:14px; min-height:20px; }
+.msg.ok{ color:#3dbe7a; }
+.msg.err{ color:#e8634d; }
+</style>
+</head>
+<body>
+<div class="card">
+  <a href="/" class="logo">Claude<span class="orange">Craft</span></a>
+  <div class="eyebrow">Free Playbook</div>
+  <h1>The Complete Paid Traffic Playbook</h1>
+  <p class="subtitle">Step-by-step, sub-step by sub-step: how to run YouTube, TikTok, and Facebook ads as one connected funnel — not three disconnected platforms.</p>
+  <ul class="bullets">
+    <li>The 3-stage funnel structure to use on every platform</li>
+    <li>YouTube, TikTok &amp; Facebook targeting, set up step by step</li>
+    <li>A real 30-day launch plan with budget allocation</li>
+  </ul>
+  <form id="form">
+    <input type="email" id="email" placeholder="you@email.com" required>
+    <button type="submit" id="btn">Send me the free playbook →</button>
+  </form>
+  <div class="msg" id="msg"></div>
+  <p class="fine">No spam. Unsubscribe any time.</p>
+</div>
+<script>
+const form = document.getElementById('form');
+const btn = document.getElementById('btn');
+const msg = document.getElementById('msg');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  msg.textContent = '';
+  msg.className = 'msg';
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, source: 'ad-platforms-playbook' }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+    msg.textContent = "Check your email — your playbook is on its way.";
+    msg.className = 'msg ok';
+    form.reset();
+  } catch (err) {
+    msg.textContent = err.message;
+    msg.className = 'msg err';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send me the free playbook →';
+  }
+});
+</script>
+</body>
+</html>

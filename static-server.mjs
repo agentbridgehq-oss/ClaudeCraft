@@ -22,6 +22,10 @@ const LOYALTY_LOG_PATH = path.join(DATA_DIR, 'loyalty-discount-log.json');
 const LOYALTY_COUPON_ID_PATH = path.join(DATA_DIR, 'loyalty-coupon-id.txt');
 const LAUNCH_PROMO_CODE_PATH = path.join(DATA_DIR, 'launch-promo-code.txt');
 const OG_IMAGE_PATH = path.join(DATA_DIR, 'og-image.png');
+const INSIDER_SUBSCRIBERS_PATH = path.join(DATA_DIR, 'insider-subscribers.json');
+const INSIDER_CONTENT_PATH = path.join(DATA_DIR, 'insider-content.json');
+const INSIDER_COOKIE_SECRET_PATH = path.join(DATA_DIR, 'insider-cookie-secret.txt');
+const INSIDER_COOKIE_NAME = 'cc_insider';
 const REFUND_WINDOW_DAYS = 30;
 const MAX_DYNAMIC_ARTICLES = 90; // a few months of daily content before the oldest roll off
 
@@ -46,7 +50,68 @@ const PRODUCTS = {
   writer: { name: "Creative Writer's Pack", amount: 3400, description: '10 done-for-you Claude skills for fiction and long-form writing — outlining, character work, line edits, and querying.' },
   builder: { name: "Claude Code Builder's Guide", amount: 2400, description: 'The real, step-by-step story of how ClaudeCraft itself was built using Claude Code in VS Code — from account setup to a live, deployed site.' },
   commands: { name: 'Claude Code Commands & Skills Mastery', amount: 3400, description: 'A long-form course on building your own custom Claude Code commands, skills, and subagents — 5 ready-made commands included.' },
+  insider: { name: 'ClaudeCraft Insider', amount: 1200, description: 'A members-only library that keeps growing: a weekly "what changed in Claude this week" digest plus a new in-depth guide added every month — on top of everything else ClaudeCraft already offers.', recurring: { interval: 'month' } },
+  promptguide: { name: 'AI Prompt Engineering Guide', amount: 2700, description: 'A practical, no-fluff guide to advanced prompt engineering technique — role/task/context/format structuring, iterative refinement, and multi-step prompt chains.', stripePriceId: 'price_1TK1cJP5z41oM8NhVJAgJRe4' },
+  selfimprovement: { name: 'AI Agent Continuous Learning Guide', amount: 1700, description: 'A complete system for using Claude as a daily self-improvement partner — habit tracking, weekly reviews, and a continuous-learning loop you actually keep using.', stripePriceId: 'price_1TK1V7P5z41oM8NhBObgjfZI' },
+  checklist: { name: 'Digital Product Launch Checklist', amount: 900, description: 'A step-by-step checklist for shipping a digital product end to end — positioning, pricing, launch sequencing, and the easy-to-miss steps most first launches skip.', stripePriceId: 'price_1TK1XJP5z41oM8NhJaqBQuiz' },
 };
+
+function getOrCreateInsiderCookieSecret() {
+  try {
+    const cached = fs.readFileSync(INSIDER_COOKIE_SECRET_PATH, 'utf8').trim();
+    if (cached) return cached;
+  } catch {}
+  const secret = crypto.randomBytes(32).toString('hex');
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(INSIDER_COOKIE_SECRET_PATH, secret);
+  return secret;
+}
+
+function signInsiderCookie(email) {
+  const secret = getOrCreateInsiderCookieSecret();
+  const sig = crypto.createHmac('sha256', secret).update(email).digest('hex');
+  return `${Buffer.from(email).toString('base64url')}.${sig}`;
+}
+
+function verifyInsiderCookie(cookieValue) {
+  if (!cookieValue) return null;
+  const [encoded, sig] = cookieValue.split('.');
+  if (!encoded || !sig) return null;
+  let email;
+  try {
+    email = Buffer.from(encoded, 'base64url').toString('utf8');
+  } catch {
+    return null;
+  }
+  const secret = getOrCreateInsiderCookieSecret();
+  const expected = crypto.createHmac('sha256', secret).update(email).digest('hex');
+  const sigBuf = Buffer.from(sig);
+  const expectedBuf = Buffer.from(expected);
+  if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) return null;
+  return email;
+}
+
+function parseCookies(req) {
+  const header = req.get('cookie');
+  if (!header) return {};
+  return header.split(';').reduce((acc, part) => {
+    const idx = part.indexOf('=');
+    if (idx === -1) return acc;
+    acc[part.slice(0, idx).trim()] = decodeURIComponent(part.slice(idx + 1).trim());
+    return acc;
+  }, {});
+}
+
+async function hasActiveInsiderSubscription(customerId) {
+  if (!stripe || !customerId) return false;
+  try {
+    const subs = await stripe.subscriptions.list({ customer: customerId, status: 'active', limit: 3 });
+    return subs.data.length > 0;
+  } catch (err) {
+    console.error('Insider subscription check error:', err.message);
+    return false;
+  }
+}
 
 function loadJson(filePath, fallback) {
   try {
@@ -73,6 +138,10 @@ const loadRefundLog = () => loadJson(REFUND_LOG_PATH, []);
 const saveRefundLog = data => saveJson(REFUND_LOG_PATH, data);
 const loadLoyaltyLog = () => loadJson(LOYALTY_LOG_PATH, []);
 const saveLoyaltyLog = data => saveJson(LOYALTY_LOG_PATH, data);
+const loadInsiderSubscribers = () => loadJson(INSIDER_SUBSCRIBERS_PATH, []);
+const saveInsiderSubscribers = data => saveJson(INSIDER_SUBSCRIBERS_PATH, data);
+const loadInsiderContent = () => loadJson(INSIDER_CONTENT_PATH, []);
+const saveInsiderContent = data => saveJson(INSIDER_CONTENT_PATH, data);
 
 // ── AI support inbox knowledge base — kept narrow and factual on purpose ──
 const SUPPORT_KB = `You are the support AI for ClaudeCraft (claudecraft.ca), which sells done-for-you Claude AI skill bundles.
@@ -211,9 +280,36 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
 
     if (!referrals.processedSessions.includes(session.id)) {
       try {
-        // 0. Email the buyer their download links — the success-page redirect is the only other place these show.
         const productSlug = session.metadata?.product;
         const buyerEmail = session.customer_details?.email;
+
+        // Insider subscriptions have no downloadable files and no referral mechanics — handle separately and stop.
+        if (productSlug === 'insider') {
+          if (buyerEmail && session.customer) {
+            const insiderSubs = loadInsiderSubscribers();
+            const existing = insiderSubs.find(s => s.email === buyerEmail.toLowerCase());
+            if (existing) {
+              existing.customerId = session.customer;
+            } else {
+              insiderSubs.push({ email: buyerEmail.toLowerCase(), customerId: session.customer, subscribedAt: new Date().toISOString() });
+            }
+            saveInsiderSubscribers(insiderSubs);
+            await sendSupportEmail(
+              buyerEmail,
+              'Welcome to ClaudeCraft Insider',
+              `You're in! Your members library is live at ${BASE_URL}/insider/library — a weekly "what changed in Claude" digest plus a new in-depth guide every month.\n\nManage or cancel anytime from inside the library. Questions? Reply to this email or contact support@claudecraft.ca.`,
+              `<p>You're in! Your members library is live at <a href="${BASE_URL}/insider/library">${BASE_URL}/insider/library</a> — a weekly "what changed in Claude" digest plus a new in-depth guide every month.</p><p>Manage or cancel anytime from inside the library. Questions? Reply to this email or contact support@claudecraft.ca.</p>`
+            ).catch(() => {});
+            if (process.env.SUPPORT_NOTIFY_EMAIL) {
+              await sendSupportEmail(process.env.SUPPORT_NOTIFY_EMAIL, 'New ClaudeCraft Insider subscriber', `${buyerEmail} just subscribed to ClaudeCraft Insider ($12/mo).`, null).catch(() => {});
+            }
+          }
+          referrals.processedSessions.push(session.id);
+          saveReferrals(referrals);
+          return res.json({ received: true });
+        }
+
+        // 0. Email the buyer their download links — the success-page redirect is the only other place these show.
         if (productSlug && buyerEmail && PRODUCTS[productSlug]) {
           await sendPurchaseEmail(buyerEmail, productSlug, PRODUCTS[productSlug].name, session.id);
         }
@@ -407,20 +503,27 @@ app.get('/checkout/:product', async (req, res) => {
   if (!stripe) return res.status(500).send('Checkout is not configured yet — STRIPE_SECRET_KEY is missing.');
 
   try {
+    const lineItem = product.stripePriceId
+      ? { price: product.stripePriceId, quantity: 1 }
+      : {
+          price_data: {
+            currency: 'usd',
+            unit_amount: product.amount,
+            product_data: { name: product.name, description: product.description },
+            ...(product.recurring ? { recurring: product.recurring } : {}),
+          },
+          quantity: 1,
+        };
+
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      customer_creation: 'always',
+      mode: product.recurring ? 'subscription' : 'payment',
+      ...(product.recurring ? {} : { customer_creation: 'always' }),
       allow_promotion_codes: true,
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          unit_amount: product.amount,
-          product_data: { name: product.name, description: product.description },
-        },
-        quantity: 1,
-      }],
+      line_items: [lineItem],
       metadata: { product: req.params.product },
-      success_url: `${BASE_URL}/?purchased=true&product=${req.params.product}&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: product.recurring
+        ? `${BASE_URL}/insider/bootstrap?session_id={CHECKOUT_SESSION_ID}`
+        : `${BASE_URL}/?purchased=true&product=${req.params.product}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${BASE_URL}/?canceled=true`,
     });
     res.redirect(303, session.url);
@@ -465,24 +568,36 @@ app.get('/api/referral-code', (req, res) => {
   res.json(entry ? { ready: true, code: entry.code } : { ready: false });
 });
 
+const LEAD_MAGNETS = {
+  'ad-platforms-playbook': {
+    url: '/ad-platforms-playbook.html',
+    subject: 'Your free playbook: The Complete Paid Traffic Playbook',
+    name: 'The Complete Paid Traffic Playbook (YouTube, TikTok & Facebook Ads)',
+  },
+};
+
 app.post('/api/subscribe', (req, res) => {
   const email = (req.body?.email || '').trim().toLowerCase();
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   if (!isValidEmail) return res.status(400).json({ error: 'Please enter a valid email address.' });
+  const source = (req.body?.source || 'default').toString().slice(0, 60);
+  const magnet = LEAD_MAGNETS[source] || null;
 
   const subscribers = loadSubscribers();
   const isNew = !subscribers.some(s => s.email === email);
   if (isNew) {
-    subscribers.push({ email, subscribedAt: new Date().toISOString() });
+    subscribers.push({ email, subscribedAt: new Date().toISOString(), source });
     saveSubscribers(subscribers);
   }
   if (isNew) {
-    const ebookUrl = `${BASE_URL}/ebook.html`;
+    const url = `${BASE_URL}${magnet ? magnet.url : '/ebook.html'}`;
+    const name = magnet ? magnet.name : '25 Claude Prompts to Reclaim 10 Hours a Week';
+    const subject = magnet ? magnet.subject : 'Your free ebook: 25 Claude Prompts to Reclaim 10 Hours a Week';
     sendSupportEmail(
       email,
-      'Your free ebook: 25 Claude Prompts to Reclaim 10 Hours a Week',
-      `Thanks for joining The AI Advantage newsletter!\n\nHere's your free ebook, as promised: ${ebookUrl}\n\nYour first newsletter issue lands this Friday. Questions any time — just reply to this email.`,
-      `<p>Thanks for joining The AI Advantage newsletter!</p><p>Here's your free ebook, as promised: <a href="${ebookUrl}">25 Claude Prompts to Reclaim 10 Hours a Week</a></p><p>Your first newsletter issue lands this Friday. Questions any time — just reply to this email.</p>`
+      subject,
+      `Thanks for joining The AI Advantage newsletter!\n\nHere's your free guide, as promised: ${url}\n\nYour first newsletter issue lands this Friday. Questions any time — just reply to this email.`,
+      `<p>Thanks for joining The AI Advantage newsletter!</p><p>Here's your free guide, as promised: <a href="${url}">${name}</a></p><p>Your first newsletter issue lands this Friday. Questions any time — just reply to this email.</p>`
     ).catch(() => {}); // best-effort — don't block the signup response on email delivery
   }
   res.json({ ok: true });
@@ -599,6 +714,92 @@ app.post('/api/loyalty-discount', async (req, res) => {
     console.error('Loyalty discount error:', err.message);
     res.status(500).json({ ok: false, message: "Something went wrong generating this automatically. Email support@claudecraft.ca and a real person will sort it out." });
   }
+});
+
+// ── ClaudeCraft Insider — $12/mo members library, email-only access (no passwords, same pattern as self-refund/loyalty-discount) ──
+function setInsiderCookie(res, email) {
+  const signed = signInsiderCookie(email);
+  res.set('Set-Cookie', `${INSIDER_COOKIE_NAME}=${encodeURIComponent(signed)}; Max-Age=${60 * 60 * 24 * 30}; Path=/; HttpOnly; Secure; SameSite=Lax`);
+}
+
+app.get('/insider/bootstrap', async (req, res) => {
+  if (!stripe) return res.status(500).send('Checkout is not configured yet.');
+  const sessionId = req.query.session_id;
+  if (!sessionId) return res.redirect(303, '/insider.html');
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const email = session.customer_details?.email;
+    if (session.mode !== 'subscription' || session.status !== 'complete' || !email) {
+      return res.redirect(303, '/insider.html');
+    }
+    setInsiderCookie(res, email.toLowerCase());
+    res.redirect(303, '/insider/library');
+  } catch (err) {
+    console.error('Insider bootstrap error:', err.message);
+    res.redirect(303, '/insider.html');
+  }
+});
+
+app.post('/api/insider-login', async (req, res) => {
+  const email = (req.body?.email || '').trim().toLowerCase();
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!isValidEmail) return res.status(400).json({ error: 'Please enter a valid email address.' });
+
+  const subscribers = loadInsiderSubscribers();
+  const record = subscribers.find(s => s.email === email);
+  if (!record || !(await hasActiveInsiderSubscription(record.customerId))) {
+    return res.json({
+      ok: false,
+      message: "We couldn't find an active Insider subscription for this email. If you think this is wrong, email support@claudecraft.ca and a real person will check manually.",
+    });
+  }
+  setInsiderCookie(res, email);
+  res.json({ ok: true, message: 'Verified! Taking you to your library…' });
+});
+
+app.get('/insider/library', async (req, res) => {
+  const email = verifyInsiderCookie(parseCookies(req)[INSIDER_COOKIE_NAME] ? decodeURIComponent(parseCookies(req)[INSIDER_COOKIE_NAME]) : null);
+  const subscribers = loadInsiderSubscribers();
+  const record = email ? subscribers.find(s => s.email === email) : null;
+  const active = record && await hasActiveInsiderSubscription(record.customerId);
+
+  if (!active) {
+    return res.send(insiderGatePage("That link has expired or isn't active anymore — enter your email to get back in.", true));
+  }
+
+  let portalUrl = null;
+  try {
+    const portal = await stripe.billingPortal.sessions.create({ customer: record.customerId, return_url: `${BASE_URL}/insider/library` });
+    portalUrl = portal.url;
+  } catch (err) {
+    console.error('Billing portal error (likely not activated in Stripe Dashboard yet):', err.message);
+  }
+
+  const entries = loadInsiderContent();
+  const entriesHtml = entries.length
+    ? entries.map(e => `
+      <div class="insider-card">
+        <div class="insider-tag">${e.tag || 'Insider'}</div>
+        <h3>${e.title}</h3>
+        <div class="insider-meta">${e.date || ''}</div>
+        <div class="insider-body">${e.bodyHtml}</div>
+      </div>`).join('\n')
+    : '<p style="color:var(--sub);">Your first digest is on its way — check back soon.</p>';
+
+  res.send(insiderLibraryPage(entriesHtml, portalUrl));
+});
+
+app.post('/api/insider-content', (req, res) => {
+  const token = req.get('X-OpenClaw-Token');
+  if (!process.env.ARTICLES_API_TOKEN || token !== process.env.ARTICLES_API_TOKEN) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const { tag, title, meta, bodyHtml } = req.body || {};
+  if (!title || !bodyHtml) return res.status(400).json({ error: 'title and bodyHtml are required' });
+  const entries = loadInsiderContent();
+  entries.unshift({ tag, title, meta, bodyHtml, date: new Date().toISOString().slice(0, 10) });
+  saveInsiderContent(entries.slice(0, 200));
+  res.json({ ok: true });
 });
 
 app.get('/api/subscribers', (req, res) => {
