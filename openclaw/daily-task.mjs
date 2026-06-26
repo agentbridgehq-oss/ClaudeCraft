@@ -387,12 +387,17 @@ const WEEKLY_GUIDE_TOPICS = [
 ];
 
 async function draftWeeklyGuide() {
-  if (!anthropic && !useOpenRouter) return null;
+  // Published, customer-facing article — stays on Anthropic (best quality), same as draftNewsArticle.
+  if (!anthropic) return null;
   const weekNumber = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
   const topic = WEEKLY_GUIDE_TOPICS[weekNumber % WEEKLY_GUIDE_TOPICS.length];
   try {
-    const text = await completeText(
-      `You are writing a free, genuinely useful guide for ClaudeCraft's "Articles" section (a site that also sells done-for-you Claude skill bundles, but this piece is 100% free standalone value — no pitch, no bundle mention). This week's topic: ${topic}
+    const msg = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1600,
+      messages: [{
+        role: 'user',
+        content: `You are writing a free, genuinely useful guide for ClaudeCraft's "Articles" section (a site that also sells done-for-you Claude skill bundles, but this piece is 100% free standalone value — no pitch, no bundle mention). This week's topic: ${topic}
 
 Write a complete guide (450-750 words) for a non-technical, everyday reader — written with enough quality and pull that someone reads the whole thing and comes back next week for more, not just skims it.
 
@@ -401,8 +406,9 @@ Write a complete guide (450-750 words) for a non-technical, everyday reader — 
 - Write with momentum and personality, like a sharp person explaining something they're genuinely excited about — never like a corporate help-center article
 - Never sacrifice accuracy or usefulness for style — every technique or claim must actually work as described
 - Format: first line is a short, magnetic title (under 12 words) and nothing else, then a blank line, then the guide body using clear paragraphs.`,
-      1600,
-    );
+      }],
+    });
+    const text = msg.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n\n').trim();
     if (!text) return null;
     const lines = text.split('\n');
     const title = lines[0].replace(/^#+\s*/, '').trim();
