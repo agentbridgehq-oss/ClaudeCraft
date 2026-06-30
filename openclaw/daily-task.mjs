@@ -620,6 +620,42 @@ async function publishInsiderContent(piece, tag) {
   }
 }
 
+// ── Weekly subscriber newsletter drafter (Mondays only) ─────────────────────
+// Drafts a short, high-value newsletter for the existing subscriber list.
+// Never sends it — drops the draft into the daily report for Ken to review
+// and send manually (or approve for future automation).
+// Subject line + body only — sending needs Ken's explicit go-ahead each issue.
+async function draftSubscriberNewsletter(weeklyGuideTitle) {
+  if (!anthropic && !useOpenRouter) return null;
+  try {
+    const text = await completeText(
+      `You are writing a weekly email newsletter for ClaudeCraft subscribers — people who signed up to learn Claude AI better. They gave their email for free tips; they haven't paid yet. This is the conversion moment: give enough real value that they trust ClaudeCraft, then make the ask feel natural, not pushy.
+
+This week's free guide published to the site: "${weeklyGuideTitle || 'Claude tips and tricks'}"
+
+Write a complete newsletter — subject line + body — that:
+- Opens with ONE punchy insight or tip they can use TODAY (not a recap of what's in the guide)
+- Links to the free guide on the site naturally mid-email (claudecraft.ca/articles)
+- Mentions 1-2 specific ClaudeCraft bundles by name (with price) that connect to this week's theme — not a hard pitch, a genuine "if you want more of this" mention
+- Closes with a clear, single call to action: browse the bundles at claudecraft.ca
+- Is 150-220 words max — short enough to read in 60 seconds, valuable enough to open next week's too
+
+Format:
+SUBJECT: <subject line>
+
+<email body>`,
+      600,
+    );
+    const subjectMatch = text.match(/^SUBJECT:\s*(.+)$/m);
+    const subject = subjectMatch?.[1]?.trim() || 'Your weekly Claude tip from ClaudeCraft';
+    const body = text.replace(/^SUBJECT:.*$/m, '').trim();
+    return { subject, body };
+  } catch (err) {
+    console.log(`Could not draft subscriber newsletter: ${err.message}`);
+    return null;
+  }
+}
+
 async function emailDailyReport(report, today) {
   if (!process.env.RESEND_API_KEY || !process.env.SUPPORT_NOTIFY_EMAIL) {
     return 'Skipped — RESEND_API_KEY and/or SUPPORT_NOTIFY_EMAIL not configured, report only logged.';
@@ -690,6 +726,8 @@ async function main() {
       insiderMonthlySection = `\n## Insider Monthly Guide Drop (first Monday only)\n${monthlyGuide ? `Title: "${monthlyGuide.title}"` : '(none drafted)'}\nPublish result: ${monthlyGuideResult}\n`;
     }
 
+    const newsletter = await draftSubscriberNewsletter(guide?.title);
+
     weeklySection = `
 ## Weekly Free Guide (Mondays only)
 ${guide ? `Title: "${guide.title}"` : '(none drafted)'}
@@ -701,7 +739,10 @@ ${shareImageResult}
 ## Insider Weekly Digest (Mondays only, members-only)
 ${insiderDigest ? `Title: "${insiderDigest.title}"` : '(none drafted)'}
 Publish result: ${insiderDigestResult}
-${insiderMonthlySection}`;
+${insiderMonthlySection}
+## ✉️ SUBSCRIBER NEWSLETTER DRAFT (Mondays only) — NOT SENT — review and send yourself via Resend or paste into your email tool
+${newsletter ? `Subject: ${newsletter.subject}\n\n${newsletter.body}` : '(none drafted)'}
+`;
   }
 
   const report = `# ClaudeCraft Daily Report — ${today}

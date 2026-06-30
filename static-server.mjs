@@ -466,38 +466,71 @@ How it works: one-time payment via Stripe or PayPal, no subscription. Each bundl
 You are also a genuinely capable general AI assistant with live web search access — answer any question the visitor asks, on any topic (Claude, AI in general, coding, current events, or anything else), the same way a top-tier AI chat assistant would, not just questions about ClaudeCraft. Use your search access for anything time-sensitive or where you're not certain — don't guess or rely on stale knowledge when you can check. Be direct, accurate, and helpful. Keep replies conversational and reasonably concise (a few sentences to a short paragraph, not a wall of text) since this is a chat widget, not a document. When a question is actually about picking or using a bundle, naturally point to the relevant one.`;
 
 app.post('/api/chat', async (req, res) => {
-  if (!GEMINI_API_KEY) return res.status(503).json({ error: 'Chat AI is not configured yet.' });
   const message = (req.body?.message || '').toString().slice(0, 2000);
   const history = Array.isArray(req.body?.history) ? req.body.history.slice(-10) : [];
   if (!message.trim()) return res.status(400).json({ error: 'message is required' });
 
-  try {
-    const contents = [
-      ...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: (h.text || '').toString().slice(0, 2000) }] })),
-      { role: 'user', parts: [{ text: message }] },
-    ];
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents,
-        systemInstruction: { parts: [{ text: CHAT_SYSTEM_PROMPT }] },
-        generationConfig: { maxOutputTokens: 500 },
-        tools: [{ google_search: {} }],
-      }),
-    });
-    if (!r.ok) {
-      console.error('Gemini chat error:', r.status, await r.text());
-      return res.status(502).json({ error: 'Chat AI is temporarily unavailable.' });
+  // Try Gemini first (has Google Search grounding)
+  if (GEMINI_API_KEY) {
+    try {
+      const contents = [
+        ...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: (h.text || '').toString().slice(0, 2000) }] })),
+        { role: 'user', parts: [{ text: message }] },
+      ];
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents,
+          systemInstruction: { parts: [{ text: CHAT_SYSTEM_PROMPT }] },
+          generationConfig: { maxOutputTokens: 500 },
+          tools: [{ google_search: {} }],
+        }),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        const reply = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('').trim();
+        if (reply) return res.json({ reply });
+      } else {
+        console.warn(`Gemini chat unavailable (${r.status}) — falling back to OpenRouter`);
+      }
+    } catch (err) {
+      console.warn(`Gemini chat error: ${err.message} — falling back to OpenRouter`);
     }
-    const data = await r.json();
-    const reply = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('').trim();
-    if (!reply) return res.status(502).json({ error: 'Chat AI returned an empty response.' });
-    res.json({ reply });
-  } catch (err) {
-    console.error('Chat error:', err.message);
-    res.status(500).json({ error: 'Something went wrong.' });
   }
+
+  // OpenRouter fallback — no web search, but basic chat works fine
+  // Add OPENROUTER_API_KEY in Railway to activate this. Free DeepSeek tier used by default.
+  const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
+  if (OPENROUTER_KEY) {
+    try {
+      const orMessages = [
+        { role: 'system', content: CHAT_SYSTEM_PROMPT },
+        ...history.map(h => ({ role: h.role === 'assistant' ? 'assistant' : 'user', content: (h.text || '').toString().slice(0, 2000) })),
+        { role: 'user', content: message },
+      ];
+      const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${OPENROUTER_KEY}` },
+        body: JSON.stringify({
+          model: process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3.1:free',
+          messages: orMessages,
+          max_tokens: 500,
+        }),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        const reply = data.choices?.[0]?.message?.content?.trim();
+        if (reply) return res.json({ reply });
+      } else {
+        console.error(`OpenRouter chat also failed: ${r.status}`);
+      }
+    } catch (err) {
+      console.error(`OpenRouter chat error: ${err.message}`);
+    }
+  }
+
+  res.status(503).json({ error: 'Chat AI is temporarily unavailable — try again in a moment.' });
 });
 
 app.get('/checkout/:product', async (req, res) => {
@@ -536,17 +569,29 @@ app.get('/checkout/:product', async (req, res) => {
   }
 });
 
+// Cache launch promo status for 1 hour — prevents spamming Stripe on every page load,
+// especially when the restricted key lacks PromotionCodes:Read permission (logs a warn once).
+let _launchPromoCache = { ts: 0, data: null };
 app.get('/api/launch-promo-status', async (req, res) => {
   if (!stripe) return res.json({ available: false });
+  if (Date.now() - _launchPromoCache.ts < 60 * 60 * 1000 && _launchPromoCache.data) {
+    return res.json(_launchPromoCache.data);
+  }
   try {
     const code = await getOrCreateLaunchPromo();
     const list = await stripe.promotionCodes.list({ code, limit: 1 });
     const promo = list.data[0];
-    if (!promo) return res.json({ available: false });
+    if (!promo) {
+      _launchPromoCache = { ts: Date.now(), data: { available: false } };
+      return res.json({ available: false });
+    }
     const remaining = Math.max((promo.max_redemptions || 100) - (promo.times_redeemed || 0), 0);
-    res.json({ available: true, code: promo.code, remaining, active: promo.active && remaining > 0 });
+    const data = { available: true, code: promo.code, remaining, active: promo.active && remaining > 0 };
+    _launchPromoCache = { ts: Date.now(), data };
+    res.json(data);
   } catch (err) {
-    console.error('Launch promo status error:', err.message);
+    console.warn('Launch promo status unavailable (add PromotionCodes:Read to the Stripe restricted key to enable this):', err.message);
+    _launchPromoCache = { ts: Date.now(), data: { available: false } };
     res.json({ available: false });
   }
 });
