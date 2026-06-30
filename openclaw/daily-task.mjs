@@ -71,6 +71,29 @@ const SEGMENTS = [
   { name: "Job Seeker's Career Pack", subreddits: 'r/jobs, r/resumes' },
 ];
 
+// All purchasable bundles — rotates daily for the bundle SEO article.
+// Each article targets that bundle's exact buyer and links directly to its checkout page.
+const BUNDLES = [
+  { slug: 'solo',           name: 'Solo Entrepreneur Pack',             price: '$49', audience: 'freelancers, consultants, and solopreneurs',          problems: 'writing proposals, pricing decisions, client emails, marketing copy, and staying organized without a team' },
+  { slug: 'content',        name: 'Content Machine Pack',               price: '$39', audience: 'content creators, YouTubers, and social media managers', problems: 'writing scripts, captions, repurposing content across platforms, and beating content-block' },
+  { slug: 'starter',        name: '55+ AI Starter Kit',                 price: '$29', audience: 'adults 55+ who are new to AI',                          problems: 'everyday tasks like writing letters, understanding documents, planning trips, and family communications' },
+  { slug: 'cowork',         name: "Claude Co-Work Beginner's Guide",    price: '$19', audience: 'complete beginners to Claude AI',                        problems: 'not knowing where to start, getting generic answers, and making Claude actually useful for daily work' },
+  { slug: 'student',        name: 'Student Success Pack',               price: '$34', audience: 'students in high school, college, and university',        problems: 'essay writing, studying, research, summarizing readings, and managing coursework load' },
+  { slug: 'jobseeker',      name: "Job Seeker's Career Pack",           price: '$34', audience: 'people actively job hunting',                             problems: 'writing resumes, cover letters, preparing for interviews, and following up after applications' },
+  { slug: 'poweruser',      name: 'Claude Power User Pack',             price: '$29', audience: 'people already using Claude who want to go deeper',       problems: 'getting stuck with shallow outputs, wasting tokens, and not knowing about advanced features' },
+  { slug: 'money',          name: 'Money Mastery Pack',                 price: '$34', audience: 'people trying to get control of their personal finances',  problems: 'budgeting, paying off debt, understanding investing basics, and tracking spending' },
+  { slug: 'vault',          name: 'Claude Power Prompts Vault',         price: '$9',  audience: 'anyone already using Claude who wants ready-made prompts', problems: 'spending too long writing prompts from scratch and getting inconsistent results' },
+  { slug: 'startup',        name: "Startup Founder's Toolkit",          price: '$39', audience: 'early-stage startup founders and entrepreneurs',           problems: 'writing pitch decks, working through fundraising math, handling cofounder conflict, and high-stakes decisions' },
+  { slug: 'family',         name: 'Family Life Pack',                   price: '$34', audience: 'parents and family organizers',                            problems: 'meal planning, tough conversations with kids, managing schedules, and reducing the mental load of running a household' },
+  { slug: 'connected',      name: 'Claude Connected Pack',              price: '$39', audience: 'professionals who use Gmail, Google Calendar, Drive, Slack, or Notion daily', problems: 'making Claude work alongside the tools they already live in, not as a separate tab' },
+  { slug: 'writer',         name: "Creative Writer's Pack",             price: '$34', audience: 'fiction writers, novelists, and storytellers',             problems: 'outlining novels, developing characters, writing better dialogue, and getting unstuck mid-draft' },
+  { slug: 'builder',        name: "Claude Code Builder's Guide",        price: '$24', audience: 'non-developers who want to build real things with Claude Code', problems: 'not knowing where to start, feeling intimidated by code, and wanting to see a real project built from scratch' },
+  { slug: 'commands',       name: 'Claude Code Commands & Skills Mastery', price: '$34', audience: 'Claude Code users who want to build custom commands and subagents', problems: 'repeating the same workflows manually and not knowing how to automate them with skills and commands' },
+  { slug: 'promptguide',    name: 'AI Prompt Engineering Guide',        price: '$27', audience: 'professionals who want to get dramatically better AI outputs', problems: 'vague, generic AI responses and not knowing how to structure prompts for real, precise results' },
+  { slug: 'selfimprovement', name: 'AI Agent Continuous Learning Guide', price: '$17', audience: 'people who want to use Claude as a daily self-improvement tool', problems: 'staying consistent with habits, doing weekly reviews, and building a learning system that actually sticks' },
+  { slug: 'checklist',      name: 'Digital Product Launch Checklist',  price: '$9',  audience: 'people launching their first digital product',              problems: 'not knowing the right order of steps, missing critical pre-launch tasks, and shipping before they are ready' },
+];
+
 async function reviewSupportEscalations() {
   if ((!anthropic && !useOpenRouter) || !process.env.ARTICLES_API_TOKEN) return 'Skipped — no AI provider or ARTICLES_API_TOKEN not configured.';
   try {
@@ -388,6 +411,97 @@ async function publishArticle(article, tag, meta, requireLink = true) {
   }
 }
 
+// ── Retry loop for news articles ────────────────────────────────────────────
+// If a draft fails (source check, reasoning leak, or QC rejection), retries
+// with a fresh call instead of silently losing the article slot.
+// Returns { article, result, attempts } on success/final-fail.
+async function draftAndPublishWithRetry(focus, tag, meta, maxAttempts = 3) {
+  let lastResult = `Failed — ${maxAttempts} attempts all rejected or returned null.`;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    console.log(`[${focus} article] Attempt ${attempt}/${maxAttempts}`);
+    const article = await draftNewsArticle(focus);
+    if (!article) {
+      console.log(`  → Draft returned null (source check or reasoning leak). ${attempt < maxAttempts ? 'Retrying...' : 'Giving up.'}`);
+      lastResult = `Attempt ${attempt}: draft null (source check / reasoning leak).`;
+      continue;
+    }
+    const result = await publishArticle(article, tag, meta);
+    if (!result.startsWith('REJECTED')) {
+      return { article, result, attempts: attempt };
+    }
+    console.log(`  → QC rejected (attempt ${attempt}): ${result}. ${attempt < maxAttempts ? 'Retrying with a fresh draft...' : 'Giving up.'}`);
+    lastResult = result;
+  }
+  return { article: null, result: lastResult, attempts: maxAttempts };
+}
+
+// ── Bundle SEO article — third article every day ─────────────────────────────
+// Targets one specific bundle's buyer with a practical, long-tail SEO article
+// that ends with a direct link to that bundle's checkout page.
+// Rotates through all BUNDLES on a day-of-year cycle so every bundle gets
+// its own article approximately every 18 days.
+async function draftBundleArticle(bundle) {
+  if (!anthropic) return null;
+  try {
+    const msg = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1300,
+      messages: [{
+        role: 'user',
+        content: `Write a practical, SEO-optimized article (380-550 words) for ClaudeCraft's Articles section.
+
+Target audience: ${bundle.audience}
+Real problems they face: ${bundle.problems}
+
+This article must:
+- Open with ONE concrete, vivid moment this exact audience will recognize immediately (no generic AI-hype opener)
+- Include 2-3 genuinely copy-pasteable Claude prompts mid-article that actually solve the problems listed above — not suggestions, real prompts with the bracket-fill-in format users can paste directly
+- Be honest: never exaggerate what Claude can do, never invent outcomes
+- Close naturally with a soft mention that ClaudeCraft has done-for-you bundles built specifically for this audience, linking to: https://claudecraft.ca/checkout/${bundle.slug} (this is NON-NEGOTIABLE — every article must end with this exact URL, nowhere else)
+- NO hard sell, NO fake urgency, NO fabricated social proof — just genuinely useful content that earns the closing mention
+
+Format rules (hard rules, not suggestions):
+- The VERY FIRST LINE must be ONLY the finished headline — under 12 words, SEO-friendly for this audience (e.g. "5 Claude Prompts Every Job Seeker Should Have Ready"), nothing else on that line
+- Never start with "I", "Let me", "Okay", "Sure", or any meta-commentary about the writing process
+- After the headline: one blank line, then the article body`,
+      }],
+    });
+    const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n\n').trim();
+    if (!text) return null;
+    const lines = text.split('\n');
+    const title = lines[0].replace(/^#+\s*/, '').trim();
+    const body = lines.slice(1).join('\n').trim();
+    if (looksLikeReasoningLeak(title)) {
+      console.log(`Bundle article draft rejected — reasoning leak in title: "${title.slice(0, 80)}"`);
+      return null;
+    }
+    return { title, body };
+  } catch (err) {
+    console.log(`Could not draft bundle article: ${err.message}`);
+    return null;
+  }
+}
+
+// Retry wrapper for the bundle article specifically — same pattern as news retry.
+async function draftBundleArticleWithRetry(bundle, maxAttempts = 3) {
+  let lastResult = `Failed — ${maxAttempts} bundle article attempts all rejected.`;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    console.log(`[bundle article: ${bundle.slug}] Attempt ${attempt}/${maxAttempts}`);
+    const article = await draftBundleArticle(bundle);
+    if (!article) {
+      lastResult = `Attempt ${attempt}: draft null (reasoning leak).`;
+      continue;
+    }
+    const result = await publishArticle(article, 'Bundle Guide', `${bundle.name} — Practical Guide`);
+    if (!result.startsWith('REJECTED')) {
+      return { article, result, attempts: attempt };
+    }
+    console.log(`  → QC rejected (attempt ${attempt}): ${result}. ${attempt < maxAttempts ? 'Retrying...' : 'Giving up.'}`);
+    lastResult = result;
+  }
+  return { article: null, result: lastResult, attempts: maxAttempts };
+}
+
 const WEEKLY_GUIDE_TOPICS = [
   'A new, genuinely useful Claude prompt for everyday productivity (not tied to any specific paid bundle) — explain what it does and give the full copy-pasteable prompt.',
   'A deeper explainer on a specific Claude feature (Projects, Artifacts, file uploads, or web search) — written for someone who has never tried it.',
@@ -541,11 +655,23 @@ async function main() {
   const health = await checkSystemHealth();
   const sales = await getSalesSummary();
   const escalationReview = await reviewSupportEscalations();
-  const draft = await draftMarketingPack(segment, sales.text);
-  const claudeArticle = await draftNewsArticle('claude');
-  const claudePublishResult = await publishArticle(claudeArticle, 'Claude Tech', 'Daily Claude Update');
-  const aiArticle = await draftNewsArticle('ai');
-  const aiPublishResult = await publishArticle(aiArticle, 'AI News', 'Daily AI News');
+
+  // Marketing pack — retry once if QC rejects the first attempt
+  let draft = await draftMarketingPack(segment, sales.text);
+  if (!draft.approved) {
+    console.log(`Marketing pack rejected on first attempt (score ${draft.score}). Retrying with a different angle...`);
+    const retry = await draftMarketingPack(segment, sales.text);
+    if (retry.approved) draft = retry;
+  }
+
+  // News articles — retry up to 3× per slot so failed drafts don't waste the daily slot
+  const { article: claudeArticle, result: claudePublishResult, attempts: claudeAttempts } = await draftAndPublishWithRetry('claude', 'Claude Tech', 'Daily Claude Update');
+  const { article: aiArticle, result: aiPublishResult, attempts: aiAttempts } = await draftAndPublishWithRetry('ai', 'AI News', 'Daily AI News');
+
+  // Bundle SEO article — third article every day, rotates through all 18 bundles
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const todayBundle = BUNDLES[dayOfYear % BUNDLES.length];
+  const { article: bundleArticle, result: bundlePublishResult, attempts: bundleAttempts } = await draftBundleArticleWithRetry(todayBundle);
 
   const isWeeklyRun = new Date().getDay() === 1; // Monday
   let weeklySection = '';
@@ -592,13 +718,19 @@ ${sales.text}
 ## ⚠️ Support Escalations — Drafted Replies & Recommendations (NOT sent, NOT processed — review and act yourself)
 ${escalationReview}
 
-## Daily Claude Tech Article
-${claudeArticle ? `Title: "${claudeArticle.title}"` : '(none drafted — no genuinely recent Claude news found, or search/API unavailable)'}
+## Daily Claude Tech Article (${claudeAttempts} attempt${claudeAttempts !== 1 ? 's' : ''})
+${claudeArticle ? `Title: "${claudeArticle.title}"` : '(none published — all attempts rejected or null)'}
 Publish result: ${claudePublishResult}
 
-## Daily AI News Article
-${aiArticle ? `Title: "${aiArticle.title}"` : '(none drafted — no genuinely recent AI news found, or search/API unavailable)'}
+## Daily AI News Article (${aiAttempts} attempt${aiAttempts !== 1 ? 's' : ''})
+${aiArticle ? `Title: "${aiArticle.title}"` : '(none published — all attempts rejected or null)'}
 Publish result: ${aiPublishResult}
+
+## Daily Bundle SEO Article — ${todayBundle.name} (${bundleAttempts} attempt${bundleAttempts !== 1 ? 's' : ''})
+Target audience: ${todayBundle.audience}
+Direct checkout link embedded: https://claudecraft.ca/checkout/${todayBundle.slug}
+${bundleArticle ? `Title: "${bundleArticle.title}"` : '(none published — all attempts rejected or null)'}
+Publish result: ${bundlePublishResult}
 ${weeklySection}
 ## Today's Marketing Pack — Reddit + X Thread + LinkedIn (focus: ${segment.name}) — NOT POSTED anywhere, copy/edit/post yourself
 Quality control: ${draft.approved ? `✅ APPROVED (score ${draft.score ?? '?'}/10) — ${draft.note}` : `❌ REJECTED (score ${draft.score ?? '?'}/10) — ${draft.note} — do not post as-is, revise first`}
@@ -606,7 +738,7 @@ Quality control: ${draft.approved ? `✅ APPROVED (score ${draft.score ?? '?'}/1
 ${draft.text}
 
 ---
-*Generated automatically by OpenClaw. Every article, guide, and marketing draft is reviewed by a quality-control pass before it's published or marked ready — rejected pieces are flagged above, not silently used. The news article and weekly guide publish automatically to ClaudeCraft's own Articles section. Everything else only drafts and reports — never posts publicly, sends messages, or takes any action outside this container.*
+*Generated automatically by OpenClaw. Every article passes a retry loop (up to 3 attempts) + a quality-control pass before publishing. The two news articles and the daily bundle SEO article publish automatically to ClaudeCraft's own Articles section. The weekly guide and Insider content also auto-publish on Mondays. The marketing pack is drafted only — never posted publicly. Nothing here sends messages, issues refunds, or takes any action outside this container.*
 `;
 
   // Print the full report to stdout — on Railway, view it anytime with:
