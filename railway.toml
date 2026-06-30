@@ -5,3 +5,5 @@ builder = "NIXPACKS"
 startCommand = "node static-server.mjs"
 healthcheckPath = "/healthz"
 healthcheckTimeout = 100
+drainingSeconds = 30
+ipv6EgressEnabled = true
