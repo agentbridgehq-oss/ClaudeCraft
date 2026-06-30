@@ -858,6 +858,27 @@ app.get('/api/subscribers', (req, res) => {
   res.json(loadSubscribers());
 });
 
+// CASL-compliant unsubscribe — link format: /api/unsubscribe?email=xxx&sig=HMAC(email, ARTICLES_API_TOKEN)
+// OpenClaw generates these links when building the newsletter batch.
+app.get('/api/unsubscribe', (req, res) => {
+  const { email, sig } = req.query;
+  if (!email || !sig || !process.env.ARTICLES_API_TOKEN) {
+    return res.status(400).send('<h2>Invalid unsubscribe link.</h2>');
+  }
+  const expected = crypto.createHmac('sha256', process.env.ARTICLES_API_TOKEN).update(email.toLowerCase()).digest('hex');
+  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
+    return res.status(400).send('<h2>Invalid unsubscribe link.</h2>');
+  }
+  const subscribers = loadSubscribers();
+  const before = subscribers.length;
+  const filtered = subscribers.filter(s => {
+    const e = typeof s === 'string' ? s : s.email;
+    return e?.toLowerCase() !== email.toLowerCase();
+  });
+  if (filtered.length < before) saveSubscribers(filtered);
+  res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Unsubscribed — ClaudeCraft</title><style>body{font-family:sans-serif;max-width:480px;margin:80px auto;text-align:center;color:#222}h2{color:#e85d00}</style></head><body><h2>You're unsubscribed.</h2><p>${email} has been removed from the ClaudeCraft newsletter list.</p><p><a href="https://claudecraft.ca">Back to ClaudeCraft</a></p></body></html>`);
+});
+
 app.get('/api/support-escalations', (req, res) => {
   const token = req.get('X-OpenClaw-Token');
   if (!process.env.ARTICLES_API_TOKEN || token !== process.env.ARTICLES_API_TOKEN) {

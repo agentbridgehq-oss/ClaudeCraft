@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import Stripe from 'stripe';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 
 // ─────────────────────────────────────────────────────────────────────────
 // ClaudeCraft OpenClaw — Daily Ops Agent
@@ -656,6 +657,77 @@ SUBJECT: <subject line>
   }
 }
 
+// ── Auto-send subscriber newsletter ─────────────────────────────────────────
+// Fetches the full subscriber list, generates a signed unsubscribe link per
+// address, and sends via Resend batch (up to 100/call).
+// CASL-compliant: every email has a working unsubscribe link.
+async function sendSubscriberNewsletter(newsletter) {
+  if (!newsletter) return 'Skipped — no newsletter drafted.';
+  if (!process.env.RESEND_API_KEY) return 'Skipped — RESEND_API_KEY not set.';
+  if (!process.env.ARTICLES_API_TOKEN) return 'Skipped — ARTICLES_API_TOKEN not set.';
+
+  const base = process.env.PUBLIC_BASE_URL || 'https://claudecraft.ca';
+
+  // Fetch subscribers from the main site
+  let emails = [];
+  try {
+    const res = await fetch(`${base}/api/subscribers`, {
+      headers: { 'X-OpenClaw-Token': process.env.ARTICLES_API_TOKEN },
+    });
+    if (!res.ok) return `Could not fetch subscriber list: ${res.status}`;
+    const list = await res.json();
+    emails = list.map(s => (typeof s === 'string' ? s : s.email)).filter(Boolean);
+  } catch (err) {
+    return `Subscriber fetch error: ${err.message}`;
+  }
+  if (emails.length === 0) return 'No subscribers on the list yet — nothing sent.';
+
+  const htmlTemplate = (body, unsubLink) =>
+    `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#222;line-height:1.6;">
+${body.split(/\n\n+/).map(p => `<p style="margin:0 0 16px">${p.replace(/\n/g,'<br>').replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" style="color:#e85d00">$1</a>')}</p>`).join('')}
+<hr style="margin:32px 0;border:none;border-top:1px solid #eee;">
+<p style="font-size:12px;color:#999;">You're getting this because you signed up at <a href="${base}" style="color:#999">claudecraft.ca</a>. <a href="${unsubLink}" style="color:#999">Unsubscribe</a>.</p>
+</div>`;
+
+  const BATCH = 100;
+  let sent = 0, failed = 0;
+
+  for (let i = 0; i < emails.length; i += BATCH) {
+    const slice = emails.slice(i, i + BATCH);
+    const batch = slice.map(email => {
+      const sig = crypto.createHmac('sha256', process.env.ARTICLES_API_TOKEN).update(email.toLowerCase()).digest('hex');
+      const unsubLink = `${base}/api/unsubscribe?email=${encodeURIComponent(email)}&sig=${sig}`;
+      return {
+        from: process.env.SUPPORT_FROM_EMAIL || 'ClaudeCraft <support@claudecraft.ca>',
+        to: email,
+        subject: newsletter.subject,
+        text: `${newsletter.body}\n\nUnsubscribe: ${unsubLink}`,
+        html: htmlTemplate(newsletter.body, unsubLink),
+      };
+    });
+
+    try {
+      const res = await fetch('https://api.resend.com/emails/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+        body: JSON.stringify(batch),
+      });
+      if (res.ok) {
+        sent += slice.length;
+      } else {
+        const err = await res.text();
+        console.log(`Newsletter batch ${i}–${i + slice.length} failed: ${res.status} ${err}`);
+        failed += slice.length;
+      }
+    } catch (err) {
+      console.log(`Newsletter batch send error: ${err.message}`);
+      failed += slice.length;
+    }
+  }
+
+  return `Newsletter sent to ${sent} subscriber(s)${failed > 0 ? `, ${failed} failed` : ''}. Total list: ${emails.length}.`;
+}
+
 async function emailDailyReport(report, today) {
   if (!process.env.RESEND_API_KEY || !process.env.SUPPORT_NOTIFY_EMAIL) {
     return 'Skipped — RESEND_API_KEY and/or SUPPORT_NOTIFY_EMAIL not configured, report only logged.';
@@ -727,6 +799,7 @@ async function main() {
     }
 
     const newsletter = await draftSubscriberNewsletter(guide?.title);
+    const newsletterSendResult = await sendSubscriberNewsletter(newsletter);
 
     weeklySection = `
 ## Weekly Free Guide (Mondays only)
@@ -740,8 +813,11 @@ ${shareImageResult}
 ${insiderDigest ? `Title: "${insiderDigest.title}"` : '(none drafted)'}
 Publish result: ${insiderDigestResult}
 ${insiderMonthlySection}
-## ✉️ SUBSCRIBER NEWSLETTER DRAFT (Mondays only) — NOT SENT — review and send yourself via Resend or paste into your email tool
-${newsletter ? `Subject: ${newsletter.subject}\n\n${newsletter.body}` : '(none drafted)'}
+## ✉️ Subscriber Newsletter — AUTO-SENT (Mondays)
+Subject: ${newsletter?.subject || '(none)'}
+Send result: ${newsletterSendResult}
+
+${newsletter ? newsletter.body : '(none drafted)'}
 `;
   }
 
