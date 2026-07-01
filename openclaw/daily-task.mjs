@@ -279,8 +279,8 @@ Slightly more professional tone than the other two, 150-200 words, framed around
 async function draftNewsArticle(focus) {
   if (!anthropic) return null;
   const focusLine = focus === 'claude'
-    ? 'Search specifically for genuinely recent Claude/Anthropic news — new model releases, feature launches, product updates, or notable Anthropic announcements from the last few days.'
-    : 'Search for genuinely recent broader AI industry news from the last few days — NOT Anthropic/Claude-specific (that runs as a separate article) — competitor model releases, AI policy/industry shifts, or notable AI tools/research.';
+    ? 'Search for the single most trending, talked-about Claude or Anthropic story right now — prioritise the last 3–7 days. Look for: new model releases, feature launches, pricing changes, safety announcements, or notable Anthropic product updates. Pick the story with the most genuine reader interest, not just the most recent press release.'
+    : 'Search for the single most trending AI industry story right now that is NOT Anthropic/Claude-specific (that runs as a separate article). Prioritise the last 3–7 days. Look for: competitor model releases (GPT, Gemini, Llama, Mistral, etc.), AI regulation or policy shifts, notable AI research breakthroughs, or significant new AI tools. Pick the story people in AI are actually talking about, not a minor update.';
   try {
     const msg = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
@@ -288,21 +288,24 @@ async function draftNewsArticle(focus) {
       tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
       messages: [{
         role: 'user',
-        content: `${focusLine} Then write a news article (300-450 words) for a general, non-technical audience reading an AI tools site — written to genuinely hook a reader and hold their attention, not just inform them.
+        content: `${focusLine}
 
-Non-negotiable (never break these, no matter how it affects the writing):
-- Every claim must be factually accurate to what you actually find in search — never speculate, embellish, or invent a single detail to make it more dramatic
-- End with a "Sources:" section listing the real URLs you found, as a plain list
-- If you genuinely cannot find anything new/recent via search, say so plainly instead of inventing something
+Then write a news article (300–450 words) for ClaudeCraft — a site for everyday Claude AI users, not developers or researchers. These readers want to know: does this affect me, and what can I actually do with it?
 
-Writing quality (this is what separates this from a generic news blurb — write like the best AI-news YouTubers, not a press release):
-- Open with a specific, concrete detail or moment — never "In a recent development..." or other throat-clearing
-- Write with momentum — short, punchy sentences mixed with longer ones, active voice, no corporate-press-release tone
-- Don't just report what happened — give an honest, opinionated take on what it actually means and whether it's worth the reader's attention, the way a trusted analyst would, not a neutral wire report
-- If it's a new tool or feature, be concrete about what someone could actually DO with it today — practical, not hypothetical
-- Make the reader feel why this actually matters to THEM, not just what happened
-- Close with ONE natural, low-pressure sentence connecting back to ClaudeCraft, and this part is NON-NEGOTIABLE — every single article must end with a real https://claudecraft.ca link (either a specific relevant bundle URL when genuinely on-topic, or a plain link to https://claudecraft.ca itself when no specific bundle fits) — never a hard sell, but never omit the link either
-- Format: first line is ONLY the final, polished headline (under 12 words, makes someone want to click) — never your reasoning about which story to pick, never "I have two stories..." or any other meta-commentary about the writing process itself. The very first line a reader sees must already be the finished headline.`,
+TOPIC RULES (hard limits — never break these):
+- Write only about AI and Claude topics. Never write about anything else regardless of what is found in search.
+- Never mention or reference Hurley or any unrelated project.
+- If nothing genuinely new (last 7 days) is found, say so plainly — never recycle old news or invent a story.
+- Every claim must be factually accurate to what you actually find in search — never speculate, embellish, or fabricate a single detail.
+- End with a "Sources:" section listing the real URLs you used, as a plain list.
+
+MARKETING RULES (what makes a ClaudeCraft article earn its place):
+- Headline: under 12 words, specific and concrete — name the actual thing, not just "AI gets an update". Create genuine curiosity or signal clear value. Never vague, never a reasoning leak ("I'll write about…" or "I have two stories…").
+- Opening line: the most interesting or surprising fact about the story, full stop. No "In a recent development…", no warmup, no context-setting. Drop the reader straight in.
+- Body: active voice, confident and opinionated — tell the reader what it MEANS, not just what happened. If it's a new model or feature, say exactly what someone can do with it TODAY, not in hypothetical terms. Write like a sharp, well-informed friend, not a press release. Short punchy sentences mixed with longer ones. Avoid: "It's worth noting", "As we can see", "In conclusion", "In a world where AI…"
+- Make the reader feel this story matters to THEM — their workflow, their tools, their daily Claude use.
+- Closing: ONE natural sentence linking back to ClaudeCraft. NON-NEGOTIABLE — every article ends with a real https://claudecraft.ca link (a specific bundle URL when genuinely on-topic, or https://claudecraft.ca itself when not). Never a hard sell. Never omit it.
+- Format: the very first line must be ONLY the finished polished headline — nothing else, no meta-commentary about the writing process.`,
       }],
     });
     const text = msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n\n').trim();
